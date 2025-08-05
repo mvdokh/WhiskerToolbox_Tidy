@@ -48,7 +48,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../whiskertoolbox.qrc">
+            <iconset>
              <normaloff>:/images/rewind.png</normaloff>:/images/rewind.png</iconset>
            </property>
            <property name="iconSize">
@@ -78,7 +78,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../whiskertoolbox.qrc">
+            <iconset>
              <normaloff>:/images/fastforward.png</normaloff>:/images/fastforward.png</iconset>
            </property>
            <property name="iconSize">
@@ -162,6 +162,42 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QPushButton" name="ruler_button">
+           <property name="focusPolicy">
+            <enum>Qt::FocusPolicy::NoFocus</enum>
+           </property>
+           <property name="text">
+            <string>Ruler</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="clear_rulers_button">
+           <property name="focusPolicy">
+            <enum>Qt::FocusPolicy::NoFocus</enum>
+           </property>
+           <property name="text">
+            <string>Clear Rulers</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </item>
        <item>
@@ -179,6 +215,19 @@
             <string>0</string>
            </property>
           </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>
@@ -227,8 +276,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../whiskertoolbox.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

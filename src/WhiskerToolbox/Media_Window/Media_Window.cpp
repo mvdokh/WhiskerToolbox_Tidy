@@ -30,6 +30,12 @@
 
 #include <iostream>
 
+// Helper function for plot color with alpha
+static QRgb plot_color_with_alpha(BaseDisplayOptions const * opts) {
+    auto color = QColor(QString::fromStdString(opts->hex_color));
+    auto output_color = qRgba(color.red(), color.green(), color.blue(), std::lround(opts->alpha * 255.0f));
+    return output_color;
+}
 
 /*
 
@@ -325,6 +331,7 @@ void Media_Window::UpdateCanvas() {
     _clearIntervals();
     _clearTensors();
     _clearTextOverlays();
+    _clearRulers(); // Clear rulers before redrawing
 
     //_convertNewMediaToQImage();
     auto _media = _data_manager->getData<MediaData>("media");
@@ -377,6 +384,8 @@ void Media_Window::UpdateCanvas() {
     _plotTensorData();
 
     _plotTextOverlays();
+
+    _plotRulers(); // Redraw rulers with new canvas scaling
 
     // Note: Hover circle is now handled efficiently via _updateHoverCirclePosition()
     // and doesn't need to be redrawn on every UpdateCanvas() call
@@ -434,6 +443,8 @@ QImage::Format Media_Window::_getQImageFormat() {
             return QImage::Format_Grayscale8;
         case MediaData::DisplayFormat::Color:
             return QImage::Format_RGBA8888;
+        default:
+            return QImage::Format_RGBA8888;
     }
 }
 
@@ -454,6 +465,13 @@ void Media_Window::mousePressEvent(QGraphicsSceneMouseEvent * event) {
     }
 
     if (event->button() == Qt::LeftButton) {
+        // Handle ruler clicks first if ruler mode is active
+        if (_ruler_mode) {
+            QPoint pos(static_cast<int>(event->scenePos().x()), static_cast<int>(event->scenePos().y()));
+            emit rulerClick(pos);
+            return; // Don't process other click events when in ruler mode
+        }
+
         if (_drawing_mode) {
             auto pos = event->scenePos();
             _drawing_points.clear();
@@ -1408,21 +1426,12 @@ bool Media_Window::_needsTimeFrameConversion(std::shared_ptr<TimeFrame> video_ti
     return video_timeframe.get() != interval_timeframe.get();
 }
 
-
-QRgb plot_color_with_alpha(BaseDisplayOptions const * opts) {
-    auto color = QColor(QString::fromStdString(opts->hex_color));
-    auto output_color = qRgba(color.red(), color.green(), color.blue(), std::lround(opts->alpha * 255.0f));
-
-    return output_color;
-}
-
 bool Media_Window::hasPreviewMaskData(std::string const & mask_key) const {
-    return _mask_preview_active && _preview_mask_data.count(mask_key) > 0;
+    return _preview_mask_data.count(mask_key) > 0;
 }
 
 std::vector<Mask2D> Media_Window::getPreviewMaskData(std::string const & mask_key) const {
-
-    if (hasPreviewMaskData(mask_key)) {
+    if (_preview_mask_data.count(mask_key) > 0) {
         return _preview_mask_data.at(mask_key);
     }
     return {};
@@ -1431,11 +1440,188 @@ std::vector<Mask2D> Media_Window::getPreviewMaskData(std::string const & mask_ke
 void Media_Window::setPreviewMaskData(std::string const & mask_key,
                                       std::vector<std::vector<Point2D<uint32_t>>> const & preview_data,
                                       bool active) {
-    if (active) {
-        _preview_mask_data[mask_key] = preview_data;
-        _mask_preview_active = true;
-    } else {
-        _preview_mask_data.erase(mask_key);
-        _mask_preview_active = !_preview_mask_data.empty();
+    _preview_mask_data[mask_key] = preview_data;
+    _mask_preview_active = active;
+
+    // Update canvas to show preview data
+    UpdateCanvas();
+}
+
+void Media_Window::showFirstRulerPoint(QPoint pos) {
+    // Clear any existing pending dot
+    if (_pending_ruler_dot) {
+        removeItem(_pending_ruler_dot);
+        delete _pending_ruler_dot;
+        _pending_ruler_dot = nullptr;
     }
+
+    // Create a smaller yellow dot at the first click point
+    QPen dotPen(Qt::yellow);
+    dotPen.setWidth(1); // Thinner pen
+    QBrush dotBrush(Qt::yellow);
+    _pending_ruler_dot = addEllipse(pos.x() - 2, pos.y() - 2, 4, 4, dotPen, dotBrush); // Smaller dot (4x4 instead of 8x8)
+}
+
+// Ruler functionality implementations
+void Media_Window::setRulerMode(bool enabled) {
+    _ruler_mode = enabled;
+    if (!enabled) {
+        // Clear the pending dot when exiting ruler mode
+        if (_pending_ruler_dot) {
+            removeItem(_pending_ruler_dot);
+            delete _pending_ruler_dot;
+            _pending_ruler_dot = nullptr;
+        }
+        _ruler_has_first_point = false;
+    }
+}
+
+void Media_Window::setRulerMeasurement(double distance, QPoint p1, QPoint p2) {
+    std::cout << "setRulerMeasurement called with points: (" << p1.x() << "," << p1.y() << ") to (" << p2.x() << "," << p2.y() << ")" << std::endl;
+
+    // Convert canvas coordinates to media coordinates for storage
+    QPointF media_p1(p1.x() / getXAspect(), p1.y() / getYAspect());
+    QPointF media_p2(p2.x() / getXAspect(), p2.y() / getYAspect());
+
+    std::cout << "Media coordinates: (" << media_p1.x() << "," << media_p1.y() << ") to (" << media_p2.x() << "," << media_p2.y() << ")" << std::endl;
+
+    // Calculate distance in media pixels
+    double dx = media_p2.x() - media_p1.x();
+    double dy = media_p2.y() - media_p1.y();
+    double media_distance = std::sqrt(dx*dx + dy*dy);
+
+    std::cout << "Calculated media distance: " << media_distance << std::endl;
+
+    // Store ruler data with media coordinates (for proper scaling)
+    RulerData ruler;
+    ruler.media_point1 = media_p1;
+    ruler.media_point2 = media_p2;
+    ruler.distance = media_distance;
+    ruler.line = nullptr;  // Will be created in _plotRulers()
+    ruler.text = nullptr;  // Will be created in _plotRulers()
+    ruler.dot1 = nullptr;  // Will be created in _plotRulers()
+    ruler.dot2 = nullptr;  // Will be created in _plotRulers()
+
+    // Store the ruler
+    _rulers.push_back(ruler);
+    std::cout << "Rulers vector size after adding: " << _rulers.size() << std::endl;
+
+    // Clear the pending dot since we now have a complete ruler
+    if (_pending_ruler_dot) {
+        removeItem(_pending_ruler_dot);
+        delete _pending_ruler_dot;
+        _pending_ruler_dot = nullptr;
+        std::cout << "Cleared pending ruler dot" << std::endl;
+    }
+
+    // Trigger redraw to show the new ruler
+    std::cout << "Calling UpdateCanvas to redraw rulers..." << std::endl;
+    UpdateCanvas();
+}
+
+void Media_Window::clearRuler() {
+    // Clear all rulers
+    for (auto& ruler : _rulers) {
+        if (ruler.line) {
+            removeItem(ruler.line);
+            delete ruler.line;
+        }
+        if (ruler.text) {
+            removeItem(ruler.text);
+            delete ruler.text;
+        }
+        if (ruler.dot1) {
+            removeItem(ruler.dot1);
+            delete ruler.dot1;
+        }
+        if (ruler.dot2) {
+            removeItem(ruler.dot2);
+            delete ruler.dot2;
+        }
+    }
+    _rulers.clear();
+
+    // Clear pending dot
+    if (_pending_ruler_dot) {
+        removeItem(_pending_ruler_dot);
+        delete _pending_ruler_dot;
+        _pending_ruler_dot = nullptr;
+    }
+
+    _ruler_distance = 0.0;
+    _ruler_has_first_point = false;
+}
+
+void Media_Window::_plotRulers() {
+    // Convert media coordinates to current canvas coordinates and draw rulers
+    for (auto& ruler : _rulers) {
+        // Only draw rulers that have a valid distance (complete rulers)
+        if (ruler.distance <= 0.0) {
+            continue;
+        }
+
+        // Convert media coordinates to current canvas coordinates
+        QPoint canvas_p1(static_cast<int>(ruler.media_point1.x() * getXAspect()),
+                         static_cast<int>(ruler.media_point1.y() * getYAspect()));
+        QPoint canvas_p2(static_cast<int>(ruler.media_point2.x() * getXAspect()),
+                         static_cast<int>(ruler.media_point2.y() * getYAspect()));
+
+        // Create the ruler line (thicker for visibility)
+        QPen rulerPen(Qt::yellow);
+        rulerPen.setWidth(3); // Make it even thicker for better visibility
+        ruler.line = addLine(canvas_p1.x(), canvas_p1.y(), canvas_p2.x(), canvas_p2.y(), rulerPen);
+
+        // Create dots at both endpoints
+        QPen dotPen(Qt::yellow);
+        dotPen.setWidth(2);
+        QBrush dotBrush(Qt::yellow);
+
+        ruler.dot1 = addEllipse(canvas_p1.x() - 3, canvas_p1.y() - 3, 6, 6, dotPen, dotBrush);
+        ruler.dot2 = addEllipse(canvas_p2.x() - 3, canvas_p2.y() - 3, 6, 6, dotPen, dotBrush);
+
+        // Add measurement text at the midpoint of the line
+        double midX = (canvas_p1.x() + canvas_p2.x()) / 2.0;
+        double midY = (canvas_p1.y() + canvas_p2.y()) / 2.0;
+
+        QString measurementText = QString("Distance: %1 px").arg(ruler.distance, 0, 'f', 1);
+        ruler.text = addText(measurementText);
+        ruler.text->setDefaultTextColor(Qt::yellow);
+        ruler.text->setPos(midX - 50, midY - 30); // Offset text above and center it better
+
+        // Make the text more visible
+        QFont font = ruler.text->font();
+        font.setBold(true);
+        font.setPointSize(10);
+        ruler.text->setFont(font);
+
+        // Add a semi-transparent background to the text for better visibility
+        ruler.text->setFlag(QGraphicsItem::ItemIgnoresTransformations, false);
+    }
+}
+
+void Media_Window::_clearRulers() {
+    // Clear the graphics items for all rulers, but keep the ruler data for redrawing
+    for (auto& ruler : _rulers) {
+        if (ruler.line) {
+            removeItem(ruler.line);
+            delete ruler.line;
+            ruler.line = nullptr;
+        }
+        if (ruler.text) {
+            removeItem(ruler.text);
+            delete ruler.text;
+            ruler.text = nullptr;
+        }
+        if (ruler.dot1) {
+            removeItem(ruler.dot1);
+            delete ruler.dot1;
+            ruler.dot1 = nullptr;
+        }
+        if (ruler.dot2) {
+            removeItem(ruler.dot2);
+            delete ruler.dot2;
+            ruler.dot2 = nullptr;
+        }
+    }
+    // Note: We don't clear _rulers vector here - we keep the data for redrawing
 }

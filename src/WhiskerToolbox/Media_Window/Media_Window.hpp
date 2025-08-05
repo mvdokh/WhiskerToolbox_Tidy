@@ -43,6 +43,7 @@ int const default_height = 480;
  * or just temporarily (scrolled back it will not be there), or data assets can be loaded which are
  * saved for the duration (loading keypoints to be plotted with each corresponding frame).
  *
+ *
  */
 class Media_Window : public QGraphicsScene {
     Q_OBJECT
@@ -100,6 +101,12 @@ public:
 
     void setShowHoverCircle(bool show);
     void setHoverCircleRadius(int radius);
+
+    // Ruler functionality
+    void setRulerMode(bool enabled);
+    void setRulerMeasurement(double distance, QPoint p1, QPoint p2);
+    void clearRuler();
+    void showFirstRulerPoint(QPoint pos);
 
     [[nodiscard]] std::optional<LineDisplayOptions *> getLineConfig(std::string const & line_key) const {
         if (_line_configs.find(line_key) == _line_configs.end()) {
@@ -208,6 +215,29 @@ private:
     // Text overlay support
     MediaText_Widget * _text_widget = nullptr;
 
+    // Ruler support
+    bool _ruler_mode = false;
+    QPoint _ruler_point1;
+    QPoint _ruler_point2;
+    bool _ruler_has_first_point = false;
+    double _ruler_distance = 0.0;
+    QGraphicsLineItem * _ruler_line = nullptr;
+    QGraphicsTextItem * _ruler_text = nullptr;
+
+    // Multiple rulers support
+    struct RulerData {
+        QGraphicsLineItem* line = nullptr;
+        QGraphicsTextItem* text = nullptr;
+        QGraphicsEllipseItem* dot1 = nullptr;
+        QGraphicsEllipseItem* dot2 = nullptr;
+        // Store media coordinates instead of canvas coordinates for proper scaling
+        QPointF media_point1;
+        QPointF media_point2;
+        double distance = 0.0;
+    };
+    std::vector<RulerData> _rulers;
+    QGraphicsEllipseItem* _pending_ruler_dot = nullptr; // For the first click dot
+
     QImage::Format _getQImageFormat();
     void _createCanvasForData();
     void _convertNewMediaToQImage();
@@ -235,6 +265,9 @@ private:
     void _plotTextOverlays();
     void _clearTextOverlays();
 
+    void _plotRulers();
+    void _clearRulers();
+
     void _updateHoverCirclePosition();
 
     void _addRemoveData();
@@ -250,21 +283,18 @@ signals:
     void rightClick(qreal, qreal);
     void leftClickMedia(qreal, qreal);
     void rightClickMedia(qreal, qreal);
+    void rulerClick(QPoint pos);
+    void leftClickCanvas(CanvasCoordinates coords);
+    void rightClickCanvas(CanvasCoordinates coords);
+    void leftClickMediaCoords(MediaCoordinates coords);
+    void rightClickMediaCoords(MediaCoordinates coords);
     void leftRelease();
     void rightRelease();
-    void leftReleaseDrawing(); // Only emitted when in drawing mode
-    void rightReleaseDrawing();// Only emitted when in drawing mode
-    void canvasUpdated(QImage const & canvasImage);
+    void leftReleaseDrawing();
+    void rightReleaseDrawing();
     void mouseMove(qreal x, qreal y);
-
-    // Strong-typed coordinate signals
-    void leftClickCanvas(CanvasCoordinates const & coords);
-    void rightClickCanvas(CanvasCoordinates const & coords);
-    void leftClickMediaCoords(MediaCoordinates const & coords);
-    void rightClickMediaCoords(MediaCoordinates const & coords);
-    void mouseMoveCanvas(CanvasCoordinates const & coords);
+    void mouseMoveCanvas(CanvasCoordinates coords);
+    void canvasUpdated(QImage image);
 };
 
-QRgb plot_color_with_alpha(BaseDisplayOptions const * opts);
-
-#endif// MEDIA_WINDOW_HPP
+#endif // MEDIA_WINDOW_HPP

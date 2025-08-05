@@ -8,6 +8,7 @@
 
 #include <QFileDialog>
 #include <QTimer>
+#include <cmath>
 
 #include <iostream>
 
@@ -31,6 +32,10 @@ TimeScrollBar::TimeScrollBar(QWidget *parent) :
     // Set up spin box with keyboard tracking disabled (only update on Enter key or arrow clicks)
     ui->frame_spinbox->setKeyboardTracking(false);
     connect(ui->frame_spinbox, QOverload<int>::of(&QSpinBox::valueChanged), this, &TimeScrollBar::FrameSpinBoxChanged);
+
+    // Ruler button connections
+    connect(ui->ruler_button, &QPushButton::toggled, this, &TimeScrollBar::RulerButtonToggled);
+    connect(ui->clear_rulers_button, &QPushButton::clicked, this, &TimeScrollBar::ClearRulersButtonClicked);
 };
 
 TimeScrollBar::~TimeScrollBar() {
@@ -179,4 +184,34 @@ void TimeScrollBar::FrameSpinBoxChanged(int new_frame)
     _updateFrameLabels(frame_id);
 
     emit timeChanged(frame_id);
+}
+
+void TimeScrollBar::RulerButtonToggled(bool checked)
+{
+    _ruler_mode = checked;
+    _ruler_has_first_point = false;
+    emit rulerModeChanged(_ruler_mode);
+}
+
+void TimeScrollBar::HandleRulerClick(QPoint pos)
+{
+    if (!_ruler_mode) return;
+    if (!_ruler_has_first_point) {
+        _ruler_point1 = pos;
+        _ruler_has_first_point = true;
+        emit rulerFirstPoint(pos);
+    } else {
+        _ruler_point2 = pos;
+        _ruler_has_first_point = false; // Allow new measurement after two points
+        // Calculate distance
+        double dx = _ruler_point2.x() - _ruler_point1.x();
+        double dy = _ruler_point2.y() - _ruler_point1.y();
+        double dist = std::sqrt(dx*dx + dy*dy);
+        emit rulerMeasurement(dist, _ruler_point1, _ruler_point2);
+    }
+}
+
+void TimeScrollBar::ClearRulersButtonClicked()
+{
+    emit clearAllRulers();
 }

@@ -32,6 +32,10 @@ private:
     bool _verbose {false};
     int _play_speed {1};
     bool _play_mode {false};
+    bool _ruler_mode {false};
+    QPoint _ruler_point1;
+    QPoint _ruler_point2;
+    bool _ruler_has_first_point {false};
 
     QTimer* _timer;
 
@@ -46,8 +50,18 @@ private slots:
     void RewindButton();
     void FastForwardButton();
     void FrameSpinBoxChanged(int frameNumber);
+    void RulerButtonToggled(bool checked);
+    void ClearRulersButtonClicked();
+
+public slots:
+    void HandleRulerClick(QPoint pos);
+
 signals:
     void timeChanged(int x);
+    void rulerModeChanged(bool enabled);
+    void rulerFirstPoint(QPoint pos);
+    void rulerMeasurement(double distance, QPoint p1, QPoint p2);
+    void clearAllRulers();
 };
 
 

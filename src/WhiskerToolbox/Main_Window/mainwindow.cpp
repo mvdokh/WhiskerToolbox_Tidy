@@ -111,6 +111,26 @@ void MainWindow::_createActions() {
 
     connect(ui->time_scrollbar, &TimeScrollBar::timeChanged, ui->media_widget, &Media_Widget::LoadFrame);
 
+    // Connect ruler functionality
+    connect(ui->time_scrollbar, &TimeScrollBar::rulerModeChanged, this, [this](bool enabled) {
+        _scene->setRulerMode(enabled);
+    });
+
+    connect(ui->time_scrollbar, &TimeScrollBar::rulerFirstPoint, this, [this](QPoint pos) {
+        // Use the public method instead of accessing private members
+        _scene->showFirstRulerPoint(pos);
+    });
+
+    connect(ui->time_scrollbar, &TimeScrollBar::rulerMeasurement, this, [this](double distance, QPoint p1, QPoint p2) {
+        _scene->setRulerMeasurement(distance, p1, p2);
+    });
+
+    connect(ui->time_scrollbar, &TimeScrollBar::clearAllRulers, this, [this]() {
+        _scene->clearRuler();
+    });
+
+    connect(_scene, &Media_Window::rulerClick, ui->time_scrollbar, &TimeScrollBar::HandleRulerClick);
+
     connect(ui->actionWhisker_Tracking, &QAction::triggered, this, &MainWindow::openWhiskerTracking);
     connect(ui->actionTongue_Tracking, &QAction::triggered, this, &MainWindow::openTongueTracking);
     connect(ui->actionMachine_Learning, &QAction::triggered, this, &MainWindow::openMLWidget);
@@ -206,16 +226,16 @@ void MainWindow::_loadJSONConfig() {
 void MainWindow::processLoadedData(std::vector<DataInfo> const & data_info) {
     bool hasMediaData = false;
     
-    for (auto const & data: data_info) {
-        if (data.data_class == "VideoData") {
+    for (auto const & data_item : data_info) {
+        if (data_item.data_class == "VideoData") {
             hasMediaData = true;
-        } else if (data.data_class == "ImageData") {
+        } else if (data_item.data_class == "ImageData") {
             hasMediaData = true;
         } else if (
-                (data.data_class == "PointData") ||
-                (data.data_class == "MaskData") ||
-                (data.data_class == "LineData")) {
-            ui->media_widget->setFeatureColor(data.key, data.color);
+                (data_item.data_class == "PointData") ||
+                (data_item.data_class == "MaskData") ||
+                (data_item.data_class == "LineData")) {
+            ui->media_widget->setFeatureColor(data_item.key, data_item.color);
         }
     }
     
