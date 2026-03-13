@@ -14,10 +14,14 @@
 class DataManager;
 class QMenu;
 
+namespace commands {
+class CommandRecorder;
+}// namespace commands
+
 namespace StateManagement {
 class StateManager;
 class WorkspaceData;
-}
+}// namespace StateManagement
 class EditorCreationController;
 class EditorRegistry;
 class GroupManager;
@@ -80,6 +84,12 @@ public:
     StateManagement::StateManager * stateManager() const { return _state_manager.get(); }
 
     /**
+     * @brief Get the global command recorder for capturing executed commands
+     * @return Non-owning pointer to the CommandRecorder
+     */
+    commands::CommandRecorder * commandRecorder() const { return _command_recorder.get(); }
+
+    /**
      * @brief Get the editor registry for state and type management
      * 
      * EditorRegistry provides:
@@ -114,15 +124,16 @@ private:
     std::unique_ptr<StateManagement::StateManager> _state_manager;
     std::unique_ptr<GroupManager> _group_manager;
     std::unique_ptr<SplitButtonHandler> _split_button_handler;
+    std::unique_ptr<commands::CommandRecorder> _command_recorder;
 
     // Main widgets created programmatically (not in UI file)
     TimeScrollBar * _time_scrollbar;
     std::shared_ptr<TimeScrollBarState> _time_scrollbar_state;
 
     std::map<std::string, std::unique_ptr<QWidget>> _widgets;
-    
+
     // Counter for generating unique media widget IDs
-    int _media_widget_counter = 1; // Start at 1 since "main" is the initial one
+    int _media_widget_counter = 1;// Start at 1 since "main" is the initial one
 
     void _createActions();
     void _buildInitialLayout();
@@ -200,5 +211,7 @@ private slots:
     void openPythonWidget();
     void openTransformsV2Widget();
     void openTriageSessionWidget();
+    void openDataSynthesizerWidget();
+    void openCommandLogWidget();
 };
 #endif// MAINWINDOW_HPP

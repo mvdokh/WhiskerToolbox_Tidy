@@ -6,6 +6,10 @@ add_subdirectory(Entity)
 
 add_subdirectory(CoreGeometry)
 
+add_subdirectory(CoreUtilities)
+
+add_subdirectory(DataObjects)
+
 add_subdirectory(CoreMath)
 
 add_subdirectory(SpatialIndex)
@@ -20,6 +24,7 @@ add_subdirectory(StateEstimation)
 
 add_subdirectory(DataManager)
 add_subdirectory(ParameterSchema)
+add_subdirectory(DataSynthesizer)
 add_subdirectory(TriageSession)
 add_subdirectory(TransformsV2)
 add_subdirectory(GatherResult)

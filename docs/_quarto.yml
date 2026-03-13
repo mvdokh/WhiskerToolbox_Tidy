@@ -67,6 +67,8 @@ website:
                 - developer/DeepLearning/hybrid_sequence_inputs.qmd
                 - developer/DeepLearning/batch_mode_guide.qmd
                 - developer/DeepLearning/batch_inference.qmd
+                - developer/DeepLearning/background_inference_roadmap.qmd
+                - developer/DeepLearning/background_inference.qmd
                 - developer/DeepLearning/roadmap.qmd
             - section: "Transforms V2"
               href: developer/transforms_v2/index.qmd
@@ -75,6 +77,13 @@ website:
                 - developer/transforms_v2/adding_transforms.qmd
             - section: "ParameterSchema"
               href: developer/ParameterSchema/index.qmd
+            - section: "Data Synthesizer"
+              contents:
+                - developer/DataSynthesizer/GeneratorRegistry.qmd
+                - developer/DataSynthesizer/Widget.qmd
+                - section: "Generators"
+                  contents:
+                    - developer/DataSynthesizer/Generators/Analog.qmd
         - section: "Data Inspectors"
           contents:
             - developer/ui/data_inspectors/tensor_inspector.qmd
@@ -94,6 +103,8 @@ website:
             - developer/DataManager/storage_architecture.qmd
             - developer/DataManager/storage_testing_roadmap.qmd
             - developer/DataManager/storage_benchmarking_roadmap.qmd
+            - developer/DataManager/concurrency_architecture.qmd
+            - developer/DataManager/threaded_loading_roadmap.qmd
             - section: "Command Architecture"
               href: developer/DataManager/Commands/index.qmd
               contents:
@@ -104,11 +115,13 @@ website:
                 - developer/DataManager/Commands/commands.qmd
                 - developer/DataManager/Commands/save_data.qmd
                 - developer/DataManager/Commands/load_data.qmd
+                - developer/DataManager/Commands/synthesize_data.qmd
                 - developer/DataManager/Commands/validation.qmd
                 - developer/DataManager/Commands/command_introspection.qmd
                 - developer/DataManager/Commands/gui_verb_audit.qmd
                 - developer/DataManager/Commands/widget_save_refactoring_guide.qmd
                 - developer/DataManager/Commands/data_manager_snapshot.qmd
+                - developer/DataManager/Commands/command_log_widget.qmd
         - section: "Triage Session"
           contents:
             - developer/TriageSession/index.qmd

@@ -1,13 +1,16 @@
 #include "DigitalEventSeriesInspector.hpp"
 #include "ui_DigitalEventSeriesInspector.h"
 
+#include "Commands/Core/CommandContext.hpp"
+#include "Commands/Core/SequenceExecution.hpp"
+#include "Commands/IO/SaveData.hpp"
 #include "DataExport_Widget/DigitalTimeSeries/CSV/CSVEventSaver_Widget.hpp"
 #include "DataInspector_Widget/DataInspectorState.hpp"
 #include "DataInspector_Widget/Inspectors/GroupFilterHelper.hpp"
 #include "DataManager.hpp"
 #include "Commands/Core/CommandContext.hpp"
 #include "Commands/IO/SaveData.hpp"
-#include "DataManager/DigitalTimeSeries/Digital_Event_Series.hpp"
+#include "DigitalTimeSeries/Digital_Event_Series.hpp"
 #include "DigitalEventSeriesDataView.hpp"
 #include "WhiskerToolbox/GroupManagementWidget/GroupManager.hpp"
 
@@ -166,9 +169,10 @@ void DigitalEventSeriesInspector::_connectSignals() {
 
                 commands::CommandContext ctx;
                 ctx.data_manager = dataManager();
+                ctx.recorder = commandRecorder();
 
-                commands::SaveData cmd(std::move(params));
-                auto result = cmd.execute(ctx);
+                auto const params_json = rfl::json::write(params);
+                auto result = commands::executeSingleCommand("SaveData", params_json, ctx);
 
                 if (result.success) {
                     QMessageBox::information(this, "Success", "Events saved successfully to CSV");

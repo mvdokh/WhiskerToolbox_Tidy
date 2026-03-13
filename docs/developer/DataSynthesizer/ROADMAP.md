@@ -1,5 +1,22 @@
 # Data Synthesizer — Development Roadmap
 
+## Progress
+
+| Milestone | Status | Date |
+|-----------|--------|------|
+| **1** — Core Library, Generators & Command | ✅ Complete | 2026-03-12 |
+| **2a** — Widget Skeleton & Registration | ✅ Complete | 2026-03-12 |
+| **2b** — State & AutoParamWidget Integration | ✅ Complete | 2026-03-12 |
+| **2c** — OpenGL Signal Preview | ✅ Complete | 2026-03-12 |
+| **3** — More AnalogTimeSeries Generators | 🔲 Not started | — |
+| **4** — DigitalEventSeries & DigitalIntervalSeries Generators | 🔲 Not started | — |
+| **5** — Spatial Data Generators | 🔲 Not started | — |
+| **6** — Multi-Signal Generation & Correlation | 🔲 Not started | — |
+| **7** — Pipeline & Fuzz Testing Integration | 🔲 Not started | — |
+| **8** — GUI Enhancements | 🔲 Not started | — |
+
+---
+
 ## Motivation
 
 WhiskerToolbox needs a built-in data synthesis system to:
@@ -48,163 +65,47 @@ WhiskerToolbox needs a built-in data synthesis system to:
 │              DataSynthesizer_Widget                      │
 │  src/WhiskerToolbox/DataSynthesizer_Widget/             │
 │                                                         │
-│  ┌──────────────────┐  ┌─────────────────┐              │
-│  │ DataSynthesizer  │  │ Properties      │              │
-│  │ State            │  │ Widget          │              │
-│  │ (EditorState)    │  │ (AutoParamWidget│              │
-│  │                  │  │  + preview)     │              │
-│  └──────────────────┘  └─────────────────┘              │
+│  ┌──────────────────┐  ┌──────────────────────────────┐ │
+│  │ DataSynthesizer  │  │ Properties Widget            │ │
+│  │ State            │  │ (output type/generator       │ │
+│  │ (EditorState)    │  │  combos + AutoParamWidget)   │ │
+│  └──────────────────┘  └──────────────────────────────┘ │
+│                                                         │
+│  ┌──────────────────────────────────────────────────────┐│
+│  │ Preview Widget (QOpenGLWidget)                       ││
+│  │  CorePlotting::SceneBuilder → PlottingOpenGL::       ││
+│  │  SceneRenderer → PolyLineRenderer                   ││
+│  └──────────────────────────────────────────────────────┘│
 └─────────────────────────────────────────────────────────┘
 ```
 
-### Core Library: `DataSynthesizer` (no Qt dependency)
+---
 
-A new static library at `src/DataSynthesizer/` containing:
+## Milestone 1 — Core Library, Generators & Command ✅ Complete (2026-03-12)
 
-- **`GeneratorRegistry`** — Singleton mapping `(output_type, generator_name)` → factory function + `GeneratorMetadata` (parameter schema, description, category).
-- **Generator interface** — A type-erased callable: `DataTypeVariant generate(rfl::Generic const& params)`. Each generator is a free function or stateless functor registered at static init time. No base class inheritance hierarchy needed — just a function signature.
-- **Static registration macro/helper** — Similar to TransformsV2's `RegisterTransform`. A file-scope RAII object that calls `GeneratorRegistry::instance().register_(...)`.
-- **Generator implementations** — One `.cpp` per generator (or per logical group). Self-registering.
-
-### Command: `SynthesizeData`
-
-A new `ICommand` in `src/DataManager/Commands/`:
-
-```cpp
-struct SynthesizeDataParams {
-    std::string output_key;          // DataManager key for the result
-    std::string generator_name;      // Registry lookup
-    std::string output_type;         // "AnalogTimeSeries", "DigitalEventSeries", etc.
-    rfl::Generic parameters;         // Generator-specific params (forwarded)
-    std::string time_key = "time";   // TimeFrame association
-};
-```
-
-`execute()` looks up the generator in the registry, calls it, stores the result via `DataManager::setData<T>()`.
-
-### Widget: `DataSynthesizer_Widget`
-
-A new widget at `src/WhiskerToolbox/DataSynthesizer_Widget/` following the TransformsV2_Widget pattern:
-
-- **State** (`DataSynthesizerState : EditorState`) — Stores selected output type, selected generator, parameter JSON, output key.
-- **Properties widget** — Output type selector (combo) → generator selector (combo, filtered by type) → `AutoParamWidget` (driven by the generator's `ParameterSchema`) → output key text field → "Generate" button → optional inline preview plot.
+`DataSynthesizer` static library with `GeneratorRegistry` singleton, five `AnalogTimeSeries` generators (SineWave, SquareWave, TriangleWave, GaussianNoise, UniformNoise), and `SynthesizeData` command. Generators self-register at static init via `RegisterGenerator<Params>` (same `--whole-archive` pattern as TransformsV2). See `GeneratorRegistry.qmd` and `Analog.qmd` for details.
 
 ---
 
-## Milestones
-
-### Milestone 1 — Core Library + AnalogTimeSeries Generators + Command (no GUI)
-
-**Goal**: A working `SynthesizeData` command that can produce `AnalogTimeSeries` from JSON, with a few initial generators to prove the pattern.
-
-#### 1a. Generator Registry & Infrastructure
-
-| Item | Description |
-|------|-------------|
-| `src/DataSynthesizer/CMakeLists.txt` | Static library target, depends on `DataManager`, `ParameterSchema`. No Qt. |
-| `src/DataSynthesizer/GeneratorRegistry.hpp/cpp` | Singleton registry. Maps `(output_type, name)` → `GeneratorEntry{factory_fn, metadata}`. Provides `listGenerators(output_type)`, `generate(name, params)`, `getSchema(name)`. |
-| `src/DataSynthesizer/GeneratorTypes.hpp` | `GeneratorMetadata` struct (name, description, category, output_type, parameter_schema). Type alias for the generator function signature. |
-| `src/DataSynthesizer/Registration.hpp` | RAII registration helper (like TransformsV2's `RegisterTransform`). |
-| Developer doc | `docs/developer/DataSynthesizer/GeneratorRegistry.qmd` |
-
-#### 1b. Initial AnalogTimeSeries Generators
-
-Each generator is a self-contained `.cpp` file under `src/DataSynthesizer/Generators/Analog/`:
-
-| Generator | Params struct | Notes |
-|-----------|--------------|-------|
-| **SineWave** | `{num_samples, amplitude, frequency, phase, dc_offset}` | Basic periodic. Validates `num_samples > 0`, `frequency > 0`. |
-| **SquareWave** | `{num_samples, amplitude, frequency, phase, dc_offset, duty_cycle}` | `duty_cycle` in `[0, 1]`, default `0.5`. |
-| **TriangleWave** | `{num_samples, amplitude, frequency, phase, dc_offset}` | Linear ramps. |
-| **GaussianNoise** | `{num_samples, mean, stddev, seed}` | i.i.d. Gaussian samples. |
-| **UniformNoise** | `{num_samples, min_value, max_value, seed}` | i.i.d. Uniform samples. |
-
-**Deliverables**:
-
-- 5 generator `.cpp` files, each self-registering.
-- Unit tests for each generator (determinism with seed, output size, value range).
-- `docs/developer/DataSynthesizer/Generators/Analog.qmd`
-
-#### 1c. `SynthesizeData` Command
-
-| Item | Description |
-|------|-------------|
-| `src/DataManager/Commands/SynthesizeData.hpp/cpp` | `ICommand` implementation. Looks up generator, calls it, stores in `DataManager`. |
-| `CommandFactory` registration | Add entry for `"SynthesizeData"`. |
-| Unit tests | Round-trip JSON → command → verify DataManager contents. Determinism (same seed = same data). Unknown generator → error. |
-| Developer doc | `docs/developer/DataManager/Commands/SynthesizeData.qmd` |
-
-#### 1c'. Linker integration
-
-Because generators use static registration (RAII objects in anonymous namespaces), the `SynthesizeData` command binary (and any test binary) **must** link the generator object files with `--whole-archive` / `-force_load` / `/WHOLEARCHIVE` to prevent the linker from discarding "unused" translation units. This is the same pattern used by TransformsV2 tests. The `DataSynthesizer` CMakeLists must expose a helper or clearly document this requirement.
-
-**Milestone 1 exit criteria**: A test like this passes:
-
-```cpp
-TEST_CASE("SynthesizeData command produces deterministic sine wave") {
-    auto dm = std::make_shared<DataManager>();
-    CommandContext ctx{dm};
-
-    auto cmd = CommandFactory::createCommandFromJson("SynthesizeData", R"({
-        "output_key": "test_sine",
-        "generator_name": "SineWave",
-        "output_type": "AnalogTimeSeries",
-        "parameters": {
-            "num_samples": 1000,
-            "amplitude": 2.0,
-            "frequency": 0.01,
-            "phase": 0.0,
-            "dc_offset": 0.0
-        }
-    })");
-
-    auto result = cmd->execute(ctx);
-    REQUIRE(result.success);
-
-    auto ts = dm->getData<AnalogTimeSeries>("test_sine");
-    REQUIRE(ts != nullptr);
-    REQUIRE(ts->getNumSamples() == 1000);
-    // Verify first value ≈ 0.0 (sin(0))
-    REQUIRE(ts->getAnalogDataAsFloat(TimeFrameIndex(0)) == Catch::Approx(0.0f));
-}
-```
-
----
-
-### Milestone 2 — GUI Widget (Properties + Preview)
+## Milestone 2 — GUI Widget
 
 **Goal**: A dockable widget where users can select a generator, configure params, preview the output, and generate data into `DataManager`.
 
-#### 2a. EditorState
+### 2a. Widget Skeleton & Registration ✅ Complete (2026-03-12)
 
-| Item | Description |
-|------|-------------|
-| `DataSynthesizerState.hpp/cpp` | Stores: `output_type`, `generator_name`, `parameter_json`, `output_key`, `instance_id`. Serializable via reflect-cpp. |
-| Module registration | `DataSynthesizerWidgetRegistration.hpp/cpp` — registers with `EditorRegistry` for docking. |
+Delivered `DataSynthesizerState`/`DataSynthesizerStateData` (`EditorState` subclass with `instance_id`/`display_name`), empty properties and view `QWidget` stubs, and `DataSynthesizerWidgetRegistration` registering under `"View/Tools"`. Static library `DataSynthesizer_Widget` depends on `Qt6::Widgets`, `EditorState`, `DataManager`.
 
-#### 2b. Properties Widget
+---
 
-| Item | Description |
-|------|-------------|
-| `DataSynthesizerProperties_Widget.hpp/cpp/ui` | Output type combo → generator combo → `AutoParamWidget` (schema from registry) → output key field → Generate button. |
-| Wiring | Generate button calls `SynthesizeData` command via `OperationContext`. |
-| State sync | Combo/field changes update `DataSynthesizerState`; state restoration repopulates UI. |
+### 2b. State & AutoParamWidget Integration ✅ Complete (2026-03-12)
 
-#### 2c. Inline Preview
+`DataSynthesizerStateData` expanded with `output_type`, `generator_name`, `parameter_json`, `output_key`, and `time_key`. Properties widget wired with output type combo → generator combo → `AutoParamWidget` → output key field → Generate button. `GeneratorRegistry::listOutputTypes()` added. State restore uses `_restoring` guard to prevent recursive updates. CMake links `AutoParamWidget`, `DataSynthesizer` (with `--whole-archive`), `ParameterSchema`, `Commands`.
 
-| Item | Description |
-|------|-------------|
-| Preview panel | Embedded plot (using existing `DataViewer` infrastructure or a lightweight `QCustomPlot`/`JKQTPlotter` instance) showing the generated signal before committing to `DataManager`. |
-| Workflow | User adjusts params → clicks "Preview" → plot updates → clicks "Generate" → data written to `DataManager`. Preview is ephemeral (not stored). |
+---
 
-#### 2d. Registration in MainWindow
+### 2c. OpenGL Signal Preview ✅ Complete (2026-03-12)
 
-| Item | Description |
-|------|-------------|
-| `mainwindow.cpp` | Add `DataSynthesizerWidgetModule::registerTypes(...)` call in `_registerEditorTypes()`. |
-| Menu entry | Add under Modules menu. |
-
-**Milestone 2 exit criteria**: User can open the Data Synthesizer panel, pick "AnalogTimeSeries" → "SineWave", set amplitude/frequency, preview a plot, and click Generate. The resulting signal appears in `DataManager_Widget` and can be viewed in `DataViewer`.
+`SynthesizerPreviewWidget` (`QOpenGLWidget`) added using `PlottingOpenGL::SceneRenderer` + `TimeSeriesMapper::mapAnalogSeriesFull()` + `glm::ortho()` projection. Non-interactive; renders a single static polyline. View widget hosts the preview widget. Properties widget gained a "Preview" button that calls `GeneratorRegistry::generate()` directly (ephemeral — no DataManager involvement) and emits `previewRequested(series)`. Registration wires `previewRequested` → `setPreviewData`. CMake adds `PlottingOpenGL`, `CorePlotting`, `Qt6::OpenGL`, `Qt6::OpenGLWidgets`, `glm::glm`.
 
 ---
 
@@ -413,11 +314,11 @@ These are ideas noted for future consideration, not committed milestones:
 
 ---
 
-## File Layout (After Milestone 2)
+## Current File Layout
 
 ```
 src/
-├── DataSynthesizer/
+├── DataSynthesizer/                          # ✅ Milestones 1 & 2 (complete)
 │   ├── CMakeLists.txt
 │   ├── GeneratorRegistry.hpp
 │   ├── GeneratorRegistry.cpp
@@ -430,25 +331,28 @@ src/
 │           ├── TriangleWaveGenerator.cpp
 │           ├── GaussianNoiseGenerator.cpp
 │           └── UniformNoiseGenerator.cpp
-├── DataManager/
-│   └── Commands/
-│       ├── SynthesizeData.hpp
-│       └── SynthesizeData.cpp
+├── Commands/                                 # ✅ Milestone 1 (complete)
+│   ├── SynthesizeData.hpp
+│   └── SynthesizeData.cpp
 └── WhiskerToolbox/
-    └── DataSynthesizer_Widget/
+    └── DataSynthesizer_Widget/               # ✅ Milestone 2 (complete)
         ├── CMakeLists.txt
         ├── DataSynthesizerWidgetRegistration.hpp
         ├── DataSynthesizerWidgetRegistration.cpp
         ├── Core/
+        │   ├── DataSynthesizerStateData.hpp
         │   ├── DataSynthesizerState.hpp
         │   └── DataSynthesizerState.cpp
         └── UI/
             ├── DataSynthesizerProperties_Widget.hpp
             ├── DataSynthesizerProperties_Widget.cpp
-            └── DataSynthesizerProperties_Widget.ui
+            ├── DataSynthesizerView_Widget.hpp
+            ├── DataSynthesizerView_Widget.cpp
+            ├── SynthesizerPreviewWidget.hpp
+            └── SynthesizerPreviewWidget.cpp
 
 tests/
-└── DataSynthesizer/
+└── DataSynthesizer/                          # ✅ Milestone 1 (complete)
     ├── CMakeLists.txt
     ├── GeneratorRegistry.test.cpp
     ├── SineWaveGenerator.test.cpp
@@ -462,25 +366,11 @@ docs/
 └── developer/
     └── DataSynthesizer/
         ├── ROADMAP.md              (this file)
-        ├── GeneratorRegistry.qmd
+        ├── GeneratorRegistry.qmd   # ✅ Milestone 1
+        ├── Widget.qmd              # ✅ Milestone 2
         └── Generators/
-            └── Analog.qmd
+            └── Analog.qmd         # ✅ Milestone 1
 ```
-
-## Implementation Order (Milestone 1 detailed)
-
-For the first milestone, the recommended implementation sequence is:
-
-1. **`GeneratorTypes.hpp`** — Define `GeneratorMetadata`, `GeneratorFunction` type alias, `GeneratorEntry`.
-2. **`GeneratorRegistry.hpp/cpp`** — Singleton with `register_()`, `generate()`, `listGenerators()`, `getSchema()`.
-3. **`Registration.hpp`** — RAII helper struct for static registration.
-4. **`SineWaveGenerator.cpp`** — First generator. Validates the full registration → generation → output path.
-5. **Unit tests for SineWave** — Proves the registry works end-to-end.
-6. **`SynthesizeData` command** — Wires generators to `DataManager` via command architecture.
-7. **Command unit tests** — Round-trip JSON → command → DataManager verification.
-8. **Remaining generators** (Square, Triangle, Gaussian, Uniform) — Now that the pattern is proven, these are mechanical.
-9. **CMake integration** — `--whole-archive` linking for test binaries.
-10. **Developer documentation**.
 
 ## Key Design Decisions
 

@@ -157,6 +157,12 @@ add_subdirectory(LayoutTesting)
 # Qt, DataManager, EditorState, reflectcpp - Test/proof-of-concept widget
 add_subdirectory(Test_Widget)
 
+# Qt, DataManager, EditorState, reflectcpp - Data synthesizer widget
+add_subdirectory(DataSynthesizer_Widget)
+
+# Qt, EditorState, Commands, reflectcpp - Command log widget
+add_subdirectory(CommandLog_Widget)
+
 set(PROJECT_SOURCES
         main.cpp
         whiskertoolbox.qrc
@@ -336,6 +342,18 @@ else()
     target_link_libraries(WhiskerToolbox PRIVATE -Wl,--whole-archive TransformsV2 -Wl,--no-whole-archive)
 endif()
 
+# Force whole-archive linking for DataSynthesizer to ensure static generator registration
+# (Generator .cpp files have file-scope RegisterGenerator<Params> RAII objects that register
+# into GeneratorRegistry's singleton; without --whole-archive the linker strips them)
+if(APPLE)
+    target_link_libraries(WhiskerToolbox PRIVATE -Wl,-force_load,$<TARGET_FILE:DataSynthesizer>)
+elseif(MSVC)
+    target_link_options(WhiskerToolbox PRIVATE /WHOLEARCHIVE:DataSynthesizer)
+    target_link_libraries(WhiskerToolbox PRIVATE DataSynthesizer)
+else()
+    target_link_libraries(WhiskerToolbox PRIVATE -Wl,--whole-archive DataSynthesizer -Wl,--no-whole-archive)
+endif()
+
 target_link_libraries(WhiskerToolbox PRIVATE PlotAlignmentWidget)
 target_link_libraries(WhiskerToolbox PRIVATE EventPlotWidget)
 target_link_libraries(WhiskerToolbox PRIVATE ACFWidget)
@@ -348,6 +366,8 @@ target_link_libraries(WhiskerToolbox PRIVATE SpectrogramWidget)
 target_link_libraries(WhiskerToolbox PRIVATE 3DPlotWidget)
 target_link_libraries(WhiskerToolbox PRIVATE OnionSkinViewWidget)
 target_link_libraries(WhiskerToolbox PRIVATE Test_Widget)
+target_link_libraries(WhiskerToolbox PRIVATE DataSynthesizer_Widget)
+target_link_libraries(WhiskerToolbox PRIVATE CommandLog_Widget)
 target_link_libraries(WhiskerToolbox PRIVATE LayoutTesting)
 
 target_link_libraries(WhiskerToolbox PRIVATE opencv_core opencv_imgproc opencv_highgui opencv_photo)

@@ -33,13 +33,15 @@
 #include "DataImport_Widget/DataImportWidgetRegistration.hpp"
 #include "DataInspector_Widget/DataInspectorWidgetRegistration.hpp"
 #include "DataManager_Widget/DataManagerWidgetRegistration.hpp"
+#include "CommandLog_Widget/CommandLogWidgetRegistration.hpp"
+#include "DataSynthesizer_Widget/DataSynthesizerWidgetRegistration.hpp"
 #include "DataTransform_Widget/DataTransformWidgetRegistration.hpp"
 #include "DataViewer_Widget/DataViewerWidgetRegistration.hpp"
 #include "DeepLearning_Widget/DeepLearningWidgetRegistration.hpp"
 #include "Export_Widgets/Export_Video_Widget/ExportVideoWidgetRegistration.hpp"
 #include "GroupManagementWidget/GroupManagementWidgetRegistration.hpp"
-#include "ML_Widget/MLWidgetRegistration.hpp"
 #include "MLCore_Widget/MLCoreWidgetRegistration.hpp"
+#include "ML_Widget/MLWidgetRegistration.hpp"
 #include "Media_Widget/MediaWidgetRegistration.hpp"
 
 #include "Plots/3DPlot/3DPlotWidgetRegistration.hpp"
@@ -53,15 +55,15 @@
 #include "Plots/SpectrogramWidget/SpectrogramWidgetRegistration.hpp"
 #include "Plots/TemporalProjectionViewWidget/TemporalProjectionViewWidgetRegistration.hpp"
 
-#include "TableDesignerWidget/TableDesignerWidgetRegistration.hpp"
-#include "TableDesignerWidget/TableDesignerWidget.hpp"
 #include "Python_Widget/PythonWidgetRegistration.hpp"
+#include "TableDesignerWidget/TableDesignerWidget.hpp"
+#include "TableDesignerWidget/TableDesignerWidgetRegistration.hpp"
 #include "Terminal_Widget/TerminalWidgetRegistration.hpp"
 #include "Test_Widget/TestWidgetRegistration.hpp"
-#include "TransformsV2_Widget/TransformsV2WidgetRegistration.hpp"
-#include "TriageSession_Widget/TriageSessionWidgetRegistration.hpp"
 #include "TimeScrollBar/TimeScrollBarRegistration.hpp"
 #include "Tongue_Widget/TongueWidgetRegistration.hpp"
+#include "TransformsV2_Widget/TransformsV2WidgetRegistration.hpp"
+#include "TriageSession_Widget/TriageSessionWidgetRegistration.hpp"
 #include "Whisker_Widget/WhiskerWidgetRegistration.hpp"
 #include "ZoneManagerWidgetRegistration.hpp"
 
@@ -69,12 +71,13 @@
 #include "TimeScrollBar/TimeScrollBarState.hpp"
 
 #include "StateManagement/AppFileDialog.hpp"
-#include "StateManagement/StateManager.hpp"
 #include "StateManagement/AppPreferences.hpp"
 #include "StateManagement/SessionStore.hpp"
-#include "StateManagement/WorkspaceManager.hpp"
+#include "StateManagement/StateManager.hpp"
 #include "StateManagement/WorkspaceData.hpp"
+#include "StateManagement/WorkspaceManager.hpp"
 
+#include "Commands/Core/CommandRecorder.hpp"
 #include "utils/DataLoadUtils.hpp"
 
 #include <QCloseEvent>
@@ -110,7 +113,8 @@ MainWindow::MainWindow(QWidget * parent)
       _editor_registry{std::make_unique<EditorRegistry>(this)},
       _zone_manager(nullptr),
       _state_manager{std::make_unique<StateManagement::StateManager>(this)},
-      _group_manager(nullptr)
+      _group_manager(nullptr),
+      _command_recorder{std::make_unique<commands::CommandRecorder>()}
 
 {
     ui->setupUi(this);
@@ -433,6 +437,8 @@ void MainWindow::_createActions() {
     connect(ui->actionScatter_Plot, &QAction::triggered, this, &MainWindow::openScatterPlotWidget);
     connect(ui->action3D_Plot, &QAction::triggered, this, &MainWindow::open3DPlotWidget);
     connect(ui->actionOnion_Skin_View, &QAction::triggered, this, &MainWindow::openOnionSkinViewWidget);
+    connect(ui->actionData_Synthesizer, &QAction::triggered, this, &MainWindow::openDataSynthesizerWidget);
+    connect(ui->actionCommand_Log, &QAction::triggered, this, &MainWindow::openCommandLogWidget);
 }
 
 /*
@@ -516,7 +522,7 @@ void MainWindow::_loadJSONConfig() {
     auto progress_callback = [&progress](int current, int total, std::string const & message) -> bool {
         // Update progress bar
         if (total > 0) {
-            int percent = (current * 100) / total;
+            int const percent = (current * 100) / total;
             progress.setValue(percent);
         }
 
@@ -678,7 +684,7 @@ ads::CDockWidget * MainWindow::findDockWidget(std::string const & key) const {
 
 bool MainWindow::eventFilter(QObject * obj, QEvent * event) {
     if (event->type() == QEvent::KeyPress) {
-        QKeyEvent * keyEvent = static_cast<QKeyEvent *>(event);
+        auto * keyEvent = dynamic_cast<QKeyEvent *>(event);
 
         // Handle spacebar for play/pause (unless in text input widget)
         if (keyEvent->key() == Qt::Key_Space && keyEvent->modifiers() == Qt::NoModifier) {
@@ -842,6 +848,14 @@ void MainWindow::openTriageSessionWidget() {
     openEditor(QStringLiteral("TriageSessionWidget"));
 }
 
+void MainWindow::openDataSynthesizerWidget() {
+    openEditor(QStringLiteral("DataSynthesizerWidget"));
+}
+
+void MainWindow::openCommandLogWidget() {
+    openEditor(QStringLiteral("CommandLogWidget"));
+}
+
 void MainWindow::openDataImport() {
     // Use EditorCreationController pattern - delegate to openEditor
     openEditor(QStringLiteral("DataImportWidget"));
@@ -949,13 +963,13 @@ void MainWindow::_registerEditorTypes() {
 
     MediaWidgetModule::registerTypes(_editor_registry.get(), _data_manager, _group_manager.get());
 
-    DataInspectorModule::registerTypes(_editor_registry.get(), _data_manager, _group_manager.get());
+    DataInspectorModule::registerTypes(_editor_registry.get(), _data_manager, _group_manager.get(), commandRecorder());
 
     DataTransformWidgetModule::registerTypes(_editor_registry.get(), _data_manager);
 
     TransformsV2WidgetModule::registerTypes(_editor_registry.get(), _data_manager);
 
-    TriageSessionWidgetModule::registerTypes(_editor_registry.get(), _data_manager);
+    TriageSessionWidgetModule::registerTypes(_editor_registry.get(), _data_manager, commandRecorder());
 
     DataImportWidgetModule::registerTypes(_editor_registry.get(), _data_manager);
 
@@ -978,7 +992,7 @@ void MainWindow::_registerEditorTypes() {
     PythonWidgetModule::registerTypes(_editor_registry.get(), _data_manager, _state_manager->preferences());
 
     TerminalWidgetModule::registerTypes(_editor_registry.get());
-    
+
     BatchProcessingWidgetModule::registerTypes(_editor_registry.get(), _data_manager);
 
     MLWidgetModule::registerTypes(_editor_registry.get(), _data_manager);
@@ -1011,6 +1025,10 @@ void MainWindow::_registerEditorTypes() {
 
     OnionSkinViewWidgetModule::registerTypes(_editor_registry.get(), _data_manager);
 
+    DataSynthesizerWidgetModule::registerTypes(_editor_registry.get(), _data_manager, commandRecorder());
+
+    CommandLogWidgetModule::registerTypes(_editor_registry.get(), commandRecorder());
+
     // Future: Add more module registrations here
     // AnalysisDashboardModule::registerTypes(_editor_registry.get(), _data_manager);
 }
@@ -1031,7 +1049,7 @@ void MainWindow::openEditor(QString const & type_id) {
             // Find the existing dock widget and show it
             // The dock widget title should contain the display name
             for (auto const & state: existing) {
-                EditorLib::EditorInstanceId instance_id(state->getInstanceId());
+                EditorLib::EditorInstanceId const instance_id(state->getInstanceId());
 
                 // Search all dock widgets for one containing this state's widget
                 for (auto * dock: _m_DockManager->dockWidgetsMap()) {
@@ -1071,7 +1089,7 @@ void MainWindow::openEditor(QString const & type_id) {
         return;
     }
 
-    EditorLib::EditorInstanceId instance_id(placed.state->getInstanceId());
+    EditorLib::EditorInstanceId const instance_id(placed.state->getInstanceId());
 
     // Set this editor as active so PropertiesHost shows its properties
     _editor_registry->selectionContext()->setActiveEditor(instance_id);
@@ -1133,7 +1151,7 @@ void MainWindow::_openWorkspace() {
     }
 
     // --- Replay data loads ---
-    for (auto const & entry : data->data_loads) {
+    for (auto const & entry: data->data_loads) {
         if (entry.loader_type == "json_config") {
             auto const json_path = QString::fromStdString(entry.source_path);
             if (QFile::exists(json_path)) {
@@ -1182,17 +1200,17 @@ void MainWindow::_openWorkspace() {
 
     // Restore data load provenance from the workspace
     _state_manager->workspace()->clearDataLoads();
-    for (auto const & entry : data->data_loads) {
+    for (auto const & entry: data->data_loads) {
         _state_manager->workspace()->recordDataLoad(entry);
     }
 
     // Restore pipeline and table provenance
     _state_manager->workspace()->clearAppliedPipelines();
-    for (auto const & pj : data->applied_pipelines) {
+    for (auto const & pj: data->applied_pipelines) {
         _state_manager->workspace()->recordAppliedPipeline(pj);
     }
     _state_manager->workspace()->clearTableDefinitions();
-    for (auto const & tj : data->table_definitions) {
+    for (auto const & tj: data->table_definitions) {
         _state_manager->workspace()->recordTableDefinition(tj);
     }
 
@@ -1248,7 +1266,7 @@ void MainWindow::_checkCrashRecovery() {
 
     if (answer == QMessageBox::Yes) {
         // Replay data loads
-        for (auto const & entry : recovery_data->data_loads) {
+        for (auto const & entry: recovery_data->data_loads) {
             if (entry.loader_type == "json_config") {
                 auto const json_path = QString::fromStdString(entry.source_path);
                 if (QFile::exists(json_path)) {
@@ -1284,15 +1302,15 @@ void MainWindow::_checkCrashRecovery() {
 
         // Restore provenance
         ws->clearDataLoads();
-        for (auto const & entry : recovery_data->data_loads) {
+        for (auto const & entry: recovery_data->data_loads) {
             ws->recordDataLoad(entry);
         }
         ws->clearAppliedPipelines();
-        for (auto const & pj : recovery_data->applied_pipelines) {
+        for (auto const & pj: recovery_data->applied_pipelines) {
             ws->recordAppliedPipeline(pj);
         }
         ws->clearTableDefinitions();
-        for (auto const & tj : recovery_data->table_definitions) {
+        for (auto const & tj: recovery_data->table_definitions) {
             ws->recordTableDefinition(tj);
         }
 
@@ -1325,7 +1343,7 @@ void MainWindow::_rebuildRecentWorkspacesMenu() {
         return;
     }
 
-    for (auto const & ws_path : recent) {
+    for (auto const & ws_path: recent) {
         auto const display = QFileInfo(ws_path).fileName();
         auto * action = _recent_workspaces_menu->addAction(display);
         action->setToolTip(ws_path);
@@ -1349,7 +1367,7 @@ void MainWindow::_rebuildRecentWorkspacesMenu() {
             }
 
             // Replay data loads
-            for (auto const & entry : data->data_loads) {
+            for (auto const & entry: data->data_loads) {
                 if (entry.loader_type == "json_config") {
                     if (QFile::exists(QString::fromStdString(entry.source_path))) {
                         auto data_info = loadDataAndBroadcastConfig(
@@ -1378,15 +1396,15 @@ void MainWindow::_rebuildRecentWorkspacesMenu() {
             _state_manager->workspace()->enableAutoSave();
 
             _state_manager->workspace()->clearDataLoads();
-            for (auto const & entry : data->data_loads) {
+            for (auto const & entry: data->data_loads) {
                 _state_manager->workspace()->recordDataLoad(entry);
             }
             _state_manager->workspace()->clearAppliedPipelines();
-            for (auto const & pj : data->applied_pipelines) {
+            for (auto const & pj: data->applied_pipelines) {
                 _state_manager->workspace()->recordAppliedPipeline(pj);
             }
             _state_manager->workspace()->clearTableDefinitions();
-            for (auto const & tj : data->table_definitions) {
+            for (auto const & tj: data->table_definitions) {
                 _state_manager->workspace()->recordTableDefinition(tj);
             }
 
@@ -1401,7 +1419,7 @@ void MainWindow::_rebuildRecentWorkspacesMenu() {
     auto * clear_action = _recent_workspaces_menu->addAction(QStringLiteral("Clear Recent"));
     connect(clear_action, &QAction::triggered, this, [this]() {
         auto const recent = _state_manager->session()->recentWorkspaces();
-        for (auto const & ws : recent) {
+        for (auto const & ws: recent) {
             _state_manager->session()->removeRecentWorkspace(ws);
         }
     });
@@ -1416,7 +1434,7 @@ void MainWindow::_closeDynamicEditors() {
     // because closing can modify the dock manager's internal map.
     std::vector<ads::CDockWidget *> to_close;
 
-    for (auto * dock : _m_DockManager->dockWidgetsMap()) {
+    for (auto * dock: _m_DockManager->dockWidgetsMap()) {
         if (!dock || !dock->widget()) {
             continue;
         }
@@ -1429,7 +1447,7 @@ void MainWindow::_closeDynamicEditors() {
         to_close.push_back(dock);
     }
 
-    for (auto * dock : to_close) {
+    for (auto * dock: to_close) {
         dock->closeDockWidget();
     }
 }
@@ -1454,7 +1472,7 @@ void MainWindow::_restoreEditorStates(StateManagement::WorkspaceData const & dat
     // Now recreate view/properties widgets for each restored state
     // and place them in their preferred zones
     auto const restored_states = _editor_registry->allStates();
-    for (auto const & state : restored_states) {
+    for (auto const & state: restored_states) {
         auto const type_id = EditorLib::EditorTypeId(state->getTypeName());
         auto const info = _editor_registry->typeInfo(type_id);
 
@@ -1508,7 +1526,7 @@ void MainWindow::_restoreZoneLayout(StateManagement::WorkspaceData const & data)
             // code now uses a fixed name like "builtin_group_manager").
             // Simply calling toggleView(true) would open them as floating
             // windows, so we re-dock them into their proper zones instead.
-            for (auto * dock : _m_DockManager->dockWidgetsMap()) {
+            for (auto * dock: _m_DockManager->dockWidgetsMap()) {
                 if (!dock || dock->features().testFlag(ads::CDockWidget::DockWidgetClosable)) {
                     continue;
                 }
@@ -1571,30 +1589,22 @@ void MainWindow::_connectProvenanceTracking() {
     // Connect to EditorRegistry's editorCreated signal to wire up
     // provenance tracking for new widget instances
     connect(_editor_registry.get(), &EditorRegistry::editorCreated,
-            this, [this](EditorInstanceId instance_id, EditorTypeId type_id) {
+            this, [this](EditorInstanceId const & instance_id, EditorTypeId const & type_id) {
                 Q_UNUSED(instance_id);
 
                 // Find the dock widget for this instance and connect signals
                 if (type_id.toString() == QStringLiteral("DataTransformWidget")) {
-                    for (auto * dock : _m_DockManager->dockWidgetsMap()) {
+                    for (auto * dock: _m_DockManager->dockWidgetsMap()) {
                         if (auto * dtw = dynamic_cast<DataTransform_Widget *>(dock->widget())) {
-                            connect(dtw, &DataTransform_Widget::pipelineExecuted,
-                                    this, [this](QString const & json) {
-                                        _state_manager->workspace()->recordAppliedPipeline(
-                                                json.toStdString());
-                                    },
-                                    Qt::UniqueConnection);
+                            connect(dtw, &DataTransform_Widget::pipelineExecuted, this, [this](QString const & json) { _state_manager->workspace()->recordAppliedPipeline(
+                                                                                                                               json.toStdString()); }, Qt::UniqueConnection);
                         }
                     }
                 } else if (type_id.toString() == QStringLiteral("TableDesignerWidget")) {
-                    for (auto * dock : _m_DockManager->dockWidgetsMap()) {
+                    for (auto * dock: _m_DockManager->dockWidgetsMap()) {
                         if (auto * tdw = dynamic_cast<TableDesignerWidget *>(dock->widget())) {
-                            connect(tdw, &TableDesignerWidget::tableCreated,
-                                    this, [this](QString const & table_id) {
-                                        _state_manager->workspace()->recordTableDefinition(
-                                                table_id.toStdString());
-                                    },
-                                    Qt::UniqueConnection);
+                            connect(tdw, &TableDesignerWidget::tableCreated, this, [this](QString const & table_id) { _state_manager->workspace()->recordTableDefinition(
+                                                                                                                              table_id.toStdString()); }, Qt::UniqueConnection);
                         }
                     }
                 }

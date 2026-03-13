@@ -1,0 +1,46 @@
+
+set(digital_subdirectory_sources
+        Digital_Interval_Series.hpp
+        Digital_Interval_Series.cpp
+        Digital_Event_Series.hpp
+        Digital_Event_Series.cpp
+        
+        storage/DigitalIntervalStorageBase.hpp
+        storage/DigitalIntervalStorage.hpp
+        storage/DigitalIntervalStorage.cpp
+        storage/LazyDigitalIntervalStorage.hpp
+        storage/OwningDigitalIntervalStorage.hpp
+        storage/OwningDigitalIntervalStorage.cpp
+        storage/ViewDigitalIntervalStorage.hpp
+        storage/ViewDigitalIntervalStorage.cpp
+        storage/DigitalEventStorageBase.hpp
+        storage/DigitalEventStorageCache.hpp
+        storage/DigitalEventStorage.hpp
+        storage/DigitalEventStorage.cpp
+        storage/LazyDigitalEventStorage.hpp
+        storage/OwningDigitalEventStorage.hpp
+        storage/OwningDigitalEventStorage.cpp
+        storage/ViewDigitalEventStorage.hpp
+        storage/ViewDigitalEventStorage.cpp
+)
+
+add_library(DigitalTimeSeries STATIC ${digital_subdirectory_sources})
+set_target_properties(DigitalTimeSeries PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+# Set up include directories
+target_include_directories(DigitalTimeSeries PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>  # For DataManager/utils and other utils
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>     # For IO subdirectories
+    $<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(DigitalTimeSeries PUBLIC
+    WhiskerToolbox::ObserverData  # Observer
+    TimeFrame                # TimeFrame  
+    Entity                   # Entity
+  #  nlohmann_json::nlohmann_json  # For JSON support
+)
+
+add_library(WhiskerToolbox::DigitalTimeSeries ALIAS DigitalTimeSeries)
+
+set_target_compiler_warnings(DigitalTimeSeries)

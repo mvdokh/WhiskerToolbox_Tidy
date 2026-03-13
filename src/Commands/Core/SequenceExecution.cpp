@@ -23,6 +23,9 @@ SequenceResult executeSequence(
         bool stop_on_error,
         CommandRecorder * recorder) {
 
+    // Fall back to the recorder embedded in the context if none was passed explicitly
+    auto * effective_recorder = recorder != nullptr ? recorder : ctx.recorder;
+
     SequenceResult seq_result;
     std::vector<std::string> all_affected_keys;
 
@@ -88,7 +91,7 @@ SequenceResult executeSequence(
         }
 
         // Record the resolved descriptor on success
-        if (cmd_result.success && recorder != nullptr) {
+        if (cmd_result.success && effective_recorder != nullptr) {
             CommandDescriptor resolved_desc;
             resolved_desc.command_name = resolved_name;
             resolved_desc.description = desc.description;
@@ -99,7 +102,7 @@ SequenceResult executeSequence(
             if (parsed_for_record) {
                 resolved_desc.parameters = std::move(parsed_for_record.value());
             }
-            recorder->record(std::move(resolved_desc));
+            effective_recorder->record(std::move(resolved_desc));
         }
 
         all_affected_keys.insert(
@@ -119,6 +122,28 @@ SequenceResult executeSequence(
         seq_result.result.affected_keys = std::move(all_affected_keys);
     }
     return seq_result;
+}
+
+CommandResult executeSingleCommand(
+        std::string const & command_name,
+        std::string const & params_json,
+        CommandContext const & ctx) {
+
+    CommandDescriptor desc;
+    desc.command_name = command_name;
+
+    if (!params_json.empty()) {
+        auto parsed = rfl::json::read<rfl::Generic>(params_json);
+        if (parsed) {
+            desc.parameters = std::move(parsed.value());
+        }
+    }
+
+    CommandSequenceDescriptor seq;
+    seq.commands = {std::move(desc)};
+
+    auto seq_result = executeSequence(seq, ctx);
+    return seq_result.result;
 }
 
 }// namespace commands
