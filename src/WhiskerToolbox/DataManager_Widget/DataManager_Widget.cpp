@@ -10,14 +10,14 @@
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
 #include "Lines/Line_Data.hpp"
 #include "Masks/Mask_Data.hpp"
-#include "DataManager/Media/Media_Data.hpp"
+#include "Media/Media_Data.hpp"
 #include "Points/Point_Data.hpp"
 
 #include "CoreGeometry/ImageSize.hpp"
 
 //https://stackoverflow.com/questions/72533139/libtorch-errors-when-used-with-qt-opencv-and-point-cloud-library
 #undef slots
-#include "DataManager/Tensors/TensorData.hpp"
+#include "Tensors/TensorData.hpp"
 #define slots Q_SLOTS
 
 #include "NewDataWidget/NewDataWidget.hpp"

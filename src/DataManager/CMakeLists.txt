@@ -14,12 +14,6 @@ find_package(Armadillo REQUIRED)
 find_package(LAPACK REQUIRED)
 find_package(OpenBLAS REQUIRED)
 
-add_subdirectory(IO)
-
-add_subdirectory(Media)
-
-add_subdirectory(Tensors)
-
 set(DATAMANAGER_SOURCES
         DataManager.hpp
         DataManager.cpp
@@ -31,12 +25,8 @@ set(DATAMANAGER_SOURCES
         Commands/MutationGuard.hpp
         Commands/MutationGuard.cpp
 
-        loaders/loading_utils.hpp
-
         utils/armadillo_wrap/analog_armadillo.hpp
         utils/armadillo_wrap/analog_armadillo.cpp
-        utils/json_helpers.hpp
-        utils/metaprogramming_utils.hpp
         utils/TimeIndexExtractor.hpp
         utils/TimeIndexExtractor.cpp
         utils/DerivedTimeFrame.hpp
@@ -198,7 +188,7 @@ set_property(GLOBAL PROPERTY DATAMANAGER_TEST_SOURCES "")
 
 add_library(DataManager STATIC ${DATAMANAGER_SOURCES})
 
-target_include_directories(DataManager PRIVATE
+target_include_directories(DataManager PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>" # State Estimation
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
@@ -210,7 +200,7 @@ target_link_libraries(DataManager PUBLIC WhiskerToolbox::ObserverData)
 target_link_libraries(DataManager PUBLIC WhiskerToolbox::TimeFrame)
 target_link_libraries(DataManager PUBLIC WhiskerToolbox::Entity)
 target_link_libraries(DataManager PRIVATE WhiskerToolbox::CoreMath)
-target_link_libraries(DataManager PRIVATE CoreUtilities)
+target_link_libraries(DataManager PUBLIC CoreUtilities) # used in 
 
 target_link_libraries(DataManager PRIVATE StateEstimation)
 
@@ -223,17 +213,17 @@ target_link_libraries(DataManager PRIVATE Whisker-Analysis)
 target_link_libraries(DataManager PUBLIC iir::iir)
 
 target_link_libraries(DataManager PRIVATE WhiskerToolbox::TensorData)
-target_link_libraries(DataManager PUBLIC WhiskerToolbox::LineData)
-target_link_libraries(DataManager PUBLIC WhiskerToolbox::MaskData)
-target_link_libraries(DataManager PUBLIC WhiskerToolbox::MediaData)
-target_link_libraries(DataManager PUBLIC WhiskerToolbox::AnalogTimeSeries)
-target_link_libraries(DataManager PUBLIC WhiskerToolbox::DigitalTimeSeries)
-target_link_libraries(DataManager PUBLIC WhiskerToolbox::PointData)
+target_link_libraries(DataManager PRIVATE WhiskerToolbox::LineData)
+target_link_libraries(DataManager PRIVATE WhiskerToolbox::MaskData)
+target_link_libraries(DataManager PRIVATE WhiskerToolbox::MediaData)
+target_link_libraries(DataManager PRIVATE WhiskerToolbox::AnalogTimeSeries)
+target_link_libraries(DataManager PRIVATE WhiskerToolbox::DigitalTimeSeries)
+target_link_libraries(DataManager PRIVATE WhiskerToolbox::PointData)
 
 target_link_libraries(DataManager PUBLIC DataTypeEnum)
 
 if(ENABLE_OPENCV)
-    target_link_libraries(DataManager PUBLIC ImageProcessing)
+    target_link_libraries(DataManager PRIVATE ImageProcessing)
 endif()
 
 target_link_libraries(DataManager PRIVATE DataManagerIO)

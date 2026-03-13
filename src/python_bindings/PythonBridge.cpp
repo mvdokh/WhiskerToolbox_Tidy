@@ -8,9 +8,9 @@
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
 #include "Lines/Line_Data.hpp"
 #include "Masks/Mask_Data.hpp"
-#include "DataManager/Media/Media_Data.hpp"
+#include "Media/Media_Data.hpp"
 #include "Points/Point_Data.hpp"
-#include "DataManager/Tensors/TensorData.hpp"
+#include "Tensors/TensorData.hpp"
 #include "TimeFrame/StrongTimeTypes.hpp"
 #include "TimeFrame/TimeFrame.hpp"
 
