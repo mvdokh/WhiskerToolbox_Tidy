@@ -5,17 +5,151 @@ toc: true
 toc-depth: 2
 ---
 
-## Overview
+## Table of Contents
 
-This is the user guide for neuralyzer.
+This page is the complete index for the User Guide, including sections and
+subsections.
 
-## How To Use This Guide
+## Introduction
 
-Use the left sidebar to navigate by topic (data loading, media viewer,
-data transforms, plotting, inspectors, machine learning, and export).
+- [Introduction](index.qmd)
 
-## Notes
+## Acquisition Systems
 
-- The guide is organized around practical workflows.
-- Concept pages and tutorials in Learning Resources complement these
-	reference sections.
+- [Overview](acquisition_systems/index.qmd)
+- [Intan](acquisition_systems/intan.qmd)
+- [Open Ephys](acquisition_systems/openephys.qmd)
+- [LabJack](acquisition_systems/labjack.qmd)
+- [Doric](acquisition_systems/doric.qmd)
+- [Generic HDF5](acquisition_systems/generic_hdf5.qmd)
+- [Generic Binary](acquisition_systems/generic_binary.qmd)
+- [Image Stacks](acquisition_systems/image_stacks.qmd)
+- [SpikeSorter](acquisition_systems/spikesorter.qmd)
+
+## Data Loading
+
+- [Overview](data_loading/index.qmd)
+- [JSON Loading](data_loading/JSON_loading.qmd)
+- [Point Loading](data_loading/Point_Loading.qmd)
+- [Mask Loading](data_loading/Mask_Loading.qmd)
+- [Video Loading](data_loading/Video_Loading.qmd)
+- [Image Loading](data_loading/Image_Loading.qmd)
+- [Line Loading](data_loading/Line_Loading.qmd)
+- [Tensor Loading](data_loading/Tensor_Loading.qmd)
+
+## Media Viewer
+
+- [Overview](media_viewer/overview.qmd)
+- [Process](media_viewer/process.qmd)
+- [Points](media_viewer/points.qmd)
+- [Masks](media_viewer/masks.qmd)
+- [Intervals](media_viewer/intervals.qmd)
+- [Lines](media_viewer/lines.qmd)
+- [Tensors](media_viewer/tensors.qmd)
+
+## Image Processing
+
+- [Overview](image_processing/index.qmd)
+- [Contrast](image_processing/contrast.qmd)
+- [Gamma](image_processing/gamma.qmd)
+- [Sharpening](image_processing/sharpening.qmd)
+- [CLAHE](image_processing/clahe.qmd)
+- [Bilateral Filter](image_processing/bilateral_filter.qmd)
+
+## Data Viewer
+
+- [Overview](data_viewer/overview.qmd)
+
+## Plot Widgets
+
+- [Overview](Plots/index.qmd)
+- [3D Plot](Plots/3DPlot/index.qmd)
+- [ACF Widget](Plots/ACFWidget/index.qmd)
+- [Data Viewer Widget](Plots/DataViewerWidget/index.qmd)
+- [Event Plot Widget](Plots/EventPlotWidget/index.qmd)
+- [Heatmap Widget](Plots/HeatmapWidget/index.qmd)
+- [Line Plot Widget](Plots/LinePlotWidget/index.qmd)
+- [Onion Skin View Widget](Plots/OnionSkinViewWidget/index.qmd)
+- [PSTH Widget](Plots/PSTHWidget/index.qmd)
+- [Scatter Plot Widget](Plots/ScatterPlotWidget/index.qmd)
+- [Spectrogram Widget](Plots/SpectrogramWidget/index.qmd)
+- [Temporal Projection View Widget](Plots/TemporalProjectionViewWidget/index.qmd)
+
+## Data Manager
+
+- [Overview](data_manager/overview.qmd)
+
+## Data Transformations
+
+- [Overview](data_transformations/overview.qmd)
+- [Transform Widget](data_transformations/transforms_v2_widget.qmd)
+
+### Reference Guides
+
+- [Mask Transforms Reference](data_transformations/mask_transforms_reference.qmd)
+- [Media Transforms Reference](data_transformations/media_transforms_reference.qmd)
+- [Point Transforms Reference](data_transformations/point_transforms_reference.qmd)
+- [Interval Transforms Reference](data_transformations/interval_transforms_reference.qmd)
+
+## Data Inspectors
+
+- [Tensor Inspector](data_inspectors/tensor_inspector.qmd)
+- [Analog Event Threshold](data_transformations/analog_event_threshold.qmd)
+- [Analog Interval Threshold](data_transformations/analog_interval_threshold.qmd)
+- [Digital Interval Group](data_transformations/digital_interval_group.qmd)
+- [Analog Hilbert Phase](data_transformations/analog_hilbert_phase.qmd)
+- [Line Angle](data_transformations/line_angle.qmd)
+- [Line Clip](data_transformations/line_clip.qmd)
+- [Line Curvature](data_transformations/line_curvature.qmd)
+- [Line Resample](data_transformations/line_resample.qmd)
+- [Extract Line Subsegment](data_transformations/extract_line_subsegment.qmd)
+- [Calculate Line-to-Point Distance](data_transformations/calculate_line_to_point_distance.qmd)
+- [Extract Point from Line](data_transformations/extract_point_from_line.qmd)
+- [Mask Area](data_transformations/mask_area.qmd)
+- [Mask Centroid](data_transformations/mask_centroid.qmd)
+- [Calculate Mask Principal Axis](data_transformations/calculate_mask_principal_axis.qmd)
+- [Remove Small Connected Components](data_transformations/remove_small_connected_components.qmd)
+- [Skeletonize Mask](data_transformations/skeletonize_mask.qmd)
+- [Fill Mask Holes](data_transformations/fill_mask_holes.qmd)
+- [Apply Median Filter](data_transformations/apply_median_filter.qmd)
+
+## Deep Learning
+
+- [Deep Learning Widget](deep_learning/deep_learning_widget.qmd)
+- [Export Encoder Models](deep_learning/export_encoder_models.qmd)
+- [Post Encoder Modules](deep_learning/post_encoder_modules.qmd)
+
+## Machine Learning
+
+- [Introduction](machine_learning/ML_intro.qmd)
+
+### Classification
+
+- [Random Forest](machine_learning/Random_Forest.qmd)
+- [Naive Bayes](machine_learning/Naive_Bayes.qmd)
+- [Logistic Regression](machine_learning/Logistic_Regression.qmd)
+- [HMM](machine_learning/HMM.qmd)
+
+### Clustering
+
+- [KMeans](machine_learning/KMeans.qmd)
+- [DBSCAN](machine_learning/DBSCAN.qmd)
+- [GMM](machine_learning/GMM.qmd)
+
+## Export
+
+- [Video Export](export/video_export.qmd)
+- [CSV Plot Export](export/csv_plot_export.qmd)
+
+## Behavioral Modules
+
+- [Whisker](behaviors/whisker.qmd)
+- [Tongue](behaviors/tongue.qmd)
+
+## Triage Session
+
+- [Overview](triage_session/overview.qmd)
+
+## Python Console
+
+- [Python Console](python_console.qmd)

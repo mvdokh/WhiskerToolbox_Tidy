@@ -18156,37 +18156,177 @@
     "href": "user_guide/index.html",
     "title": "User Guide",
     "section": "",
-    "text": "This is the user guide for neuralyzer.",
+    "text": "This page is the complete index for the User Guide, including sections and subsections.",
     "crumbs": [
       "Introduction"
     ]
   },
   {
-    "objectID": "user_guide/index.html#overview",
-    "href": "user_guide/index.html#overview",
+    "objectID": "user_guide/index.html#table-of-contents",
+    "href": "user_guide/index.html#table-of-contents",
     "title": "User Guide",
     "section": "",
-    "text": "This is the user guide for neuralyzer.",
+    "text": "This page is the complete index for the User Guide, including sections and subsections.",
     "crumbs": [
       "Introduction"
     ]
   },
   {
-    "objectID": "user_guide/index.html#how-to-use-this-guide",
-    "href": "user_guide/index.html#how-to-use-this-guide",
+    "objectID": "user_guide/index.html#introduction",
+    "href": "user_guide/index.html#introduction",
     "title": "User Guide",
-    "section": "How To Use This Guide",
-    "text": "How To Use This Guide\nUse the left sidebar to navigate by topic (data loading, media viewer, data transforms, plotting, inspectors, machine learning, and export).",
+    "section": "Introduction",
+    "text": "Introduction\n\nIntroduction",
     "crumbs": [
       "Introduction"
     ]
   },
   {
-    "objectID": "user_guide/index.html#notes",
-    "href": "user_guide/index.html#notes",
+    "objectID": "user_guide/index.html#acquisition-systems",
+    "href": "user_guide/index.html#acquisition-systems",
     "title": "User Guide",
-    "section": "Notes",
-    "text": "Notes\n\nThe guide is organized around practical workflows.\nConcept pages and tutorials in Learning Resources complement these reference sections.",
+    "section": "Acquisition Systems",
+    "text": "Acquisition Systems\n\nOverview\nIntan\nOpen Ephys\nLabJack\nDoric\nGeneric HDF5\nGeneric Binary\nImage Stacks\nSpikeSorter",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#data-loading",
+    "href": "user_guide/index.html#data-loading",
+    "title": "User Guide",
+    "section": "Data Loading",
+    "text": "Data Loading\n\nOverview\nJSON Loading\nPoint Loading\nMask Loading\nVideo Loading\nImage Loading\nLine Loading\nTensor Loading",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#media-viewer",
+    "href": "user_guide/index.html#media-viewer",
+    "title": "User Guide",
+    "section": "Media Viewer",
+    "text": "Media Viewer\n\nOverview\nProcess\nPoints\nMasks\nIntervals\nLines\nTensors",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#image-processing",
+    "href": "user_guide/index.html#image-processing",
+    "title": "User Guide",
+    "section": "Image Processing",
+    "text": "Image Processing\n\nOverview\nContrast\nGamma\nSharpening\nCLAHE\nBilateral Filter",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#data-viewer",
+    "href": "user_guide/index.html#data-viewer",
+    "title": "User Guide",
+    "section": "Data Viewer",
+    "text": "Data Viewer\n\nOverview",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#plot-widgets",
+    "href": "user_guide/index.html#plot-widgets",
+    "title": "User Guide",
+    "section": "Plot Widgets",
+    "text": "Plot Widgets\n\nOverview\n3D Plot\nACF Widget\nData Viewer Widget\nEvent Plot Widget\nHeatmap Widget\nLine Plot Widget\nOnion Skin View Widget\nPSTH Widget\nScatter Plot Widget\nSpectrogram Widget\nTemporal Projection View Widget",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#data-manager",
+    "href": "user_guide/index.html#data-manager",
+    "title": "User Guide",
+    "section": "Data Manager",
+    "text": "Data Manager\n\nOverview",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#data-transformations",
+    "href": "user_guide/index.html#data-transformations",
+    "title": "User Guide",
+    "section": "Data Transformations",
+    "text": "Data Transformations\n\nOverview\nTransform Widget\n\n\nReference Guides\n\nMask Transforms Reference\nMedia Transforms Reference\nPoint Transforms Reference\nInterval Transforms Reference",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#data-inspectors",
+    "href": "user_guide/index.html#data-inspectors",
+    "title": "User Guide",
+    "section": "Data Inspectors",
+    "text": "Data Inspectors\n\nTensor Inspector\nAnalog Event Threshold\nAnalog Interval Threshold\nDigital Interval Group\nAnalog Hilbert Phase\nLine Angle\nLine Clip\nLine Curvature\nLine Resample\nExtract Line Subsegment\nCalculate Line-to-Point Distance\nExtract Point from Line\nMask Area\nMask Centroid\nCalculate Mask Principal Axis\nRemove Small Connected Components\nSkeletonize Mask\nFill Mask Holes\nApply Median Filter",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#deep-learning",
+    "href": "user_guide/index.html#deep-learning",
+    "title": "User Guide",
+    "section": "Deep Learning",
+    "text": "Deep Learning\n\nDeep Learning Widget\nExport Encoder Models\nPost Encoder Modules",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#machine-learning",
+    "href": "user_guide/index.html#machine-learning",
+    "title": "User Guide",
+    "section": "Machine Learning",
+    "text": "Machine Learning\n\nIntroduction\n\n\nClassification\n\nRandom Forest\nNaive Bayes\nLogistic Regression\nHMM\n\n\n\nClustering\n\nKMeans\nDBSCAN\nGMM",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#export",
+    "href": "user_guide/index.html#export",
+    "title": "User Guide",
+    "section": "Export",
+    "text": "Export\n\nVideo Export\nCSV Plot Export",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#behavioral-modules",
+    "href": "user_guide/index.html#behavioral-modules",
+    "title": "User Guide",
+    "section": "Behavioral Modules",
+    "text": "Behavioral Modules\n\nWhisker\nTongue",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#triage-session",
+    "href": "user_guide/index.html#triage-session",
+    "title": "User Guide",
+    "section": "Triage Session",
+    "text": "Triage Session\n\nOverview",
+    "crumbs": [
+      "Introduction"
+    ]
+  },
+  {
+    "objectID": "user_guide/index.html#python-console",
+    "href": "user_guide/index.html#python-console",
+    "title": "User Guide",
+    "section": "Python Console",
+    "text": "Python Console\n\nPython Console",
     "crumbs": [
       "Introduction"
     ]
