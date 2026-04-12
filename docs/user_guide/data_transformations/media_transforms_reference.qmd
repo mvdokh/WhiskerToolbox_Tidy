@@ -1,0 +1,21 @@
+---
+title: "Media Transforms Reference"
+format: html
+---
+
+This is a placeholder reference page for media-input transforms.
+
+## Current Registered Media Transforms
+
+- `Whisker Tracing` (`MediaData` -> `LineData`)
+
+## Notes
+
+- Detailed algorithm documentation will be expanded here.
+- This page will eventually include parameters, expected outputs, and
+  troubleshooting guidance per media transform.
+
+## See Also
+
+- [Data Transformations Overview](overview.qmd)
+- [How to Import Video](../../examples/video_import.qmd)

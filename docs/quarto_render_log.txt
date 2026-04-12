@@ -1,0 +1,198 @@
+[1m[34m[  1/279] developer/tensor_roadmap.md[39m[22m
+[1m[34m[  2/279] developer/benchmark/raster_plot_views.qmd[39m[22m
+[1m[34m[  3/279] developer/benchmark/line_plot_views.qmd[39m[22m
+[1m[34m[  4/279] developer/benchmark/benchmarking.qmd[39m[22m
+[1m[34m[  5/279] developer/TimeFrame/roadmap.md[39m[22m
+[1m[34m[  6/279] developer/ui/TriageSession_Widget/index.qmd[39m[22m
+[1m[34m[  7/279] developer/ui/data_transform/data_transform_widget.qmd[39m[22m
+[1m[34m[  8/279] developer/ui/media_widget/media_widget.qmd[39m[22m
+[1m[34m[  9/279] developer/ui/extending_data_import.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/ui/DataImport_Widget_Roadmap.md[39m
+[33mWARN: Unable to resolve link target: developer/ui/editor_state_refactoring_roadmap.md[39m
+[33mWARN: Unable to resolve link target: developer/ui/DataManager/loaders.qmd[39m
+[1m[34m[ 10/279] developer/ui/Features/overview.qmd[39m[22m
+[1m[34m[ 11/279] developer/ui/Features/Collapsible_Widget.qmd[39m[22m
+[1m[34m[ 12/279] developer/ui/data_manager/data_manager_widget.qmd[39m[22m
+[1m[34m[ 13/279] developer/ui/data_inspectors/tensor_inspector.qmd[39m[22m
+[1m[34m[ 14/279] developer/ui/data_inspectors/digital_event_series_inspector.qmd[39m[22m
+[1m[34m[ 15/279] developer/ui/autoparam.qmd[39m[22m
+[1m[34m[ 16/279] developer/ui/Plots/ScatterPlotWidget/roadmap.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/ui/DataViewer_Widget/index.qmd[39m
+[33mWARN: Unable to resolve link target: developer/ui/PlottingSVG/roadmap.md[39m
+[1m[34m[ 17/279] developer/ui/Plots/ScatterPlotWidget/index.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/ui/MLCore/widget.qmd[39m
+[1m[34m[ 18/279] developer/ui/Plots/DataViewerWidget/roadmap.qmd[39m[22m
+[1m[34m[ 19/279] developer/ui/Plots/DataViewerWidget/index.qmd[39m[22m
+[1m[34m[ 20/279] developer/ui/Plots/PSTHWidget/roadmap.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/ui/DataViewer_Widget/index.qmd[39m
+[33mWARN: Unable to resolve link target: developer/ui/PlottingSVG/roadmap.md[39m
+[1m[34m[ 21/279] developer/ui/Plots/PSTHWidget/index.qmd[39m[22m
+[1m[34m[ 22/279] developer/ui/Plots/HeatmapWidget/roadmap.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/ui/DataViewer_Widget/index.qmd[39m
+[33mWARN: Unable to resolve link target: developer/ui/PlottingSVG/roadmap.md[39m
+[1m[34m[ 23/279] developer/ui/Plots/HeatmapWidget/index.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/ui/EditorState/SelectionContext.qmd[39m
+[33mWARN: Unable to resolve link target: developer/ui/EditorState/ContextAction.qmd[39m
+[1m[34m[ 24/279] developer/ui/Plots/OnionSkinViewWidget/roadmap.qmd[39m[22m
+[1m[34m[ 25/279] developer/ui/Plots/OnionSkinViewWidget/index.qmd[39m[22m
+[1m[34m[ 26/279] developer/ui/Plots/Common/TooltipManager/index.qmd[39m[22m
+[1m[34m[ 27/279] developer/ui/Plots/Common/EventRateEstimation/rate_estimation_redesign.md[39m[22m
+[1m[34m[ 28/279] developer/ui/Plots/Common/ColormapControls/index.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/ui/Plots/Common/RateEstimationControls/index.qmd[39m
+[33mWARN: Unable to resolve link target: developer/CorePlotting/Colormaps/index.qmd[39m
+[33mWARN: Unable to resolve link target: developer/ui/Plots/Common/RateEstimationControls/index.qmd[39m
+[1m[34m[ 29/279] developer/ui/Plots/plot_widget_guide.md[39m[22m
+[1m[34m[ 30/279] developer/ui/Plots/refactor.md[39m[22m
+[1m[34m[ 31/279] developer/ui/Plots/TemporalProjectionViewWidget/roadmap.qmd[39m[22m
+[1m[34m[ 32/279] developer/ui/Plots/TemporalProjectionViewWidget/index.qmd[39m[22m
+[1m[34m[ 33/279] developer/ui/Plots/SpectrogramWidget/roadmap.qmd[39m[22m
+[1m[34m[ 34/279] developer/ui/Plots/SpectrogramWidget/index.qmd[39m[22m
+[1m[34m[ 35/279] developer/ui/Plots/LinePlotWidget/roadmap.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/ui/DataViewer_Widget/index.qmd[39m
+[1m[34m[ 36/279] developer/ui/Plots/LinePlotWidget/index.qmd[39m[22m
+[1m[34m[ 37/279] developer/ui/Plots/EventPlotWidget/roadmap.qmd[39m[22m
+[1m[34m[ 38/279] developer/ui/Plots/EventPlotWidget/index.qmd[39m[22m
+[1m[34m[ 39/279] developer/ui/Plots/3DPlot/index.qmd[39m[22m
+[1m[34m[ 40/279] developer/ui/Plots/ACFWidget/index.qmd[39m[22m
+[1m[34m[ 41/279] developer/copilot.qmd[39m[22m
+[1m[34m[ 42/279] developer/KeybindingEditor/index.qmd[39m[22m
+[1m[34m[ 43/279] developer/contributing_code.qmd[39m[22m
+[1m[34m[ 44/279] developer/CoreGeometry/index.qmd[39m[22m
+[1m[34m[ 45/279] developer/analysis/static_analysis.qmd[39m[22m
+[1m[34m[ 46/279] developer/analysis/precondition_protocol.qmd[39m[22m
+[1m[34m[ 47/279] developer/Media_Widget/MediaProcessing_Refactoring_Roadmap.md[39m[22m
+[1m[34m[ 48/279] developer/Media_Widget/refactoring_roadmap.md[39m[22m
+[1m[34m[ 49/279] developer/DataManager/storage_architecture.qmd[39m[22m
+[1m[34m[ 50/279] developer/DataManager/storage_benchmarking_roadmap.qmd[39m[22m
+[1m[34m[ 51/279] developer/DataManager/IO/mask_csv_rle.qmd[39m[22m
+[1m[34m[ 52/279] developer/DataManager/IO/capnproto_line_data.qmd[39m[22m
+[1m[34m[ 53/279] developer/DataManager/IO/opencv_mask_image.qmd[39m[22m
+[1m[34m[ 54/279] developer/DataManager/IO/csv_line_data.qmd[39m[22m
+[1m[34m[ 55/279] developer/DataManager/IO/saver_infrastructure.qmd[39m[22m
+[1m[34m[ 56/279] developer/DataManager/generic_time_series.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/storage_strategy_roadmap.md[39m
+[33mWARN: Unable to resolve link target: TimeFrame/index.qmd[39m
+[1m[34m[ 57/279] developer/DataManager/data_manager.qmd[39m[22m
+[1m[34m[ 58/279] developer/DataManager/storage_testing_roadmap.qmd[39m[22m
+[1m[34m[ 59/279] developer/DataManager/observer_thread_safety_roadmap.qmd[39m[22m
+[1m[34m[ 60/279] developer/DataManager/concurrency_architecture.qmd[39m[22m
+[1m[34m[ 61/279] developer/DataManager/Commands/gui_verb_audit.qmd[39m[22m
+[1m[34m[ 62/279] developer/DataManager/Commands/save_data.qmd[39m[22m
+[1m[34m[ 63/279] developer/DataManager/Commands/sequence_execution.qmd[39m[22m
+[1m[34m[ 64/279] developer/DataManager/Commands/command_log_widget.qmd[39m[22m
+[1m[34m[ 65/279] developer/DataManager/Commands/widget_save_refactoring_guide.qmd[39m[22m
+[1m[34m[ 66/279] developer/DataManager/Commands/roadmap.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/IO/saver_infrastructure.qmd[39m
+[33mWARN: Unable to resolve link target: developer/STATE_MANAGEMENT_ROADMAP.md[39m
+[1m[34m[ 67/279] developer/DataManager/Commands/index.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/STATE_MANAGEMENT_ROADMAP.md[39m
+[1m[34m[ 68/279] developer/DataManager/Commands/load_data.qmd[39m[22m
+[1m[34m[ 69/279] developer/DataManager/Commands/synthesize_data.qmd[39m[22m
+[1m[34m[ 70/279] developer/DataManager/Commands/validation.qmd[39m[22m
+[1m[34m[ 71/279] developer/DataManager/Commands/data_manager_snapshot.qmd[39m[22m
+[1m[34m[ 72/279] developer/DataManager/Commands/get_entity_ids_in_range.qmd[39m[22m
+[1m[34m[ 73/279] developer/DataManager/Commands/command_introspection.qmd[39m[22m
+[1m[34m[ 74/279] developer/DataManager/Commands/command_registry.qmd[39m[22m
+[1m[34m[ 75/279] developer/DataManager/Commands/commands.qmd[39m[22m
+[1m[34m[ 76/279] developer/DataManager/Commands/core_types.qmd[39m[22m
+[1m[34m[ 77/279] developer/DataManager/DataObjects_Reorganization.md[39m[22m
+[1m[34m[ 78/279] developer/DataManager/binary_loading_performance.qmd[39m[22m
+[1m[34m[ 79/279] developer/DataManager/data_structures.qmd[39m[22m
+[1m[34m[ 80/279] developer/DataManager/file_io.qmd[39m[22m
+[1m[34m[ 81/279] developer/DataManager/threaded_loading_roadmap.qmd[39m[22m
+[1m[34m[ 82/279] developer/transforms_v2/sinc_interpolation.qmd[39m[22m
+[1m[34m[ 83/279] developer/transforms_v2/index.qmd[39m[22m
+[1m[34m[ 84/279] developer/transforms_v2/adding_transforms.qmd[39m[22m
+[1m[34m[ 85/279] developer/transforms_v2/architecture.qmd[39m[22m
+[1m[34m[ 86/279] developer/compute_outline.qmd[39m[22m
+[1m[34m[ 87/279] developer/PlottingSVG/decorations.qmd[39m[22m
+[1m[34m[ 88/279] developer/PlottingSVG/index.qmd[39m[22m
+[1m[34m[ 89/279] developer/PlottingSVG/roadmap.md[39m[22m
+[1m[34m[ 90/279] developer/PlottingSVG/SVGUtils.qmd[39m[22m
+[1m[34m[ 91/279] developer/PlottingSVG/SVGExport.qmd[39m[22m
+[1m[34m[ 92/279] developer/DeepLearning/param_schemas.qmd[39m[22m
+[1m[34m[ 93/279] developer/DeepLearning/batch_inference.qmd[39m[22m
+[1m[34m[ 94/279] developer/DeepLearning/post_encoder_modules.qmd[39m[22m
+[1m[34m[ 95/279] developer/DeepLearning/aot_inductor_tutorial.qmd[39m[22m
+[1m[34m[ 96/279] developer/DeepLearning/batch_mode_guide.qmd[39m[22m
+[1m[34m[ 97/279] developer/DeepLearning/background_inference.qmd[39m[22m
+[1m[34m[ 98/279] developer/DeepLearning/roadmap.qmd[39m[22m
+[1m[34m[ 99/279] developer/DeepLearning/index.qmd[39m[22m
+[1m[34m[100/279] developer/DeepLearning/device_selector.qmd[39m[22m
+[1m[34m[101/279] developer/DeepLearning/model_wrapper_guide.qmd[39m[22m
+[1m[34m[102/279] developer/DeepLearning/widget_param_schemas.qmd[39m[22m
+[1m[34m[103/279] developer/DeepLearning/hybrid_sequence_inputs.qmd[39m[22m
+[1m[34m[104/279] developer/DeepLearning/static_input_capture.qmd[39m[22m
+[1m[34m[105/279] developer/DeepLearning/background_inference_roadmap.qmd[39m[22m
+[1m[34m[106/279] developer/DeepLearning/general_encoder.qmd[39m[22m
+[1m[34m[107/279] developer/DeepLearning/recurrent_inputs.qmd[39m[22m
+[1m[34m[108/279] developer/Entity/index.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/transforms/index.qmd[39m
+[33mWARN: Unable to resolve link target: developer/data_manager.qmd[39m
+[1m[34m[109/279] developer/Entity/roadmap.md[39m[22m
+[1m[34m[110/279] developer/DeepLearning_Widget/helpers.qmd[39m[22m
+[1m[34m[111/279] developer/DeepLearning_Widget/refactoring_roadmap.md[39m[22m
+[1m[34m[112/279] developer/DeepLearning_Widget/inference_controller.qmd[39m[22m
+[1m[34m[113/279] developer/IO/AutoParamWidget_Migration_Roadmap.qmd[39m[22m
+[1m[34m[114/279] developer/Observer/index.qmd[39m[22m
+[1m[34m[115/279] developer/PlotDataExport/index.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/GatherResult/index.qmd[39m
+[33mWARN: Unable to resolve link target: developer/Plots/Common/EventRateEstimation.qmd[39m
+[1m[34m[116/279] developer/PlotDataExport/roadmap.md[39m[22m
+[1m[34m[117/279] developer/coreplotting/feature_color.qmd[39m[22m
+[1m[34m[118/279] developer/coreplotting/implementation_guide.qmd[39m[22m
+[1m[34m[119/279] developer/coreplotting/index.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/coreplotting/modules/mappers.qmd[39m
+[1m[34m[120/279] developer/coreplotting/concepts/architecture.qmd[39m[22m
+[1m[34m[121/279] developer/index.qmd[39m[22m
+[1m[34m[122/279] developer/testing/testing.qmd[39m[22m
+[1m[34m[123/279] developer/testing/layout_sanity_checker_roadmap.qmd[39m[22m
+[1m[34m[124/279] developer/python_bindings/python_integration.qmd[39m[22m
+[1m[34m[125/279] developer/KeymapSystem/index.qmd[39m[22m
+[1m[34m[126/279] developer/KeymapSystem/library_reference.qmd[39m[22m
+[1m[34m[127/279] developer/KeymapSystem/roadmap.md[39m[22m
+[1m[34m[128/279] developer/tensor_transforms_roadmap.md[39m[22m
+[33mWARN: Unable to resolve link target: MLCore/logit_projection.qmd[39m
+[33mWARN: Unable to resolve link target: MLCore/pipelines.qmd[39m
+[1m[34m[129/279] developer/MLCore/supervised_pca.qmd[39m[22m
+[1m[34m[130/279] developer/MLCore/label_assembly.qmd[39m[22m
+[1m[34m[131/279] developer/MLCore/HMM_WhiskerContact_Analysis.md[39m[22m
+[1m[34m[132/279] developer/MLCore/features.qmd[39m[22m
+[1m[34m[133/279] developer/MLCore/models.qmd[39m[22m
+[1m[34m[134/279] developer/MLCore/logit_projection.qmd[39m[22m
+[1m[34m[135/279] developer/MLCore/validation_cross_validation.qmd[39m[22m
+[1m[34m[136/279] developer/MLCore/index.qmd[39m[22m
+[1m[34m[137/279] developer/MLCore/widget.qmd[39m[22m
+[1m[34m[138/279] developer/MLCore/GLM_HMM_Roadmap.md[39m[22m
+[1m[34m[139/279] developer/MLCore/pipelines.qmd[39m[22m
+[1m[34m[140/279] developer/MLCore/hmm.qmd[39m[22m
+[1m[34m[141/279] developer/MLCore/scaling_roadmap.md[39m[22m
+[1m[34m[142/279] developer/MLCore/sequence_assembler.qmd[39m[22m
+[1m[34m[143/279] developer/MLCore/dim_reduction.qmd[39m[22m
+[1m[34m[144/279] developer/MLCore/prediction_regions.qmd[39m[22m
+[1m[34m[145/279] developer/MLCore/supervised_robust_pca.qmd[39m[22m
+[1m[34m[146/279] developer/MLCore/output.qmd[39m[22m
+[1m[34m[147/279] developer/MLCore/softmax_regression.qmd[39m[22m
+[1m[34m[148/279] developer/MediaProcessingPipeline/index.qmd[39m[22m
+[33mWARN: Unable to resolve link target: developer/MediaProcessingPipeline/MediaProcessing_Refactoring_Roadmap.md[39m
+[1m[34m[149/279] developer/DataSynthesizer/Widget.qmd[39m[22m
+[1m[34m[150/279] developer/DataSynthesizer/GeneratorRegistry.qmd[39m[22m
+[1m[34m[151/279] developer/DataSynthesizer/ROADMAP.md[39m[22m
+[1m[34m[152/279] developer/DataSynthesizer/Generators/DigitalEvent.qmd[39m[22m
+[1m[34m[153/279] developer/DataSynthesizer/Generators/Analog.qmd[39m[22m
+[1m[34m[154/279] developer/DataSynthesizer/Generators/DigitalInterval.qmd[39m[22m
+[1m[34m[155/279] developer/DataSynthesizer/Generators/Spatial.qmd[39m[22m
+[1m[34m[156/279] developer/DataSynthesizer/Generators/MotionModels.qmd[39m[22m
+[1m[34m[157/279] developer/WidgetDevelopment/index.qmd[39m[22m
+[1m[34m[158/279] developer/TriageSession/index.qmd[39m[22m
+[1m[34m[159/279] developer/inter_widget_communication_roadmap.md[39m[22m
+[1m[34m[160/279] developer/fuzz/fuzzing.qmd[39m[22m
+[1m[34m[161/279] developer/ParameterSchema/index.qmd[39m[22m
+[1m[34m[162/279] developer/ParameterSchema/enum_variant_roadmap.qmd[39m[22m
+[1m[34m[163/279] developer/building.qmd[39m[22m
+[1m[34m[164/279] developer/DataObjects/Tensors/row_mutation.qmd[39m[22m
+[1m[34m[165/279] developer/test_fixture_porting_guide.md[39m[22m
+[1m[34m[166/279] developer/settings_widget_roadmap.md[39m[22m
+[33mWARN: Unable to resolve link target: developer/STATE_MANAGEMENT_ROADMAP.md[39m
+[33mWARN: Unable to resolve link target: developer/COMMAND_ARCHITECTURE_ROADMAP.md[39m
+[1m[34m[167/279] developer/intro_to_c.qmd[39m[22m

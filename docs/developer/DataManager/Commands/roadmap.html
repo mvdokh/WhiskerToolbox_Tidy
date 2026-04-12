@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.42">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Command Architecture Roadmap – Neuralyzer</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -29,17 +32,21 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../../">
-<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<link href="../../../images/WhiskerToolbox-logo.png" rel="icon" type="image/png">
+<script src="../../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-b53751a350365c71b6c909e95f209ed1.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../../site_libs/bootstrap/bootstrap-87cd5c4c137eb48cdca371794a3979d3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../../site_libs/bootstrap/bootstrap-dark-686b15c34b244653d4c55e362e50c6f0.min.css" rel="prefetch" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-a25fe14d71fb15effab06e6c3a28be36.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../../site_libs/bootstrap/bootstrap-dark-e81e705a60e2ff9ff9452b33e0528bd2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../../site_libs/bootstrap/bootstrap-a25fe14d71fb15effab06e6c3a28be36.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -72,13 +79,179 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="../../../styles.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed">
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../../images/WhiskerToolbox-logo.png" alt="" class="navbar-logo light-content">
+    <img src="../../../images/WhiskerToolbox-logo.png" alt="" class="navbar-logo dark-content">
+    </a>
     <a class="navbar-brand" href="../../../index.html">
     <span class="navbar-title">Neuralyzer</span>
     </a>
@@ -247,12 +420,75 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Core Geometry</span></a>
   </div>
 </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../developer/coreplotting/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CorePlotting</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../../developer/coreplotting/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">CorePlotting Library</span></a>
+  <a href="../../../developer/coreplotting/feature_color.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FeatureColor Module</span></a>
   </div>
 </li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../developer/PlottingSVG/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PlottingSVG</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/PlottingSVG/SVGExport.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PlottingSVG — SVGExport (legacy flat document)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/PlottingSVG/SVGUtils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PlottingSVG — SVGUtils</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/PlottingSVG/decorations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PlottingSVG — Decorations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/PlottingSVG/roadmap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PlottingSVG Implementation Roadmap</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../developer/PlotDataExport/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PlotDataExport</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/PlotDataExport/roadmap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PlotDataExport — Implementation Roadmap</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../../developer/Entity/index.html" class="sidebar-item-text sidebar-link">
@@ -263,11 +499,11 @@ ul.task-list li input[type="checkbox"] {
       <div class="sidebar-item-container"> 
             <a href="../../../developer/DeepLearning/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Deep Learning</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth2 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../../developer/DeepLearning/model_wrapper_guide.html" class="sidebar-item-text sidebar-link">
@@ -336,6 +572,24 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../../developer/DeepLearning/param_schemas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Per-Component Parameter Schemas</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/DeepLearning/widget_param_schemas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Widget-Level Parameter Schemas</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/DeepLearning/device_selector.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Device Selector (GPU/CPU)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../../developer/DeepLearning/roadmap.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Deep Learning Roadmap</span></a>
   </div>
@@ -346,11 +600,11 @@ ul.task-list li input[type="checkbox"] {
       <div class="sidebar-item-container"> 
             <a href="../../../developer/transforms_v2/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Transforms V2</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth2 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../../developer/transforms_v2/architecture.html" class="sidebar-item-text sidebar-link">
@@ -363,17 +617,23 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Adding New Transforms</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/transforms_v2/sinc_interpolation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sinc Interpolation Transform</span></a>
+  </div>
+</li>
       </ul>
   </li>
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a href="../../../developer/ParameterSchema/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ParameterSchema</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../../developer/ParameterSchema/enum_variant_roadmap.html" class="sidebar-item-text sidebar-link">
@@ -384,13 +644,13 @@ ul.task-list li input[type="checkbox"] {
   </li>
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
  <span class="menu-text">Data Synthesizer</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth2 ">  
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth2 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../../developer/DataSynthesizer/GeneratorRegistry.html" class="sidebar-item-text sidebar-link">
@@ -403,15 +663,116 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">DataSynthesizer Widget</span></a>
   </div>
 </li>
+      </ul>
+  </li>
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
- <span class="menu-text">Generators</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <a href="../../../developer/MLCore/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MLCore</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth3 ">  
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Model Interface &amp; Registry</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/softmax_regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Softmax Regression Operation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/logit_projection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Logit Projection Operation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/supervised_pca.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Supervised PCA Operation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/supervised_robust_pca.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Supervised Robust PCA Operation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/dim_reduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dimensionality Reduction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/hmm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hidden Markov Model (Gaussian / GMM)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/features.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Feature Processing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/label_assembly.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Label Assembly</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/pipelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pipelines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/validation_cross_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Validation &amp; Cross-Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/prediction_regions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prediction Regions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/sequence_assembler.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sequence Assembler</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/output.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Output &amp; Entity Utils</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/MLCore/widget.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MLCore Widget</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">Generators</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth3 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../../developer/DataSynthesizer/Generators/Analog.html" class="sidebar-item-text sidebar-link">
@@ -449,18 +810,35 @@ ul.task-list li input[type="checkbox"] {
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+ <span class="menu-text">TimeFrame</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/TimeFrame/roadmap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">TimeFrame Resampling &amp; Upsampling Roadmap</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
       <span class="sidebar-item-text sidebar-link text-start">
  <span class="menu-text">Media Processing Pipeline</span></span>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="true">
  <span class="menu-text">Data Inspectors</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../../developer/ui/data_inspectors/tensor_inspector.html" class="sidebar-item-text sidebar-link">
@@ -477,13 +855,13 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="true">
  <span class="menu-text">Data Management</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-15" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../../developer/DataManager/data_manager.html" class="sidebar-item-text sidebar-link">
@@ -570,19 +948,42 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../../developer/DataManager/observer_thread_safety_roadmap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Observer Thread-Safety Roadmap</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../../developer/DataManager/threaded_loading_roadmap.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Threaded Loading Roadmap</span></a>
   </div>
 </li>
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="../../../developer/DataManager/Commands/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Command Architecture</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="false">
+ <span class="menu-text">TensorData</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 show">  
+      <ul id="quarto-sidebar-section-16" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/DataObjects/Tensors/row_mutation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">TensorData Row Mutation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../developer/DataManager/Commands/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Command Architecture</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-17" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-17" class="collapse list-unstyled sidebar-section depth2 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../../developer/DataManager/Commands/roadmap.html" class="sidebar-item-text sidebar-link active">
@@ -645,6 +1046,12 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../../developer/DataManager/Commands/command_registry.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Command Registry</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../../developer/DataManager/Commands/gui_verb_audit.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">GUI Verb Audit (Step 1.10)</span></a>
   </div>
@@ -673,13 +1080,13 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" role="navigation" aria-expanded="true">
  <span class="menu-text">Triage Session</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-18" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../../developer/TriageSession/index.html" class="sidebar-item-text sidebar-link">
@@ -690,13 +1097,65 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true">
- <span class="menu-text">User Interface</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" role="navigation" aria-expanded="true">
+ <span class="menu-text">Architecture</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-19" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/WidgetDevelopment/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Widget Development Guide</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/inter_widget_communication_roadmap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inter-Widget Communication — Architecture Analysis &amp; Roadmap</span></a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../../../developer/KeymapSystem/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Keymap System</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-20" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-20" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/KeymapSystem/roadmap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Keymap System — Implementation Roadmap</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/KeymapSystem/library_reference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">KeymapSystem Library Reference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/KeybindingEditor/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Keybinding Editor</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-21" role="navigation" aria-expanded="true">
+ <span class="menu-text">User Interface</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-21" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-21" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../../developer/ui/data_manager/data_manager_widget.html" class="sidebar-item-text sidebar-link">
@@ -731,11 +1190,11 @@ ul.task-list li input[type="checkbox"] {
       <div class="sidebar-item-container"> 
             <a href="../../../developer/ui/Features/overview.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Features</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-22" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth2 ">  
+      <ul id="quarto-sidebar-section-22" class="collapse list-unstyled sidebar-section depth2 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../../developer/ui/Features/Collapsible_Widget.html" class="sidebar-item-text sidebar-link">
@@ -752,22 +1211,45 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="../../../developer/ui/Plots/plot_widget_guide.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Plot Widgets</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-23" role="navigation" aria-expanded="false">
+ <span class="menu-text">Deep Learning Widget</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-23" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-15" class="collapse list-unstyled sidebar-section depth2 ">  
+      <ul id="quarto-sidebar-section-23" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/DeepLearning_Widget/helpers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DeepLearning Widget Helpers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../developer/DeepLearning_Widget/inference_controller.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">InferenceController</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="false">
- <span class="menu-text">Common</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <a href="../../../developer/ui/Plots/plot_widget_guide.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Plot Widgets</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-24" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-16" class="collapse list-unstyled sidebar-section depth3 ">  
+      <ul id="quarto-sidebar-section-24" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-25" role="navigation" aria-expanded="false">
+ <span class="menu-text">Common</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-25" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-25" class="collapse list-unstyled sidebar-section depth3 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../../developer/ui/Plots/Common/ColormapControls/index.html" class="sidebar-item-text sidebar-link">
@@ -865,7 +1347,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#progress-summary" id="toc-progress-summary" class="nav-link active" data-scroll-target="#progress-summary">Progress Summary</a></li>
   <li><a href="#what-exists-today" id="toc-what-exists-today" class="nav-link" data-scroll-target="#what-exists-today">What Exists Today</a>
   <ul class="collapse">
-  <li><a href="#registered-commands-6" id="toc-registered-commands-6" class="nav-link" data-scroll-target="#registered-commands-6">Registered Commands (6)</a></li>
+  <li><a href="#registered-commands-7" id="toc-registered-commands-7" class="nav-link" data-scroll-target="#registered-commands-7">Registered Commands (7)</a></li>
   <li><a href="#infrastructure" id="toc-infrastructure" class="nav-link" data-scroll-target="#infrastructure">Infrastructure</a></li>
   <li><a href="#test-coverage" id="toc-test-coverage" class="nav-link" data-scroll-target="#test-coverage">Test Coverage</a></li>
   </ul></li>
@@ -874,25 +1356,22 @@ ul.task-list li input[type="checkbox"] {
   <ul class="collapse">
   <li><a href="#phase-1-command-foundation-complete" id="toc-phase-1-command-foundation-complete" class="nav-link" data-scroll-target="#phase-1-command-foundation-complete">Phase 1 — Command Foundation (Complete)</a></li>
   <li><a href="#phase-3-persistence-commands-save-registry-complete" id="toc-phase-3-persistence-commands-save-registry-complete" class="nav-link" data-scroll-target="#phase-3-persistence-commands-save-registry-complete">Phase 3 — Persistence Commands &amp; Save Registry (Complete)</a></li>
+  <li><a href="#phase-7-command-registration-api-complete" id="toc-phase-7-command-registration-api-complete" class="nav-link" data-scroll-target="#phase-7-command-registration-api-complete">Phase 7 — Command Registration API (Complete)</a></li>
   </ul></li>
   <li><a href="#phase-2-triage-session-nearly-complete" id="toc-phase-2-triage-session-nearly-complete" class="nav-link" data-scroll-target="#phase-2-triage-session-nearly-complete">Phase 2 — Triage Session (Nearly Complete)</a>
   <ul class="collapse">
   <li><a href="#remaining-steps" id="toc-remaining-steps" class="nav-link" data-scroll-target="#remaining-steps">Remaining Steps</a></li>
+  </ul></li>
+  <li><a href="#phase-3.5-command-recording-test-generation-nearly-complete" id="toc-phase-3.5-command-recording-test-generation-nearly-complete" class="nav-link" data-scroll-target="#phase-3.5-command-recording-test-generation-nearly-complete">Phase 3.5 — Command Recording &amp; Test Generation (Nearly Complete)</a>
+  <ul class="collapse">
+  <li><a href="#remaining-step-3.5.4-end-to-end-verification" id="toc-remaining-step-3.5.4-end-to-end-verification" class="nav-link" data-scroll-target="#remaining-step-3.5.4-end-to-end-verification">Remaining: Step 3.5.4 — End-to-End Verification</a></li>
+  <li><a href="#exit-criteria" id="toc-exit-criteria" class="nav-link" data-scroll-target="#exit-criteria">Exit Criteria</a></li>
   </ul></li>
   <li><a href="#widget-command-ification-ongoing" id="toc-widget-command-ification-ongoing" class="nav-link" data-scroll-target="#widget-command-ification-ongoing">Widget Command-ification (Ongoing)</a>
   <ul class="collapse">
   <li><a href="#definition-of-done" id="toc-definition-of-done" class="nav-link" data-scroll-target="#definition-of-done">Definition of Done</a></li>
   <li><a href="#audited-widgets" id="toc-audited-widgets" class="nav-link" data-scroll-target="#audited-widgets">Audited Widgets</a></li>
   <li><a href="#commands-still-needed" id="toc-commands-still-needed" class="nav-link" data-scroll-target="#commands-still-needed">Commands Still Needed</a></li>
-  </ul></li>
-  <li><a href="#phase-3.5-command-recording-test-generation" id="toc-phase-3.5-command-recording-test-generation" class="nav-link" data-scroll-target="#phase-3.5-command-recording-test-generation">Phase 3.5 — Command Recording &amp; Test Generation</a>
-  <ul class="collapse">
-  <li><a href="#current-gap" id="toc-current-gap" class="nav-link" data-scroll-target="#current-gap">Current Gap</a></li>
-  <li><a href="#step-3.5.1-centralized-recorder-complete" id="toc-step-3.5.1-centralized-recorder-complete" class="nav-link" data-scroll-target="#step-3.5.1-centralized-recorder-complete">Step 3.5.1 — Centralized Recorder (Complete)</a></li>
-  <li><a href="#step-3.5.2-route-widgets-through-executesequence" id="toc-step-3.5.2-route-widgets-through-executesequence" class="nav-link" data-scroll-target="#step-3.5.2-route-widgets-through-executesequence">Step 3.5.2 — Route Widgets Through executeSequence()</a></li>
-  <li><a href="#step-3.5.3-command-log-ui-complete" id="toc-step-3.5.3-command-log-ui-complete" class="nav-link" data-scroll-target="#step-3.5.3-command-log-ui-complete">Step 3.5.3 — Command Log UI (Complete)</a></li>
-  <li><a href="#step-3.5.4-end-to-end-verification" id="toc-step-3.5.4-end-to-end-verification" class="nav-link" data-scroll-target="#step-3.5.4-end-to-end-verification">Step 3.5.4 — End-to-End Verification</a></li>
-  <li><a href="#exit-criteria" id="toc-exit-criteria" class="nav-link" data-scroll-target="#exit-criteria">Exit Criteria</a></li>
   </ul></li>
   <li><a href="#phase-4-action-journal-integration" id="toc-phase-4-action-journal-integration" class="nav-link" data-scroll-target="#phase-4-action-journal-integration">Phase 4 — Action Journal Integration</a>
   <ul class="collapse">
@@ -923,6 +1402,7 @@ ul.task-list li input[type="checkbox"] {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../developer/DataManager/data_manager.html">Data Management</a></li><li class="breadcrumb-item"><a href="../../../developer/DataManager/Commands/index.html">Command Architecture</a></li><li class="breadcrumb-item"><a href="../../../developer/DataManager/Commands/roadmap.html">Command Architecture Roadmap</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Command Architecture Roadmap</h1>
@@ -942,9 +1422,12 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<blockquote class="blockquote">
+<p><strong>See also:</strong> <a href="../../../developer/inter_widget_communication_roadmap.html#ownership--registration-best-practices">Inter-Widget Communication Roadmap — Ownership &amp; Registration Best Practices</a> for guidance on where Commands vs ContextActions should be defined as operations scale.</p>
+</blockquote>
 <section id="progress-summary" class="level2">
 <h2 class="anchored" data-anchor-id="progress-summary">Progress Summary</h2>
-<p><em>Last updated: 2026-03-12</em></p>
+<p><em>Last updated: 2025-07-22</em></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -957,12 +1440,12 @@ ul.task-list li input[type="checkbox"] {
 <tr class="odd">
 <td><strong>Phase 1:</strong> Command Foundation</td>
 <td><strong>Complete</strong></td>
-<td>6 commands, factory, validation, variable substitution, recorder, mutation guard, golden traces</td>
+<td>7 commands, factory, validation, variable substitution, recorder, mutation guard, golden traces</td>
 </tr>
 <tr class="even">
 <td><strong>Phase 2:</strong> Triage Session</td>
 <td><strong>Nearly Complete</strong></td>
-<td>Core, widget, guided editor all done. Keyboard shortcuts (2.4) and tracked-regions overlay (2.5) remain.</td>
+<td>Core, widget, guided editor all done. tracked-regions overlay (2.5) remains.</td>
 </tr>
 <tr class="odd">
 <td><strong>Phase 3:</strong> Persistence &amp; Save Registry</td>
@@ -971,13 +1454,13 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="even">
 <td><strong>Phase 3.5:</strong> Command Recording &amp; Test Generation</td>
-<td>Not Started</td>
-<td>Wire CommandRecorder into GUI, route widgets through executeSequence(), minimal Command Log UI</td>
+<td><strong>Nearly Complete</strong></td>
+<td>Steps 3.5.1–3.5.3 done (recorder wired, widgets routed, Command Log UI). Only end-to-end verification (3.5.4) remains.</td>
 </tr>
 <tr class="odd">
 <td><strong>Phase 4:</strong> Action Journal Integration</td>
 <td>Not Started</td>
-<td>Generalizes CommandRecorder into persistent, timestamped journal</td>
+<td>Generalizes CommandRecorder into persistent, timestamped journal. Depends on Phase 3.5.</td>
 </tr>
 <tr class="even">
 <td><strong>Phase 5:</strong> Undo/Redo</td>
@@ -990,6 +1473,11 @@ ul.task-list li input[type="checkbox"] {
 <td>Headless command execution; generalizes golden trace tests</td>
 </tr>
 <tr class="even">
+<td><strong>Phase 7:</strong> Command Registration API</td>
+<td><strong>Complete</strong></td>
+<td><code>CommandRegistry</code> singleton, <code>register_core_commands()</code>, explicit dispatcher. All exit criteria met.</td>
+</tr>
+<tr class="odd">
 <td><strong>Widget Command-ification</strong></td>
 <td>Ongoing</td>
 <td>9 new commands identified via audit; none yet implemented. See <a href="../../../developer/DataManager/Commands/gui_verb_audit.html">GUI Verb Audit</a>.</td>
@@ -1000,8 +1488,8 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="what-exists-today" class="level2">
 <h2 class="anchored" data-anchor-id="what-exists-today">What Exists Today</h2>
-<section id="registered-commands-6" class="level3">
-<h3 class="anchored" data-anchor-id="registered-commands-6">Registered Commands (6)</h3>
+<section id="registered-commands-7" class="level3">
+<h3 class="anchored" data-anchor-id="registered-commands-7">Registered Commands (7)</h3>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 21%">
@@ -1054,6 +1542,12 @@ ul.task-list li input[type="checkbox"] {
 <td>Yes</td>
 <td>Load a data object via <code>LoaderRegistry::tryLoad()</code></td>
 </tr>
+<tr class="odd">
+<td><code>SynthesizeData</code></td>
+<td>data_creation</td>
+<td>No</td>
+<td>Generate data via <code>GeneratorRegistry</code></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -1074,9 +1568,19 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
+<td><code>CommandRegistry</code></td>
+<td><code>src/Commands/Core/</code></td>
+<td>Singleton registry with <code>registerCommand()</code>, <code>isKnown()</code>, <code>create()</code>, <code>availableCommands()</code></td>
+</tr>
+<tr class="even">
 <td><code>CommandFactory</code></td>
 <td><code>src/Commands/Core/</code></td>
-<td><code>createCommand()</code>, <code>createCommandFromJson()</code>, <code>getAvailableCommands()</code>, <code>getCommandInfo()</code></td>
+<td>Thin wrappers delegating to <code>CommandRegistry::instance()</code></td>
+</tr>
+<tr class="odd">
+<td><code>register_core_commands()</code></td>
+<td><code>src/Commands/Core/</code></td>
+<td>Explicit dispatcher registering all 7 built-in commands</td>
 </tr>
 <tr class="even">
 <td><code>CommandRecorder</code></td>
@@ -1084,41 +1588,46 @@ ul.task-list li input[type="checkbox"] {
 <td>Records executed commands for replay; hook in <code>executeSequence()</code></td>
 </tr>
 <tr class="odd">
+<td><code>CommandLog_Widget</code></td>
+<td><code>src/WhiskerToolbox/CommandLog_Widget/</code></td>
+<td>Real-time command log with “Copy as JSON” export</td>
+</tr>
+<tr class="even">
 <td><code>MutationGuard</code></td>
 <td><code>src/DataManager/Commands/</code></td>
 <td>Debug-only: warns when <code>DataManager</code> is mutated outside a command</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DataManagerSnapshot</code></td>
 <td><code>src/DataManager/</code></td>
 <td>Lightweight state snapshot (type, entity count, content hash) for golden trace tests</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>ParameterSchema</code></td>
 <td><code>src/ParameterSchema/</code></td>
 <td>Compile-time parameter schema extraction from reflect-cpp structs</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>AutoParamWidget</code></td>
 <td><code>src/WhiskerToolbox/AutoParamWidget/</code></td>
 <td>Dynamic Qt form builder from <code>ParameterSchema</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>TriageSession</code></td>
 <td><code>src/TriageSession/</code></td>
 <td>Mark/Commit/Recall state machine using command sequences</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>SaverRegistry</code></td>
 <td><code>src/DataManager/IO/core/</code></td>
 <td><code>SaverInfo</code>, <code>AtomicWrite</code>, <code>getSupportedSaveFormats()</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>Validation</code></td>
 <td><code>src/Commands/Core/</code></td>
 <td><code>validateSequence()</code> — structural, type, and variable checks</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>VariableSubstitution</code></td>
 <td><code>src/Commands/Core/</code></td>
 <td>Two-pass <code>${variable}</code> substitution + <code>normalizeJsonNumbers()</code></td>
@@ -1131,6 +1640,7 @@ ul.task-list li input[type="checkbox"] {
 <ul>
 <li><strong>Command unit tests</strong>: 25+ test cases (factory, move, copy, interval, forEach, error handling)</li>
 <li><strong>CommandRecorder tests</strong>: 19 test cases (record/clear, JSON serialization, executeSequence integration, MutationGuard)</li>
+<li><strong>CommandRegistry tests</strong>: 10 test cases (registration, discovery, creation, all-commands-present check)</li>
 <li><strong>Validation tests</strong>: 10+ test cases (structural, deserialization, variable resolution, type compatibility)</li>
 <li><strong>Variable substitution tests</strong>: 10+ test cases (static/runtime variables, integer normalization)</li>
 <li><strong>SaveData/LoadData tests</strong>: 22 test cases (factory, execution, undo, serialization, round-trip)</li>
@@ -1142,142 +1652,66 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="dependency-graph-remaining-work" class="level2">
 <h2 class="anchored" data-anchor-id="dependency-graph-remaining-work">Dependency Graph (Remaining Work)</h2>
-<pre><code>Completed Foundation (Phases 1, 3)
+<pre><code>Completed Foundation (Phases 1, 3, 3.5 nearly done, 7)
    │
-   ├──► Phase 2 Remaining: Keyboard shortcuts (2.4), tracked-regions viz (2.5)
+   ├──► Phase 2 Remaining: tracked-regions viz (2.5)
    │
-   ├──► Phase 3.5: Command Recording &amp; Test Generation
-   │       Wires CommandRecorder into GUI, routes widgets through executeSequence()
-   │       Enables: "do it in GUI → export JSON → write golden trace test"
+   ├──► Phase 3.5 Remaining: End-to-end verification (3.5.4)
+   │       Steps 3.5.1–3.5.3 done (recorder wired, widgets routed, Command Log UI)
    │
    ├──► Widget Command-ification (ongoing, on-demand)
    │       Uses: MutationGuard for gap detection, golden traces for verification
-   │       Blocked commands: CreateData, DeleteData, AddEvent, RemoveEvent, etc.
+   │       Needed: CreateData, DeleteData, AddEvent, RemoveEvent, etc.
    │
    ├──► Phase 4: Action Journal
-   │       Depends on: Phase 3.5 (recorder wired into app)
+   │       Depends on: Phase 3.5 completion
    │       Generalizes recorder into persistent timestamped log
    │
    ├──► Phase 5: Undo/Redo
-   │       Independent of Phases 2, 4, 6
+   │       Independent of other phases
    │       MoveByTimeRange already supports undo; needs CommandStack
    │
    └──► Phase 6: CLI Batch &amp; Macro Recording
-           Depends on: Phases 3 (done), 4
+           Depends on: Phase 4
            Generalizes golden trace tests into CLI tool</code></pre>
-<p><strong>Parallelizable:</strong> Phases 3.5, 5, and widget command-ification can proceed independently. Phase 4 depends on Phase 3.5. Phase 6 requires Phase 4.</p>
+<p><strong>Parallelizable:</strong> Phase 3.5.4, Phase 5, and widget command-ification can proceed independently. Phase 4 depends on Phase 3.5. Phase 6 requires Phase 4.</p>
 <hr>
 </section>
 <section id="completed-phases-summary" class="level2">
 <h2 class="anchored" data-anchor-id="completed-phases-summary">Completed Phases (Summary)</h2>
 <section id="phase-1-command-foundation-complete" class="level3">
 <h3 class="anchored" data-anchor-id="phase-1-command-foundation-complete">Phase 1 — Command Foundation (Complete)</h3>
-<p>All 14 steps complete. Delivered:</p>
-<ul>
-<li><strong>Core types</strong> (Steps 1.1–1.3): <code>CommandResult</code>, <code>CommandContext</code>, <code>CommandDescriptor</code>, <code>CommandSequenceDescriptor</code>, <code>ICommand</code> base class, <code>CommandFactory</code> with <code>createCommand()</code> / <code>createCommandFromJson()</code>.</li>
-<li><strong>Execution engine</strong> (Steps 1.4–1.5): Two-pass <code>${variable}</code> substitution, <code>executeSequence()</code> with stop-on-error, <code>SequenceResult</code> for undo.</li>
-<li><strong>Query helpers</strong> (Step 1.6): <code>getEntityIdsInRange()</code> for <code>RaggedTimeSeries&lt;T&gt;</code>, <code>DigitalEventSeries</code>, and <code>DigitalIntervalSeries</code>.</li>
-<li><strong>First commands</strong> (Step 1.7): <code>MoveByTimeRange</code>, <code>CopyByTimeRange</code>, <code>AddInterval</code>, <code>ForEachKey</code>.</li>
-<li><strong>Validation</strong> (Step 1.9): <code>validateSequence()</code> with structural, deserialization, variable, key existence, and type compatibility checks.</li>
-<li><strong>GUI verb audit</strong> (Step 1.10): On-demand hybrid strategy. DataManager_Widget and DataInspector_Widget audited. See <a href="../../../developer/DataManager/Commands/gui_verb_audit.html">GUI Verb Audit</a>.</li>
-<li><strong>ParameterSchema</strong> (Step 1.11): Extracted to <code>src/ParameterSchema/</code> as standalone library.</li>
-<li><strong>CommandInfo</strong> (Step 1.12): <code>getAvailableCommands()</code>, <code>getCommandInfo()</code>, per-command <code>ParameterUIHints</code>.</li>
-<li><strong>CommandRecorder + MutationGuard</strong> (Step 1.13): Trace recording with <code>executeSequence()</code> hook; debug-only strangulation pattern for runtime gap detection.</li>
-<li><strong>DataManagerSnapshot + Golden Traces</strong> (Step 1.14): Lightweight snapshot comparison; golden trace test pattern for widget verification.</li>
-</ul>
-<p><strong>Known pitfall (resolved):</strong> <code>rfl::Generic</code> stores integers as <code>double</code>, causing round-trip failures. Fixed via <code>normalizeJsonNumbers()</code> in <code>VariableSubstitution</code> and <code>createCommandFromJson()</code> in <code>CommandFactory</code>.</p>
+<p>All 14 steps complete. Delivered: core types (<code>CommandResult</code>, <code>CommandContext</code>, <code>CommandDescriptor</code>, <code>ICommand</code>), execution engine (two-pass variable substitution, <code>executeSequence()</code> with stop-on-error), query helpers (<code>getEntityIdsInRange()</code>), 4 initial commands (<code>MoveByTimeRange</code>, <code>CopyByTimeRange</code>, <code>AddInterval</code>, <code>ForEachKey</code>), validation (<code>validateSequence()</code>), GUI verb audit (on-demand strategy), <code>ParameterSchema</code> as standalone library, <code>CommandInfo</code> introspection, <code>CommandRecorder</code> + <code>MutationGuard</code>, <code>DataManagerSnapshot</code> + golden trace test pattern.</p>
+<p><strong>Known pitfall (resolved):</strong> <code>rfl::Generic</code> stores integers as <code>double</code>. Fixed via <code>normalizeJsonNumbers()</code>.</p>
 <p>See the <a href="../../../developer/DataManager/Commands/index.html">design document</a> for architecture details.</p>
 </section>
 <section id="phase-3-persistence-commands-save-registry-complete" class="level3">
 <h3 class="anchored" data-anchor-id="phase-3-persistence-commands-save-registry-complete">Phase 3 — Persistence Commands &amp; Save Registry (Complete)</h3>
-<p>All steps complete. Delivered:</p>
+<p>All steps complete. Delivered: <code>SaverInfo</code> metadata + <code>AtomicWrite</code> utility, 8 format savers (CSV ×6 data types, CapnProto LineData, OpenCV MaskData), all fuzz-tested. <code>SaveData</code> command (not undoable) and <code>LoadData</code> command (undoable via <code>deleteData()</code>).</p>
+<p>See <a href="../../IO/saver_infrastructure.qmd">SaverInfo &amp; AtomicWrite</a>, <a href="../../../developer/DataManager/Commands/save_data.html">SaveData</a>, <a href="../../../developer/DataManager/Commands/load_data.html">LoadData</a>.</p>
+</section>
+<section id="phase-7-command-registration-api-complete" class="level3">
+<h3 class="anchored" data-anchor-id="phase-7-command-registration-api-complete">Phase 7 — Command Registration API (Complete)</h3>
+<p>Replaced the hardcoded if-else chain in <code>CommandFactory</code> with <code>CommandRegistry</code> singleton + explicit dispatcher pattern. All exit criteria met:</p>
 <ul>
-<li><p><strong>SaverRegistry infrastructure</strong> (Step 3.1.1): <code>SaverInfo</code> metadata, <code>AtomicWrite</code> utility, <code>getSupportedSaveFormats()</code> on <code>LoaderRegistry</code>. See <a href="../../IO/saver_infrastructure.qmd">SaverInfo &amp; AtomicWrite</a>.</p></li>
-<li><p><strong>8 format savers</strong> (Steps 3.1.2–3.1.9):</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Format</th>
-<th>Data Type</th>
-<th>Fuzz Tested</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>CSV</td>
-<td>PointData</td>
-<td>Yes (round-trip + delimiter)</td>
-</tr>
-<tr class="even">
-<td>CSV</td>
-<td>LineData (single-file)</td>
-<td>Yes (round-trip + delimiter)</td>
-</tr>
-<tr class="odd">
-<td>CSV</td>
-<td>LineData (multi-file)</td>
-<td>Yes (round-trip)</td>
-</tr>
-<tr class="even">
-<td>CSV</td>
-<td>AnalogTimeSeries</td>
-<td>Yes (round-trip + delimiter)</td>
-</tr>
-<tr class="odd">
-<td>CSV</td>
-<td>DigitalEventSeries</td>
-<td>Yes (round-trip + delimiter)</td>
-</tr>
-<tr class="even">
-<td>CSV</td>
-<td>DigitalIntervalSeries</td>
-<td>Yes (round-trip + delimiter)</td>
-</tr>
-<tr class="odd">
-<td>CSV</td>
-<td>MaskData (RLE)</td>
-<td>Yes (round-trip + delimiter)</td>
-</tr>
-<tr class="even">
-<td>CapnProto</td>
-<td>LineData</td>
-<td>Yes (exact binary round-trip)</td>
-</tr>
-<tr class="odd">
-<td>OpenCV (Image)</td>
-<td>MaskData</td>
-<td>Yes (robustness)</td>
-</tr>
-</tbody>
-</table></li>
-<li><p><strong>SaveData command</strong> (Step 3.2): Dispatches via <code>LoaderRegistry::trySave()</code>. Not undoable. See <a href="../../../developer/DataManager/Commands/save_data.html">SaveData Command</a>.</p></li>
-<li><p><strong>LoadData command</strong> (Step 3.3): Dispatches via <code>LoaderRegistry::tryLoad()</code>. Undoable (undo calls <code>deleteData()</code>). See <a href="../../../developer/DataManager/Commands/load_data.html">LoadData Command</a>.</p></li>
+<li><code>CommandFactory.cpp</code> contains zero if-else branches; delegates to <code>CommandRegistry::instance()</code></li>
+<li><code>register_core_commands()</code> registers all 7 built-in commands</li>
+<li>Called from <code>MainWindow</code> constructor (dedicated <code>register_all_commands.cpp</code> deferred until domain libraries contribute commands)</li>
+<li>Reusable <code>tests/shared/RegisterCommandsListener.cpp</code> Catch2 listener for test setup</li>
+<li><code>CommandRegistry.test.cpp</code> verifies all commands registered (10 test cases)</li>
+<li>No <code>--whole-archive</code> flags needed for Commands</li>
 </ul>
+<p><strong>Why Explicit Dispatcher over RAII:</strong> Commands chose a different registration pattern than TransformsV2/DataSynthesizer (RAII + <code>--whole-archive</code>). The explicit dispatcher avoids silent registration failures, eliminates platform-specific <code>--whole-archive</code> linker flags, gives tests precise control over available commands, and works cleanly across shared library boundaries. See the <a href="../../../developer/DataManager/Commands/index.html">design document</a> for the detailed comparison table.</p>
+<p><strong>Next use:</strong> When domain libraries (TransformsV2, MLCore) contribute commands, each defines a <code>register_*_commands()</code> function and the central dispatcher gains one line. See <a href="../../../developer/inter_widget_communication_roadmap.html#ownership--registration-best-practices">Ownership &amp; Registration Best Practices</a> for the full pattern.</p>
 <hr>
 </section>
 </section>
 <section id="phase-2-triage-session-nearly-complete" class="level2">
 <h2 class="anchored" data-anchor-id="phase-2-triage-session-nearly-complete">Phase 2 — Triage Session (Nearly Complete)</h2>
 <p><strong>Goal:</strong> Mark/Commit/Recall workflow using command sequences.</p>
-<p><strong>Completed steps:</strong></p>
-<ul>
-<li><strong>TriageSession core</strong> (Step 2.1): <code>Idle ↔︎ Marking</code> state machine in <code>src/TriageSession/</code>. <code>commit()</code> populates runtime variables (<code>mark_frame</code>, <code>current_frame</code>) and delegates to <code>executeSequence()</code>. Retains last commit commands for undo support.</li>
-<li><strong>TriageSessionState</strong> (Step 2.2): EditorState subclass with pipeline/tracked-regions serialization.</li>
-<li><strong>TriageSessionWidget</strong> (Step 2.3): Mark/Commit/Recall buttons, pipeline display, tracked-regions summary.</li>
-<li><strong>Unit tests</strong> (Step 2.6): State machine transitions, runtime variable population, full triage round-trip integration test.</li>
-<li><strong>AutoParamWidget extraction</strong> (Step 2.7): Extracted to <code>src/WhiskerToolbox/AutoParamWidget/</code> with <code>Qt6::Widgets</code> + <code>ParameterSchema</code> dependencies only.</li>
-<li><strong>Guided Pipeline Editor</strong> (Step 2.8): Command picker dialog, editable command list with <code>AutoParamWidget</code> rows, bidirectional sync with raw JSON editor.</li>
-</ul>
+<p><strong>Completed:</strong> TriageSession core (state machine, <code>commit()</code> with runtime variables), TriageSessionState (EditorState subclass), TriageSessionWidget (UI), unit tests, AutoParamWidget extraction, Guided Pipeline Editor.</p>
 <section id="remaining-steps" class="level3">
 <h3 class="anchored" data-anchor-id="remaining-steps">Remaining Steps</h3>
-<section id="step-2.4-keyboard-shortcuts" class="level4">
-<h4 class="anchored" data-anchor-id="step-2.4-keyboard-shortcuts">Step 2.4 — Keyboard Shortcuts</h4>
-<ul class="task-list">
-<li><label><input type="checkbox"><strong>M</strong> — Mark (start a triage range)</label></li>
-<li><label><input type="checkbox"><strong>C</strong> — Commit (execute pipeline for <code>[mark_frame, current_frame]</code>)</label></li>
-<li><label><input type="checkbox"><strong>R</strong> — Recall (abort, jump back to mark frame)</label></li>
-</ul>
-</section>
 <section id="step-2.5-tracked-regions-visualization" class="level4">
 <h4 class="anchored" data-anchor-id="step-2.5-tracked-regions-visualization">Step 2.5 — Tracked-Regions Visualization</h4>
 <ul class="task-list">
@@ -1285,6 +1719,33 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 <hr>
 </section>
+</section>
+</section>
+<section id="phase-3.5-command-recording-test-generation-nearly-complete" class="level2">
+<h2 class="anchored" data-anchor-id="phase-3.5-command-recording-test-generation-nearly-complete">Phase 3.5 — Command Recording &amp; Test Generation (Nearly Complete)</h2>
+<p><strong>Goal:</strong> Wire <code>CommandRecorder</code> into the running application so GUI actions produce exportable <code>CommandSequenceDescriptor</code> JSON, enabling semi-automated golden trace test generation.</p>
+<p><strong>Completed:</strong> Steps 3.5.1–3.5.3 all done:</p>
+<ul>
+<li><strong>Step 3.5.1 (Centralized Recorder):</strong> <code>CommandContext</code> has <code>CommandRecorder* recorder</code> field. <code>executeSequence()</code> falls back to <code>ctx.recorder</code>. <code>MainWindow</code> owns a <code>CommandRecorder</code> and exposes <code>commandRecorder()</code> getter.</li>
+<li><strong>Step 3.5.2 (Route Widgets):</strong> DataSynthesizer Generate, SaveData call sites, and TriageSession <code>commit()</code> all route through <code>executeSequence()</code> with the shared recorder.</li>
+<li><strong>Step 3.5.3 (Command Log UI):</strong> <code>CommandLog_Widget</code> displays recorded commands in real-time with “Copy as JSON” and “Clear” buttons. Accessible via Modules → Command Log.</li>
+</ul>
+<section id="remaining-step-3.5.4-end-to-end-verification" class="level3">
+<h3 class="anchored" data-anchor-id="remaining-step-3.5.4-end-to-end-verification">Remaining: Step 3.5.4 — End-to-End Verification</h3>
+<ul class="task-list">
+<li><label><input type="checkbox">Demo workflow: Open app → open Command Log → generate a SineWave via Data Synthesizer → save as CSV via DataInspector → Command Log shows 2 entries (<code>SynthesizeData</code>, <code>SaveData</code>) → “Copy as JSON” → paste into a Catch2 golden trace test with <code>DataManagerSnapshot</code> assertions → test passes.</label></li>
+<li><label><input type="checkbox">Debug build: exercising recorded workflows produces no <code>MutationGuard</code> warnings.</label></li>
+<li><label><input type="checkbox">Round-trip: <code>executeSequence(recorded_json)</code> then <code>executeSequence(recorder.toSequence())</code> produce identical <code>DataManagerSnapshot</code>s.</label></li>
+</ul>
+</section>
+<section id="exit-criteria" class="level3">
+<h3 class="anchored" data-anchor-id="exit-criteria">Exit Criteria</h3>
+<ol type="1">
+<li>All GUI command execution paths go through <code>executeSequence()</code> with a recorder.</li>
+<li>Command Log widget displays recorded commands in real-time.</li>
+<li>“Copy as JSON” produces a valid <code>CommandSequenceDescriptor</code> that, when pasted into a Catch2 test and executed via <code>executeSequence()</code>, reproduces the same <code>DataManagerSnapshot</code>.</li>
+</ol>
+<hr>
 </section>
 </section>
 <section id="widget-command-ification-ongoing" class="level2">
@@ -1347,112 +1808,10 @@ ul.task-list li input[type="checkbox"] {
 <hr>
 </section>
 </section>
-<section id="phase-3.5-command-recording-test-generation" class="level2">
-<h2 class="anchored" data-anchor-id="phase-3.5-command-recording-test-generation">Phase 3.5 — Command Recording &amp; Test Generation</h2>
-<p><strong>Goal:</strong> Wire <code>CommandRecorder</code> into the running application so GUI actions produce exportable <code>CommandSequenceDescriptor</code> JSON, enabling semi-automated golden trace test generation.</p>
-<p><strong>Depends on:</strong> Phase 1 (done)</p>
-<p><strong>Motivation:</strong> All the infrastructure exists (<code>CommandRecorder</code>, <code>executeSequence()</code> hook, <code>DataManagerSnapshot</code>, golden trace tests) but nothing is connected in the running app. Widgets call <code>cmd.execute(ctx)</code> directly, bypassing <code>executeSequence()</code> and its recording hook. This phase wires everything together so a user can: <em>do actions in GUI → see recorded commands → copy JSON → paste into a Catch2 golden trace test</em>.</p>
-<section id="current-gap" class="level3">
-<h3 class="anchored" data-anchor-id="current-gap">Current Gap</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 57%">
-<col style="width: 42%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Component</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>CommandRecorder</code> class</td>
-<td>✅ Implemented, tested (19 test cases)</td>
-</tr>
-<tr class="even">
-<td><code>executeSequence()</code> recording hook</td>
-<td>✅ Implemented (accepts <code>CommandRecorder*</code> param)</td>
-</tr>
-<tr class="odd">
-<td><code>MutationGuard</code></td>
-<td>✅ Active in debug builds</td>
-</tr>
-<tr class="even">
-<td>Shared recorder instance in app</td>
-<td>✅ <code>MainWindow</code> owns <code>CommandRecorder</code>; <code>commandRecorder()</code> getter</td>
-</tr>
-<tr class="odd">
-<td><code>ctx.recorder</code> fallback</td>
-<td>✅ <code>executeSequence()</code> falls back to <code>ctx.recorder</code> when no explicit recorder passed</td>
-</tr>
-<tr class="even">
-<td>DataSynthesizer “Generate”</td>
-<td>✅ Routes through <code>executeSequence()</code></td>
-</tr>
-<tr class="odd">
-<td>SaveData call sites</td>
-<td>✅ Routes through <code>executeSequence()</code></td>
-</tr>
-<tr class="even">
-<td>TriageSession <code>commit()</code></td>
-<td>✅ Routes through <code>executeSequence()</code> with recorder</td>
-</tr>
-<tr class="odd">
-<td>UI to view/export recorded commands</td>
-<td>✅ CommandLog_Widget (Step 3.5.3)</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="step-3.5.1-centralized-recorder-complete" class="level3">
-<h3 class="anchored" data-anchor-id="step-3.5.1-centralized-recorder-complete">Step 3.5.1 — Centralized Recorder (Complete)</h3>
-<ul class="task-list">
-<li><label><input type="checkbox" checked="">Add <code>CommandRecorder*</code> field to <code>CommandContext</code> (<code>src/Commands/Core/CommandContext.hpp</code>). Backwards-compatible default of <code>nullptr</code>.</label></li>
-<li><label><input type="checkbox" checked="">Update <code>executeSequence()</code> (<code>src/Commands/Core/SequenceExecution.cpp</code>) to use <code>ctx.recorder</code> as fallback when the explicit <code>recorder</code> parameter is <code>nullptr</code>.</label></li>
-<li><label><input type="checkbox" checked="">Add <code>std::unique_ptr&lt;commands::CommandRecorder&gt;</code> to <code>MainWindow</code> (<code>src/WhiskerToolbox/Main_Window/mainwindow.hpp</code>). Expose via <code>commandRecorder()</code> getter. Populate <code>CommandContext::recorder</code> for all widget command execution.</label></li>
-</ul>
-</section>
-<section id="step-3.5.2-route-widgets-through-executesequence" class="level3">
-<h3 class="anchored" data-anchor-id="step-3.5.2-route-widgets-through-executesequence">Step 3.5.2 — Route Widgets Through executeSequence()</h3>
-<ul class="task-list">
-<li><label><input type="checkbox" checked=""><strong>DataSynthesizer Generate</strong> (<code>src/WhiskerToolbox/DataSynthesizer_Widget/UI/DataSynthesizerProperties_Widget.cpp</code>): Build a <code>CommandDescriptor{.command_name = "SynthesizeData", .parameters = ...}</code> and call <code>executeSequence()</code> instead of <code>cmd.execute(ctx)</code>.</label></li>
-<li><label><input type="checkbox" checked=""><strong>SaveData call sites</strong> (DataInspector savers, DataExport): Same pattern. See <a href="../../../developer/DataManager/Commands/widget_save_refactoring_guide.html">widget_save_refactoring_guide.qmd</a>.</label></li>
-<li><label><input type="checkbox" checked=""><strong>TriageSession</strong> (<code>src/TriageSession/TriageSession.cpp</code>): Accept <code>CommandRecorder*</code> in <code>commit()</code>, forward to <code>executeSequence()</code>.</label></li>
-</ul>
-</section>
-<section id="step-3.5.3-command-log-ui-complete" class="level3">
-<h3 class="anchored" data-anchor-id="step-3.5.3-command-log-ui-complete">Step 3.5.3 — Command Log UI (Complete)</h3>
-<ul class="task-list">
-<li><label><input type="checkbox" checked="">Create a minimal “Command Log” dock widget showing the list of recorded <code>CommandDescriptor</code> names and parameters from the shared recorder. See <a href="../../../developer/DataManager/Commands/command_log_widget.html">Command Log Widget</a>.</label></li>
-<li><label><input type="checkbox" checked="">“Copy as JSON” button: calls <code>recorder-&gt;toSequence("recorded_session")</code>, serializes via <code>rfl::json::write()</code>, copies to clipboard.</label></li>
-<li><label><input type="checkbox" checked="">“Clear” button.</label></li>
-<li><label><input type="checkbox" checked="">Add “Modules → Command Log” menu item in MainWindow.</label></li>
-</ul>
-<p><strong>Note:</strong> This is intentionally minimal — NOT the full Phase 4 Action Journal. No persistence, timestamps, filtering, or provenance. Just enough to see what happened and export it.</p>
-</section>
-<section id="step-3.5.4-end-to-end-verification" class="level3">
-<h3 class="anchored" data-anchor-id="step-3.5.4-end-to-end-verification">Step 3.5.4 — End-to-End Verification</h3>
-<ul class="task-list">
-<li><label><input type="checkbox">Demo workflow: Open app → open Command Log → generate a SineWave via Data Synthesizer → save as CSV via DataInspector → Command Log shows 2 entries (<code>SynthesizeData</code>, <code>SaveData</code>) → “Copy as JSON” → paste into a Catch2 golden trace test with <code>DataManagerSnapshot</code> assertions → test passes.</label></li>
-<li><label><input type="checkbox">Debug build: exercising recorded workflows produces no <code>MutationGuard</code> warnings.</label></li>
-<li><label><input type="checkbox">Round-trip: <code>executeSequence(recorded_json)</code> then <code>executeSequence(recorder.toSequence())</code> produce identical <code>DataManagerSnapshot</code>s.</label></li>
-</ul>
-</section>
-<section id="exit-criteria" class="level3">
-<h3 class="anchored" data-anchor-id="exit-criteria">Exit Criteria</h3>
-<ol type="1">
-<li>All GUI command execution paths go through <code>executeSequence()</code> with a recorder.</li>
-<li>Command Log widget displays recorded commands in real-time.</li>
-<li>“Copy as JSON” produces a valid <code>CommandSequenceDescriptor</code> that, when pasted into a Catch2 test and executed via <code>executeSequence()</code>, reproduces the same <code>DataManagerSnapshot</code>.</li>
-</ol>
-<hr>
-</section>
-</section>
 <section id="phase-4-action-journal-integration" class="level2">
 <h2 class="anchored" data-anchor-id="phase-4-action-journal-integration">Phase 4 — Action Journal Integration</h2>
 <p><strong>Goal:</strong> Commands auto-record to journal; journal can replay command entries.</p>
-<p><strong>Depends on:</strong> Phase 3.5 (recorder wired into app)</p>
+<p><strong>Depends on:</strong> Phase 3.5 (nearly complete — only 3.5.4 verification remains)</p>
 <p>Generalizes the <code>CommandRecorder</code> into a persistent, timestamped, filterable log with workspace integration. The <code>executeSequence()</code> hook from Step 1.13 is reused — the change is swapping <code>CommandRecorder*</code> for <code>ActionJournal*</code> with persistence and metadata.</p>
 <section id="step-4.1-journal-hook-in-executesequence" class="level3">
 <h3 class="anchored" data-anchor-id="step-4.1-journal-hook-in-executesequence">Step 4.1 — Journal Hook in executeSequence</h3>
@@ -1496,7 +1855,6 @@ ul.task-list li input[type="checkbox"] {
 <li><label><input type="checkbox">Captures before/after JSON snapshots</label></li>
 <li><label><input type="checkbox"><code>mergeWith()</code> for coalescing rapid changes to the same widget</label></li>
 </ul>
-<p>See <a href="../../../developer/DataManager/Commands/index.html#widgetstatechangecommand">WidgetStateChangeCommand</a> in the design document.</p>
 </section>
 <section id="step-5.3-commandsequencecommand" class="level3">
 <h3 class="anchored" data-anchor-id="step-5.3-commandsequencecommand">Step 5.3 — CommandSequenceCommand</h3>
@@ -1505,7 +1863,6 @@ ul.task-list li input[type="checkbox"] {
 <li><label><input type="checkbox"><code>isUndoable()</code> returns true if any child is undoable</label></li>
 <li><label><input type="checkbox"><code>undo()</code> reverses children in reverse order, skipping non-undoable ones</label></li>
 </ul>
-<p>See <a href="../../../developer/DataManager/Commands/index.html#commandsequencecommand-triage-undo">CommandSequenceCommand</a> in the design document.</p>
 </section>
 <section id="step-5.4-movebytimerange-undo-verification" class="level3">
 <h3 class="anchored" data-anchor-id="step-5.4-movebytimerange-undo-verification">Step 5.4 — MoveByTimeRange Undo Verification</h3>
@@ -1527,19 +1884,18 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="phase-6-cli-batch-executor-macro-recording">Phase 6 — CLI Batch Executor &amp; Macro Recording</h2>
 <p><strong>Goal:</strong> Execute command sequences headlessly; record GUI actions as commands.</p>
 <p><strong>Depends on:</strong> Phases 3 (done), 4</p>
-<p>Generalizes the golden trace test pattern (load JSON → create <code>DataManager</code> → <code>executeSequence()</code> → check results) into a CLI tool. The macro recorder generalizes <code>CommandRecorder</code> from a test utility into a user-facing feature.</p>
 <section id="step-6.1-cli-executor" class="level3">
 <h3 class="anchored" data-anchor-id="step-6.1-cli-executor">Step 6.1 — CLI Executor</h3>
 <ul class="task-list">
 <li><label><input type="checkbox">CLI tool or application mode: load a <code>.json</code> command sequence, create <code>DataManager</code>, execute, exit</label></li>
-<li><label><input type="checkbox">Variable substitution for batch parameterization (reuses existing pipeline variable system)</label></li>
+<li><label><input type="checkbox">Variable substitution for batch parameterization</label></li>
 <li><label><input type="checkbox">Exit code reflects success/failure</label></li>
 </ul>
 </section>
 <section id="step-6.2-macro-recorder" class="level3">
 <h3 class="anchored" data-anchor-id="step-6.2-macro-recorder">Step 6.2 — Macro Recorder</h3>
 <ul class="task-list">
-<li><label><input type="checkbox">Intercept GUI actions (data loads, transforms, triage commits) and emit <code>CommandDescriptor</code>s</label></li>
+<li><label><input type="checkbox">Intercept GUI actions and emit <code>CommandDescriptor</code>s</label></li>
 <li><label><input type="checkbox">Record to an in-memory <code>CommandSequenceDescriptor</code> that can be saved to JSON</label></li>
 </ul>
 </section>
@@ -1547,13 +1903,13 @@ ul.task-list li input[type="checkbox"] {
 <h3 class="anchored" data-anchor-id="step-6.3-configexporttoolbar">Step 6.3 — ConfigExportToolbar</h3>
 <ul class="task-list">
 <li><label><input type="checkbox">Reusable toolbar component: “Copy as JSON”, “Save Configuration…”</label></li>
-<li><label><input type="checkbox">Attach to widgets that produce command sequences (triage session, transform widget, etc.)</label></li>
+<li><label><input type="checkbox">Attach to widgets that produce command sequences</label></li>
 </ul>
 </section>
 <section id="step-6.4-commandsequencewidget" class="level3">
 <h3 class="anchored" data-anchor-id="step-6.4-commandsequencewidget">Step 6.4 — CommandSequenceWidget</h3>
 <ul class="task-list">
-<li><label><input type="checkbox">Standalone Qt widget (<code>src/WhiskerToolbox/Commands/</code>) for building, editing, and running command sequences outside the triage workflow</label></li>
+<li><label><input type="checkbox">Standalone Qt widget for building, editing, and running command sequences</label></li>
 <li><label><input type="checkbox">JSON editor with validation feedback</label></li>
 <li><label><input type="checkbox">Command list view with run button</label></li>
 </ul>
@@ -1562,53 +1918,15 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="relationship-to-state-management-roadmap" class="level2">
 <h2 class="anchored" data-anchor-id="relationship-to-state-management-roadmap">Relationship to State Management Roadmap</h2>
-<p>This roadmap replaces Phases 4–6 of the <a href="../../STATE_MANAGEMENT_ROADMAP.md">State Management Roadmap</a> with a more comprehensive command-first architecture. The key differences:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>State Mgmt Roadmap (old)</th>
-<th>Command Architecture (this doc)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Phase 4: Action Journal records ad-hoc action types</td>
-<td>Phase 4 here: records <code>CommandDescriptor</code>s — standardized, replayable</td>
-</tr>
-<tr class="even">
-<td>Phase 5: <code>Command</code> interface with <code>execute()</code>/<code>undo()</code></td>
-<td>Phases 1+5 here: <code>ICommand</code> base with factory, <code>CommandStack</code> layered on top</td>
-</tr>
-<tr class="odd">
-<td>Phase 6: <code>SessionReplayer</code> replays workspace provenance</td>
-<td>Phase 6 here: CLI executor replays <code>CommandSequenceDescriptor</code></td>
-</tr>
-<tr class="even">
-<td>No concept of triage or batch operations</td>
-<td>Triage Session (Phase 2) demonstrates the architecture</td>
-</tr>
-</tbody>
-</table>
-<p>Ideas <strong>carried forward</strong> from the State Management Roadmap:</p>
-<ul>
-<li><strong>Action Journal</strong> (<code>ActionEntry</code>, append-only log, JSONL format, query/filter) — Phase 4</li>
-<li><strong>CommandStack</strong> (undo/redo, clean state, merge) — Phase 5</li>
-<li><strong>Memento-based EditorState undo</strong> (<code>WidgetStateChangeCommand</code>) — Phase 5</li>
-<li><strong>Command merging</strong> for sequential similar operations — Phase 5 (<code>ICommand::mergeWith()</code>)</li>
-<li><strong>ConfigExportToolbar</strong> (“Copy as JSON”, “Save Configuration…”) — Phase 6</li>
-<li><strong>Session replay / batch processing</strong> — Phase 6</li>
-<li><strong>Incremental adoption</strong> (not every operation needs to be a command immediately) — design principle</li>
-</ul>
+<p>This roadmap replaces Phases 4–6 of the <a href="../../STATE_MANAGEMENT_ROADMAP.md">State Management Roadmap</a> with a more comprehensive command-first architecture. Ideas carried forward: Action Journal, CommandStack, memento-based EditorState undo, command merging, ConfigExportToolbar, session replay, and incremental adoption.</p>
 </section>
 <section id="see-also" class="level2">
 <h2 class="anchored" data-anchor-id="see-also">See Also</h2>
 <ul>
 <li><a href="../../../developer/DataManager/Commands/index.html">Command Architecture Design Document</a> — full architecture, types, and code examples</li>
 <li><a href="../../../developer/DataManager/Commands/gui_verb_audit.html">GUI Verb Audit</a> — widget audit tables and new command designs</li>
+<li><a href="../../../developer/inter_widget_communication_roadmap.html">Inter-Widget Communication Roadmap</a> — ContextActions, OperationContext, cross-roadmap sequence</li>
+<li><a href="../../../developer/tensor_transforms_roadmap.html">Tensor Transforms Roadmap</a> — PCA, t-SNE, scatter integration</li>
 <li><a href="../../../developer/DataManager/data_manager.html">Data Manager</a> — core data management documentation</li>
 </ul>
 
@@ -1617,380 +1935,256 @@ ul.task-list li input[type="checkbox"] {
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
-window.document.addEventListener("DOMContentLoaded", function (event) {
-  const toggleBodyColorMode = (bsSheetEl) => {
-    const mode = bsSheetEl.getAttribute("data-mode");
-    const bodyEl = window.document.querySelector("body");
-    if (mode === "dark") {
-      bodyEl.classList.add("quarto-dark");
-      bodyEl.classList.remove("quarto-light");
-    } else {
-      bodyEl.classList.add("quarto-light");
-      bodyEl.classList.remove("quarto-dark");
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
     }
-  }
-  const toggleBodyColorPrimary = () => {
-    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
-    if (bsSheetEl) {
-      toggleBodyColorMode(bsSheetEl);
-    }
-  }
-  toggleBodyColorPrimary();  
-  const disableStylesheet = (stylesheets) => {
-    for (let i=0; i < stylesheets.length; i++) {
-      const stylesheet = stylesheets[i];
-      stylesheet.rel = 'prefetch';
-    }
-  }
-  const enableStylesheet = (stylesheets) => {
-    for (let i=0; i < stylesheets.length; i++) {
-      const stylesheet = stylesheets[i];
-      stylesheet.rel = 'stylesheet';
-    }
-  }
-  const manageTransitions = (selector, allowTransitions) => {
-    const els = window.document.querySelectorAll(selector);
-    for (let i=0; i < els.length; i++) {
-      const el = els[i];
-      if (allowTransitions) {
-        el.classList.remove('notransition');
-      } else {
-        el.classList.add('notransition');
-      }
-    }
-  }
-  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
-    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
-    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
-    let newTheme = '';
-    if(darkModeDefault) {
-      newTheme = isAlternate ? baseTheme : alternateTheme;
-    } else {
-      newTheme = isAlternate ? alternateTheme : baseTheme;
-    }
-    const changeGiscusTheme = () => {
-      // From: https://github.com/giscus/giscus/issues/336
-      const sendMessage = (message) => {
-        const iframe = document.querySelector('iframe.giscus-frame');
-        if (!iframe) return;
-        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
-      }
-      sendMessage({
-        setConfig: {
-          theme: newTheme
-        }
-      });
-    }
-    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
-    if (isGiscussLoaded) {
-      changeGiscusTheme();
-    }
-  }
-  const toggleColorMode = (alternate) => {
-    // Switch the stylesheets
-    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
-    manageTransitions('#quarto-margin-sidebar .nav-link', false);
-    if (alternate) {
-      enableStylesheet(alternateStylesheets);
-      for (const sheetNode of alternateStylesheets) {
-        if (sheetNode.id === "quarto-bootstrap") {
-          toggleBodyColorMode(sheetNode);
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
         }
       }
-    } else {
-      disableStylesheet(alternateStylesheets);
-      toggleBodyColorPrimary();
-    }
-    manageTransitions('#quarto-margin-sidebar .nav-link', true);
-    // Switch the toggles
-    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
-    for (let i=0; i < toggles.length; i++) {
-      const toggle = toggles[i];
-      if (toggle) {
-        if (alternate) {
-          toggle.classList.add("alternate");     
-        } else {
-          toggle.classList.remove("alternate");
-        }
-      }
-    }
-    // Hack to workaround the fact that safari doesn't
-    // properly recolor the scrollbar when toggling (#1455)
-    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
-      manageTransitions("body", false);
-      window.scrollTo(0, 1);
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-        manageTransitions("body", true);
-      }, 40);  
-    }
-  }
-  const isFileUrl = () => { 
-    return window.location.protocol === 'file:';
-  }
-  const hasAlternateSentinel = () => {  
-    let styleSentinel = getColorSchemeSentinel();
-    if (styleSentinel !== null) {
-      return styleSentinel === "alternate";
-    } else {
       return false;
     }
-  }
-  const setStyleSentinel = (alternate) => {
-    const value = alternate ? "alternate" : "default";
-    if (!isFileUrl()) {
-      window.localStorage.setItem("quarto-color-scheme", value);
-    } else {
-      localAlternateSentinel = value;
-    }
-  }
-  const getColorSchemeSentinel = () => {
-    if (!isFileUrl()) {
-      const storageValue = window.localStorage.getItem("quarto-color-scheme");
-      return storageValue != null ? storageValue : localAlternateSentinel;
-    } else {
-      return localAlternateSentinel;
-    }
-  }
-  const darkModeDefault = false;
-  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
-  // Dark / light mode switch
-  window.quartoToggleColorScheme = () => {
-    // Read the current dark / light value 
-    let toAlternate = !hasAlternateSentinel();
-    toggleColorMode(toAlternate);
-    setStyleSentinel(toAlternate);
-    toggleGiscusIfUsed(toAlternate, darkModeDefault);
-  };
-  // Ensure there is a toggle, if there isn't float one in the top right
-  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
-    const a = window.document.createElement('a');
-    a.classList.add('top-right');
-    a.classList.add('quarto-color-scheme-toggle');
-    a.href = "";
-    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
-    const i = window.document.createElement("i");
-    i.classList.add('bi');
-    a.appendChild(i);
-    window.document.body.appendChild(a);
-  }
-  // Switch to dark mode if need be
-  if (hasAlternateSentinel()) {
-    toggleColorMode(true);
-  } else {
-    toggleColorMode(false);
-  }
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
-  const isCodeAnnotation = (el) => {
-    for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {                     
-        return true;
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
       }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
     }
-    return false;
-  }
-  const onCopySuccess = function(e) {
-    // button target
-    const button = e.trigger;
-    // don't keep focus
-    button.blur();
-    // flash "checked"
-    button.classList.add('code-copy-button-checked');
-    var currentTitle = button.getAttribute("title");
-    button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
-    setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
-      }
-      button.setAttribute("title", currentTitle);
-      button.classList.remove('code-copy-button-checked');
-    }, 1000);
-    // clear code selection
-    e.clearSelection();
-  }
-  const getTextToCopy = function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
       for (const childEl of codeEl.children) {
         if (isCodeAnnotation(childEl)) {
           childEl.remove();
         }
       }
       return codeEl.innerText;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-    text: getTextToCopy
-  });
-  clipboard.on('success', onCopySuccess);
-  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-      text: getTextToCopy,
-      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
     });
-    clipboardModal.on('success', onCopySuccess);
-  }
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
     }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
-    }
-  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-    const config = {
-      allowHTML: true,
-      maxWidth: 500,
-      delay: 100,
-      arrow: false,
-      appendTo: function(el) {
-          return el.parentElement;
-      },
-      interactive: true,
-      interactiveBorder: 10,
-      theme: 'quarto',
-      placement: 'bottom-start',
-    };
-    if (contentFn) {
-      config.content = contentFn;
-    }
-    if (onTriggerFn) {
-      config.onTrigger = onTriggerFn;
-    }
-    if (onUntriggerFn) {
-      config.onUntrigger = onUntriggerFn;
-    }
-    window.tippy(el, config); 
-  }
-  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-  for (var i=0; i<noterefs.length; i++) {
-    const ref = noterefs[i];
-    tippyHover(ref, function() {
-      // use id or data attribute instead here
-      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-      try { href = new URL(href).hash; } catch {}
-      const id = href.replace(/^#\/?/, "");
-      const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
-    });
-  }
-  const xrefs = window.document.querySelectorAll('a.quarto-xref');
-  const processXRef = (id, note) => {
-    // Strip column container classes
-    const stripColumnClz = (el) => {
-      el.classList.remove("page-full", "page-columns");
-      if (el.children) {
-        for (const child of el.children) {
-          stripColumnClz(child);
-        }
-      }
-    }
-    stripColumnClz(note)
-    if (id === null || id.startsWith('sec-')) {
-      // Special case sections, only their first couple elements
-      const container = document.createElement("div");
-      if (note.children && note.children.length > 2) {
-        container.appendChild(note.children[0].cloneNode(true));
-        for (let i = 1; i < note.children.length; i++) {
-          const child = note.children[i];
-          if (child.tagName === "P" && child.innerText === "") {
-            continue;
-          } else {
-            container.appendChild(child.cloneNode(true));
-            break;
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
           }
         }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(container);
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
         }
-        return container.innerHTML
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
       } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
         if (window.Quarto?.typesetMath) {
           window.Quarto.typesetMath(note);
         }
-        return note.innerHTML;
-      }
-    } else {
-      // Remove any anchor links if they are present
-      const anchorLink = note.querySelector('a.anchorjs-link');
-      if (anchorLink) {
-        anchorLink.remove();
-      }
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(note);
-      }
-      if (note.classList.contains("callout")) {
-        return note.outerHTML;
-      } else {
-        return note.innerHTML;
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
       }
     }
-  }
-  for (var i=0; i<xrefs.length; i++) {
-    const xref = xrefs[i];
-    tippyHover(xref, undefined, function(instance) {
-      instance.disable();
-      let url = xref.getAttribute('href');
-      let hash = undefined; 
-      if (url.startsWith('#')) {
-        hash = url;
-      } else {
-        try { hash = new URL(url).hash; } catch {}
-      }
-      if (hash) {
-        const id = hash.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note !== null) {
-          try {
-            const html = processXRef(id, note.cloneNode(true));
-            instance.setContent(html);
-          } finally {
-            instance.enable();
-            instance.show();
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
           }
         } else {
-          // See if we can fetch this
-          fetch(url.split('#')[0])
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
           .then(res => res.text())
           .then(html => {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.getElementById(id);
+            const note = htmlDoc.querySelector('main.content');
             if (note !== null) {
-              const html = processXRef(id, note);
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
               instance.setContent(html);
             } 
           }).finally(() => {
@@ -1998,185 +2192,161 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
-      } else {
-        // See if we can fetch a full url (with no hash to target)
-        // This is a special case and we should probably do some content thinning / targeting
-        fetch(url)
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(html, "text/html");
-          const note = htmlDoc.querySelector('main.content');
-          if (note !== null) {
-            // This should only happen for chapter cross references
-            // (since there is no id in the URL)
-            // remove the first header
-            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-              note.children[0].remove();
-            }
-            const html = processXRef(null, note);
-            instance.setContent(html);
-          } 
-        }).finally(() => {
-          instance.enable();
-          instance.show();
-        });
-      }
-    }, function(instance) {
-    });
-  }
-      let selectedAnnoteEl;
-      const selectorForAnnotation = ( cell, annotation) => {
-        let cellAttr = 'data-code-cell="' + cell + '"';
-        let lineAttr = 'data-code-annotation="' +  annotation + '"';
-        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-        return selector;
-      }
-      const selectCodeLines = (annoteEl) => {
-        const doc = window.document;
-        const targetCell = annoteEl.getAttribute("data-target-cell");
-        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-        const lineIds = lines.map((line) => {
-          return targetCell + "-" + line;
-        })
-        let top = null;
-        let height = null;
-        let parent = null;
-        if (lineIds.length > 0) {
-            //compute the position of the single el (top and bottom and make a div)
-            const el = window.document.getElementById(lineIds[0]);
-            top = el.offsetTop;
-            height = el.offsetHeight;
-            parent = el.parentElement.parentElement;
-          if (lineIds.length > 1) {
-            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-            height = bottom - top;
-          }
-          if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it 
-            let div = window.document.getElementById("code-annotation-line-highlight");
-            if (div === null) {
-              div = window.document.createElement("div");
-              div.setAttribute("id", "code-annotation-line-highlight");
-              div.style.position = 'absolute';
-              parent.appendChild(div);
-            }
-            div.style.top = top - 2 + "px";
-            div.style.height = height + 4 + "px";
-            div.style.left = 0;
-            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-            if (gutterDiv === null) {
-              gutterDiv = window.document.createElement("div");
-              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-              gutterDiv.style.position = 'absolute';
-              const codeCell = window.document.getElementById(targetCell);
-              const gutter = codeCell.querySelector('.code-annotation-gutter');
-              gutter.appendChild(gutterDiv);
-            }
-            gutterDiv.style.top = top - 2 + "px";
-            gutterDiv.style.height = height + 4 + "px";
-          }
-          selectedAnnoteEl = annoteEl;
-        }
-      };
-      const unselectCodeLines = () => {
-        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-        elementsIds.forEach((elId) => {
-          const div = window.document.getElementById(elId);
-          if (div) {
-            div.remove();
-          }
-        });
-        selectedAnnoteEl = undefined;
-      };
-        // Handle positioning of the toggle
-    window.addEventListener(
-      "resize",
-      throttle(() => {
-        elRect = undefined;
-        if (selectedAnnoteEl) {
-          selectCodeLines(selectedAnnoteEl);
-        }
-      }, 10)
-    );
-    function throttle(fn, ms) {
-    let throttle = false;
-    let timer;
-      return (...args) => {
-        if(!throttle) { // first call gets through
-            fn.apply(this, args);
-            throttle = true;
-        } else { // all the others get throttled
-            if(timer) clearTimeout(timer); // cancel #2
-            timer = setTimeout(() => {
-              fn.apply(this, args);
-              timer = throttle = false;
-            }, ms);
-        }
-      };
-    }
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
-          }
-        });
-      }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
-    }
-  };
-  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-  for (var i=0; i<bibliorefs.length; i++) {
-    const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
-          }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+      }, function(instance) {
       });
     }
-  }
-});
-</script>
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
 </div> <!-- /content -->
 
 

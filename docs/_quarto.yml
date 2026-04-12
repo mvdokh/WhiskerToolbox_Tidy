@@ -4,9 +4,9 @@ project:
 
 website:
   title: "Neuralyzer" # Title of the website
-  favicon: WhiskerToolbox.icns
+  favicon: images/WhiskerToolbox-logo.png
   navbar:
-    logo: WhiskerToolbox.icns
+    logo: images/WhiskerToolbox-logo.png
     collapse-below: lg
     pinned: true
     right:
@@ -235,11 +235,23 @@ website:
           contents:
             - text: "Keypoint Labeling"
               href: examples/keypoint_labeling.qmd
+            - text: "Mask Labeling"
+              href: learning-resources/tutorials/mask_labeling.qmd
+            - text: "Interval Series Labeling"
+              href: learning-resources/tutorials/interval_series_labeling.qmd
+            - text: "Event Labeling"
+              href: learning-resources/tutorials/event_labeling.qmd
+            - text: "Using the Data Viewer"
+              href: learning-resources/tutorials/using_data_viewer.qmd
+            - text: "Performing Data Transforms"
+              href: learning-resources/tutorials/performing_data_transforms.qmd
             - text: "HMM Behavioral Epoch Prediction"
               href: learning-resources/tutorials/hmm_behavioral_epochs.qmd
         - section: "Concepts"
           contents: 
             - concepts/timeframe.qmd
+            - concepts/interface_roles.qmd
+            - concepts/no_write_access.qmd
         - section: "How-to Guides"
           contents:
             - text: "Label Creation"
@@ -332,6 +344,12 @@ website:
             - user_guide/data_transformations/overview.qmd
             - text: "Transform Widget"
               href: user_guide/data_transformations/transforms_v2_widget.qmd
+            - section: "Reference Guides"
+              contents:
+                - user_guide/data_transformations/mask_transforms_reference.qmd
+                - user_guide/data_transformations/media_transforms_reference.qmd
+                - user_guide/data_transformations/point_transforms_reference.qmd
+                - user_guide/data_transformations/interval_transforms_reference.qmd
         - section: "Data Inspectors"
           contents:
             - text: "Tensor Inspector"

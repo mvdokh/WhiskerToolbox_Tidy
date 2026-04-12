@@ -1,0 +1,79 @@
+---
+title: "Tutorial: Interval Series Labeling"
+editor:
+  markdown:
+    wrap: 72
+---
+
+## Overview
+
+Use interval series labeling when behavior spans a duration, such as a
+contact bout, grooming epoch, or movement window. The output is a
+`DigitalIntervalSeries` that stores start and end frames for each
+labeled region.
+
+## Prerequisites
+
+- A video loaded in the Media Viewer.
+- A target behavior definition (what counts as an interval).
+- Optional predicted intervals for curation.
+
+## Step 1: Create an Interval Feature
+
+1. Open **Modules > Data Manager**.
+2. Create a new data object with type **Interval**.
+3. Name it clearly (for example: `contact_intervals`).
+4. Assign the correct **TimeFrame**.
+
+## Step 2: Open the Interval Data Inspector
+
+1. Open the Data Inspector for your interval feature.
+2. Keep Media Viewer and Data Viewer visible for time-locked context.
+3. Confirm you are editing the intended interval key.
+
+## Step 3: Create, Remove, and Extend Intervals
+
+1. Use **Create Interval** to mark start and end frames.
+2. Use **Remove Interval** and **Flip Current Frame** for cleanup.
+3. Use **Extend Interval** to stretch selected intervals to the current
+   frame.
+
+## Step 4: Understand Merge and Overlap Behavior
+
+- Creating a new interval that overlaps existing intervals merges into a
+  single interval.
+- Starting a new interval inside an existing interval and ending outside
+  it effectively extends coverage.
+- Creating one broad interval that bounds several intervals merges them
+  into one combined interval.
+- This is equivalent in spirit to selecting multiple intervals in the
+  inspector table and using **Merge Intervals**.
+
+## Step 5: Curate and Iterate
+
+- Review interval edges against video and signal context.
+- Split or merge as needed for consistency.
+- Keep naming and conventions stable across sessions.
+
+::: {.callout-note}
+## Optional: Triage Session Workflow
+
+The Triage Session widget is still useful for non-contiguous
+mark/commit review workflows and large-scale curation, but it is
+optional for day-to-day interval labeling.
+:::
+
+## Python Console for Custom Workflows
+
+Interval features and their TimeFrames are available in Python for
+custom scripts, metrics, and transforms.
+
+- Get intervals with `dm.getData("your_interval_key")`.
+- Get their time base with `dm.getTimeKey("your_interval_key")`.
+
+## See Also
+
+- [How-To: Label Video Intervals](../how-to/label_video_intervals.qmd)
+- [How-To: Triage Line Data](../how-to/triage_line_data.qmd)
+- [Interval Transforms Reference](../../user_guide/data_transformations/interval_transforms_reference.qmd)
+- [Python Console](../../user_guide/python_console.qmd)

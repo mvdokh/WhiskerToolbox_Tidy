@@ -1,6 +1,21 @@
 ---
 title: "User Guide"
 format: html
+toc: true
+toc-depth: 2
 ---
 
-This is the user guide for neuralyzer
+## Overview
+
+This is the user guide for neuralyzer.
+
+## How To Use This Guide
+
+Use the left sidebar to navigate by topic (data loading, media viewer,
+data transforms, plotting, inspectors, machine learning, and export).
+
+## Notes
+
+- The guide is organized around practical workflows.
+- Concept pages and tutorials in Learning Resources complement these
+	reference sections.

@@ -1,0 +1,32 @@
+---
+title: "Interval Transforms Reference"
+format: html
+---
+
+This is a placeholder reference page for interval-input transforms.
+
+## Current Interval-Focused Transforms
+
+Legacy transform system:
+
+- `Group Intervals` (`DigitalIntervalSeries` -> `DigitalIntervalSeries`)
+- `Boolean Operation` (`DigitalIntervalSeries` (+ optional second
+  interval series) -> `DigitalIntervalSeries`)
+
+TransformsV2 family (names in registry):
+
+- `DigitalIntervalBoolean`
+- `AnalogIntervalReduction`
+- `EventIntervalReduction`
+- `IntervalOverlapReduction`
+
+## Notes
+
+- Detailed per-transform math and examples are planned.
+- The next version of this page will map each transform to UI names,
+  parameter schemas, and output tensor structure where applicable.
+
+## See Also
+
+- [Data Transformations Overview](overview.qmd)
+- [Tutorial: Interval Series Labeling](../../learning-resources/tutorials/interval_series_labeling.qmd)

@@ -2,4 +2,95 @@
 title: "Introduction"
 ---
 
-(Content to be added)
+WhiskerToolbox is a desktop platform for neural and behavioral data analysis. It helps researchers load diverse datasets, inspect signals over time, run transforms, build reproducible analysis workflows, and visualize results in a way that is fast enough for real data and clear enough for day-to-day decisions.
+
+WhiskerToolbox is designed around a practical problem in scientific workflows: it is often hard to *see* and *interact with* all of your data in one place. Instead of jumping between separate tools for signals, events, labels, media, and model outputs, the platform gives you a unified workspace where those views stay connected and time-aligned.
+
+::: {.callout-note title="At a glance"}
+- Built for neural time-series, media, spatial annotations, and derived features.
+- Designed so heterogeneous data can be inspected and interacted with in one interface.
+- Engineered for cross-platform scientific workflows (macOS, Linux, Windows).
+:::
+
+## What This Program Does
+
+### Core capabilities
+
+- **Single-place data interaction:** Keep signals, events, labels, media, and derived outputs in one connected workspace for exploration and decision-making.
+- **Data ingestion and organization:** Import analog signals, digital events/intervals, tensors, points, lines, masks, and media.
+- **Unified analysis workflows:** Apply transforms and feature extraction pipelines to convert raw data into interpretable outputs.
+- **Interactive visualization:** Explore data through time-series views, media overlays, event plots, scatter/heatmap views, and specialized widgets.
+- **Machine learning support:** Integrate supervised/unsupervised pipelines and dimensionality reduction for exploratory and predictive analysis.
+- **Deep learning integration:** Run encoder/post-encoder modules and use model-aware tooling for modern feature workflows.
+
+### Typical use cases
+
+- Curating and triaging long recordings.
+- Building reproducible processing pipelines for lab-specific modalities.
+- Comparing model outputs against raw signals and labels.
+- Exporting publication-ready summaries and plot-derived tables.
+
+## How It Is Written
+
+## Architecture Overview {.tabset}
+
+### Application stack
+
+- **Language and standard:** C++23
+- **GUI framework:** Qt6
+- **Build system:** CMake presets
+- **Testing:** Catch2 (plus dedicated fuzz-test targets)
+
+The codebase is split into focused libraries, then composed into the main application. This separation keeps the UI responsive while protecting core logic from GUI coupling.
+
+### Library design
+
+The platform is intentionally modular. Important layers include:
+
+- **Data core:** strongly typed temporal indexing and object storage/orchestration.
+- **Processing layer:** transforms, feature extraction, and conversion pipelines.
+- **Visualization layer:** plotting abstractions and backend renderers.
+- **UI layer:** editor-state driven widgets and dockable tools.
+
+This arrangement allows teams to add data types or algorithms without destabilizing unrelated modules.
+
+### Extensibility model
+
+WhiskerToolbox emphasizes registries and schemas:
+
+- Parameter schemas are extracted and used to auto-generate user-facing controls.
+- Processing and synthesis systems use registration patterns so new operations can be introduced cleanly.
+- IO and transform ecosystems are designed to accommodate both built-in and project-specific workflows.
+
+## General Philosophy
+
+### Read-first, write-intentionally
+
+The baseline posture is conservative around data mutation: inspect first, validate assumptions, and write only when the user explicitly chooses to commit/export/save. This protects source datasets and keeps analysis sessions auditable.
+
+::: {.callout-important title="No-write-access mindset"}
+The system is designed so that exploration and diagnosis can happen safely without forcing writes to canonical data. Persisting changes is an explicit step, not a side effect of simply viewing or analyzing data.
+:::
+
+### Scientific ergonomics over novelty
+
+The interface and APIs prioritize:
+
+- clear provenance,
+- predictable transformations,
+- high signal-to-noise visual feedback,
+- and reproducibility under real lab constraints.
+
+### Performance with clarity
+
+The implementation aims for strong runtime behavior while preserving understandable abstractions. The goal is not only speed, but speed that remains maintainable by research and engineering teams over time.
+
+## Who This Is For
+
+WhiskerToolbox is meant for researchers and engineers who need one place to:
+
+- inspect heterogeneous experimental data,
+- connect manual review with algorithmic processing,
+- and move from raw recordings to defensible results.
+
+If your workflow includes time-synchronized signals, behavioral labels, media streams, and model-driven feature analysis, this platform is built for that intersection.

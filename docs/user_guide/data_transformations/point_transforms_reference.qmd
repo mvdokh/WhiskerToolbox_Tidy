@@ -1,0 +1,23 @@
+---
+title: "Point Transforms Reference"
+format: html
+---
+
+This is a placeholder reference page for point-input transforms.
+
+## Current Registered Point Transforms
+
+- `Track Points Through Masks (Particle Filter)`
+  (`PointData` + `MaskData` + groups -> `PointData`)
+
+## Notes
+
+- Detailed mathematical and implementation notes will be added in the
+  next pass.
+- This page will include parameter sensitivity guidance (particle count,
+  transition radius, velocity model, and noise terms).
+
+## See Also
+
+- [Data Transformations Overview](overview.qmd)
+- [Keypoint Video Labeling](../../examples/keypoint_labeling.qmd)

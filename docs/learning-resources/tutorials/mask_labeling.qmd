@@ -1,0 +1,73 @@
+---
+title: "Tutorial: Mask Labeling"
+editor:
+  markdown:
+    wrap: 72
+---
+
+## Overview
+
+Mask labeling is useful when you need full object shapes (not just
+single points) across time. This tutorial walks through a practical
+workflow for creating and refining masks in video data.
+
+## Prerequisites
+
+- A video loaded in the Media Viewer.
+- A clear definition of the object you want to segment.
+- A project where you can store mask output in the Data Manager.
+
+## Step 1: Create a Mask Data Object
+
+1. Open **Modules > Data Manager**.
+2. Create a new data object with type **Mask**.
+3. Give it a descriptive key (for example: `tongue_mask` or
+   `whisker_pad_mask`).
+4. Choose the correct **TimeFrame** for this mask feature.
+
+## Step 2: Enable the Mask in the Media Viewer
+
+1. Open the Media Viewer and find your new mask feature.
+2. Enable it so the feature becomes editable.
+3. Move to the frame you want to label first.
+
+## Step 3: Draw and Edit Masks
+
+1. Use mask drawing tools to paint the object region.
+2. Refine boundaries as needed for anatomical consistency.
+3. Repeat frame-by-frame (or at representative frames) for your task.
+
+## Step 4: Review Temporal Consistency
+
+- Check neighboring frames for abrupt shape jumps.
+- Fix outlier frames before exporting or downstream analysis.
+
+## Step 5: Run Downstream Mask Transforms
+
+Once masks are labeled, you can derive quantitative and geometric
+features using transforms, including:
+
+- **Calculate Mask Area** for per-frame area traces.
+- **Convert Mask To Line** (with polynomial fitting options) for
+  line-based analyses.
+- Mask principal axis, skeletonization, hole filling, and other mask
+  processing operations.
+
+## Step 6: Python Console for Custom Workflows
+
+Mask data and their associated TimeFrames are available in Python for
+custom transforms and analysis.
+
+Example flow:
+
+1. Get mask data with `dm.getData("your_mask_key")`.
+2. Get its time base with `dm.getTimeKey("your_mask_key")`.
+3. Build custom processing logic in the Python Console.
+
+## See Also
+
+- [Creating Mask Labels](../../labeling/mask.qmd)
+- [Keypoint Video Labeling](../../examples/keypoint_labeling.qmd)
+- [Mask Transforms Reference](../../user_guide/data_transformations/mask_transforms_reference.qmd)
+- [Calculate Mask Area](../../user_guide/data_transformations/mask_area.qmd)
+- [Python Console](../../user_guide/python_console.qmd)

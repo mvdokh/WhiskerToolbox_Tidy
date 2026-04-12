@@ -1,0 +1,63 @@
+---
+title: "Tutorial: Using the Data Viewer"
+editor:
+  markdown:
+    wrap: 72
+---
+
+## Overview
+
+The Data Viewer is the main place to inspect analog time series,
+digital event series, and digital interval series on a shared timeline.
+This tutorial covers a practical workflow for loading, navigating, and
+interpreting multiple synchronized series.
+
+## Prerequisites
+
+- One or more time series loaded in the Data Manager.
+- A known master timeline for your session.
+
+## Step 1: Open the Data Viewer
+
+1. Open the Data Viewer widget from the main interface.
+2. Add the series you want to inspect from the feature list.
+3. Confirm each selected key appears as a lane in the viewer.
+
+## Step 2: Configure What You See
+
+- Toggle per-series visibility.
+- Set colors and opacity for clarity.
+- Adjust per-series scaling to make comparisons readable.
+
+## Step 3: Navigate Time
+
+- Use the global time controls to move through the recording.
+- Zoom in for event-level precision.
+- Zoom out for session-level context.
+
+## Step 4: Compare Across Modalities
+
+- Overlay event and interval labels on analog traces.
+- Verify that labels align with expected signal structure.
+- Use this pass to identify missing labels or suspicious artifacts.
+
+## Step 5: Export or Hand Off
+
+After review, pass cleaned data to transforms, machine learning, or
+CSV/export workflows.
+
+## Python Console Handoff
+
+When you find candidate features in Data Viewer, you can immediately
+continue in Python:
+
+- Use `dm.getData("key")` to pull the feature.
+- Use `dm.getTimeKey("key")` to preserve the TimeFrame context.
+- Prototype custom analyses and transforms in the Python Console.
+
+## See Also
+
+- [Data Viewer](../../user_guide/data_viewer/overview.qmd)
+- [Tutorial: Event Labeling](event_labeling.qmd)
+- [Tutorial: Interval Series Labeling](interval_series_labeling.qmd)
+- [Python Console](../../user_guide/python_console.qmd)

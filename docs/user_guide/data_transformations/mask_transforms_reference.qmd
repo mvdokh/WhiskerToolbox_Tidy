@@ -1,0 +1,215 @@
+---
+title: "Mask Transforms Reference"
+format: html
+---
+
+This page summarizes all currently registered mask-input transforms and
+links to existing detailed pages where available.
+
+## Scope
+
+The transforms below are sourced from the C++ transform registry for
+`MaskData` input.
+
+## Quick Index
+
+- `Calculate Area` -> `AnalogTimeSeries`
+- `Calculate Mask Centroid` -> `PointData`
+- `Calculate Mask Principal Axis` -> `LineData`
+- `Remove Small Connected Components` -> `MaskData`
+- `Fill Mask Holes` -> `MaskData`
+- `Apply Median Filter` -> `MaskData`
+- `Skeletonize Mask` -> `MaskData`
+- `Convert Mask To Line` -> `LineData`
+
+## 1. Calculate Area
+
+**What it does**: For each timestamp, sums pixel counts across all masks
+at that time.
+
+If $\mathcal{M}_t$ is the set of masks at time $t$ and $|m|$ is pixel
+count of mask $m$:
+
+$$
+A_t = \sum_{m \in \mathcal{M}_t} |m|
+$$
+
+**Output**: `AnalogTimeSeries` (`time -> total area`).
+
+**See detailed page**: [Calculate Mask Area](mask_area.qmd)
+
+## 2. Calculate Mask Centroid
+
+**What it does**: Computes geometric centroid per mask using uniform
+pixel weighting.
+
+For a mask with points $(x_i, y_i)$, $i = 1..N$:
+
+$$
+\bar{x} = \frac{1}{N}\sum_{i=1}^{N} x_i,
+\qquad
+\bar{y} = \frac{1}{N}\sum_{i=1}^{N} y_i
+$$
+
+**Output**: `PointData` (one centroid point per mask instance).
+
+**See detailed page**: [Calculate Mask Centroid](mask_centroid.qmd)
+
+## 3. Calculate Mask Principal Axis
+
+**What it does**: Computes covariance of mask points, takes the major or
+minor eigenvector, and emits a line through centroid extended to the
+mask bounding box.
+
+Covariance terms (sample form):
+
+$$
+C_{xx}=\frac{1}{N-1}\sum (x_i-\bar{x})^2,
+\quad
+C_{xy}=\frac{1}{N-1}\sum (x_i-\bar{x})(y_i-\bar{y}),
+\quad
+C_{yy}=\frac{1}{N-1}\sum (y_i-\bar{y})^2
+$$
+
+Eigenvalues of
+$\begin{bmatrix}C_{xx} & C_{xy}\\ C_{xy} & C_{yy}\end{bmatrix}$:
+
+$$
+\lambda_{1,2} = \frac{\operatorname{tr}(C)}{2}
+\pm
+\sqrt{\left(\frac{C_{xx}-C_{yy}}{2}\right)^2 + C_{xy}^2}
+$$
+
+Major axis uses eigenvector of larger $\lambda$; minor axis uses the
+orthogonal direction.
+
+**Output**: `LineData`.
+
+**See detailed page**: [Calculate Mask Principal Axis](calculate_mask_principal_axis.qmd)
+
+## 4. Remove Small Connected Components
+
+**What it does**: Converts each mask to a binary image, labels
+8-connected components (BFS), and removes components smaller than a
+threshold.
+
+If component sizes are $s_k$, keep component $k$ iff:
+
+$$
+s_k \ge \tau
+$$
+
+where $\tau$ is the user threshold.
+
+**Output**: `MaskData`.
+
+**See detailed page**: [Remove Small Connected Components](remove_small_connected_components.qmd)
+
+## 5. Fill Mask Holes
+
+**What it does**: Flood-fills boundary-connected background
+(4-connectivity) on the inverted mask; unvisited background pixels are
+holes and are filled.
+
+Let $M$ be foreground and $B = \neg M$ background. If
+$B_{\text{boundary-connected}}$ are background pixels reachable from the
+image border, then holes are:
+
+$$
+H = B \setminus B_{\text{boundary-connected}}
+$$
+
+and filled mask is:
+
+$$
+M' = M \cup H
+$$
+
+**Output**: `MaskData`.
+
+**See detailed page**: [Fill Mask Holes](fill_mask_holes.qmd)
+
+## 6. Apply Median Filter
+
+**What it does**: Applies median filtering on the binary mask image with
+an odd square window and reflection padding.
+
+For window neighborhood $\mathcal{N}_w(p)$:
+
+$$
+M'(p) = \operatorname{median}\{M(q) : q \in \mathcal{N}_w(p)\}
+$$
+
+For binary masks, this behaves like a local majority operation.
+
+**Output**: `MaskData`.
+
+**See detailed page**: [Apply Median Filter](apply_median_filter.qmd)
+
+## 7. Skeletonize Mask
+
+**What it does**: Iterative LUT-based thinning (adapted from
+scikit-image) until convergence, preserving topology while reducing
+regions to a 1-pixel skeleton.
+
+Conceptually:
+
+$$
+M^{(k+1)} = T\left(M^{(k)}\right)
+$$
+
+where $T$ removes only pixels marked deletable by neighborhood LUT rules
+in alternating passes.
+
+**Output**: `MaskData`.
+
+**See detailed page**: [Skeletonize Mask](skeletonize_mask.qmd)
+
+## 8. Convert Mask To Line
+
+**What it does**: Converts each mask to an ordered line using one of two
+entry strategies:
+
+- `Skeletonize`: skeletonize first, then order points.
+- `NearestToReference`: order points directly from mask pixels.
+
+Then applies optional cleanup/smoothing:
+
+1. Order points by endpoint/reference-aware nearest-neighbor traversal.
+2. Optional outlier removal via parametric polynomial fit.
+3. Optional polynomial smoothing.
+4. Final resampling to target spacing.
+
+Parametric fit uses normalized arc-length $t \in [0,1]$:
+
+$$
+x(t)=\sum_{j=0}^{n} a_j t^j,
+\qquad
+y(t)=\sum_{j=0}^{n} b_j t^j
+$$
+
+Outlier score for point $i$:
+
+$$
+e_i^2 = (x_i-x(t_i))^2 + (y_i-y(t_i))^2
+$$
+
+Point is removed if
+$e_i^2 > \text{error_threshold}^2$
+(equivalently, $e_i > \text{error_threshold}$).
+
+**Output**: `LineData`.
+
+**Status**: No dedicated user-guide page yet.
+
+## Notes
+
+- Some UI labels may differ slightly from file names in docs.
+- TimeFrame association is preserved through these transforms by the
+  transform pipeline/data manager context.
+
+## See Also
+
+- [Data Transformations Overview](overview.qmd)
+- [Transform Widget](transforms_v2_widget.qmd)
+- [Tutorial: Mask Labeling](../../learning-resources/tutorials/mask_labeling.qmd)

@@ -1,0 +1,73 @@
+---
+title: "Tutorial: Performing Data Transforms"
+editor:
+  markdown:
+    wrap: 72
+---
+
+## Overview
+
+Data transforms convert one data type into another, extract features, or
+clean data for downstream analysis. This tutorial walks through building
+and running a transform pipeline in the Transform Widget.
+
+## Prerequisites
+
+- Input data loaded in the Data Manager.
+- A clear target output (for example events, intervals, or processed
+  masks).
+
+## Step 1: Open Transform Widget
+
+1. Open the **Transform Widget**.
+2. Select the input data key you want to process.
+3. Confirm available transforms update for the selected data type.
+
+## Step 2: Build a Pipeline
+
+1. Add one or more transform steps.
+2. Arrange them in execution order.
+3. Remove steps that no longer fit the workflow.
+
+## Step 3: Configure Parameters
+
+1. Select each step and set required parameters.
+2. Use descriptive output names to keep provenance clear.
+3. Re-check units and thresholds before execution.
+
+## Step 4: Use Pre-Reductions (Optional)
+
+If a transform needs global statistics (for example mean/std), compute
+those in the pre-reduction panel and bind them to step parameters.
+
+## Step 5: Execute and Inspect Output
+
+1. Run the pipeline.
+2. Verify the new output appears in Data Manager.
+3. Open the result in Data Viewer to validate behavior.
+
+## Example Mini-Workflows
+
+- Analog signal to events: `Analog Event Threshold`.
+- Events to intervals: `Digital Interval Group`.
+- Masks to morphology features: area/centroid/skeleton transforms.
+
+## Python Console for Novel Transforms
+
+For workflows not covered by built-in transforms, use the Python
+Console with DataManager-backed objects:
+
+- Retrieve inputs with `dm.getData("key")`.
+- Preserve temporal alignment with `dm.getTimeKey("key")`.
+- Register custom outputs back into DataManager for immediate
+  visualization.
+
+## See Also
+
+- [Transform Widget](../../user_guide/data_transformations/transforms_v2_widget.qmd)
+- [Data Transformations](../../user_guide/data_transformations/overview.qmd)
+- [Mask Transforms Reference](../../user_guide/data_transformations/mask_transforms_reference.qmd)
+- [Media Transforms Reference](../../user_guide/data_transformations/media_transforms_reference.qmd)
+- [Point Transforms Reference](../../user_guide/data_transformations/point_transforms_reference.qmd)
+- [Interval Transforms Reference](../../user_guide/data_transformations/interval_transforms_reference.qmd)
+- [Python Console](../../user_guide/python_console.qmd)

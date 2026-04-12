@@ -1,0 +1,66 @@
+---
+title: "Inspector vs Media Viewer vs Data Viewer vs Data Manager"
+---
+
+This concept page gives a practical model of where to create and edit
+features, where to visualize them, and where to curate labels.
+
+## The Short Version
+
+- **Data Manager**: create data objects and assign TimeFrames.
+- **Media Viewer**: spatial annotation and frame-level editing on image/video.
+- **Data Viewer**: timeline-based visualization of analog, event, and interval data.
+- **Data Inspector**: precise per-feature editing, curation, and table-driven operations.
+
+## What Each Tool Is Best For
+
+| Tool | Primary role | Typical actions |
+|---|---|---|
+| Data Manager | Data orchestration | Create keys, choose data type, assign TimeFrame, organize features |
+| Media Viewer | Spatial labeling | Draw/edit points, masks, and lines on frames |
+| Data Viewer | Temporal visualization | Compare traces with events and intervals across time |
+| Data Inspector | Data curation and correction | Create/remove/extend/merge intervals, clean event series, inspect table rows |
+
+## Mental Model for Daily Work
+
+1. Start in **Data Manager** to create the target feature and choose its
+   TimeFrame.
+2. Use **Media Viewer** when your edits are spatial and frame-based.
+3. Use **Data Inspector** when your edits are object-level and
+   curation-heavy (for example interval operations).
+4. Use **Data Viewer** to validate timing consistency across modalities.
+5. Use transforms or Python for derived features after manual curation.
+
+## Common Patterns
+
+### Pattern A: Spatial Labeling
+
+- Create mask/point/line key in Data Manager.
+- Label in Media Viewer.
+- Validate temporal behavior in Data Viewer.
+- Curate edge cases in Data Inspector.
+
+### Pattern B: Event and Interval Curation
+
+- Create event/interval keys in Data Manager.
+- Edit and curate in Data Inspector.
+- Validate against analog traces in Data Viewer.
+
+### Pattern C: Feature Engineering
+
+- Keep raw and curated features separate.
+- Derive outputs with transforms or Python.
+- Compare source and output in Data Viewer.
+
+## Why This Separation Helps
+
+- Reduces accidental edits in the wrong context.
+- Keeps workflows reproducible and easier to audit.
+- Makes it clear which widget is authoritative for each kind of action.
+
+## See Also
+
+- [TimeFrame](timeframe.qmd)
+- [Python Console](../user_guide/python_console.qmd)
+- [Tutorial: Using the Data Viewer](../learning-resources/tutorials/using_data_viewer.qmd)
+- [Tutorial: Interval Series Labeling](../learning-resources/tutorials/interval_series_labeling.qmd)

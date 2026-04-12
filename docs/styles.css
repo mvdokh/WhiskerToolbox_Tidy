@@ -1,1 +1,12 @@
 /* css styles */
+
+/* Keep navbar height unchanged while making the brand logo appear 2x larger. */
+.navbar-brand.navbar-brand-logo {
+	overflow: visible;
+	margin-right: 28px;
+}
+
+.navbar-brand.navbar-brand-logo .navbar-logo {
+	transform: scale(2);
+	transform-origin: left center;
+}

@@ -1,0 +1,65 @@
+---
+title: "Tutorial: Event Labeling"
+editor:
+  markdown:
+    wrap: 72
+---
+
+## Overview
+
+Event labeling is for discrete time points (single-frame or
+near-instant occurrences), such as cue onsets, licks, or threshold
+crossings. The output is a `DigitalEventSeries` with one timestamp per
+labeled event.
+
+## Prerequisites
+
+- A signal or video stream where events are visible.
+- A consistent event definition (exact onset rule).
+- A `DigitalEventSeries` key to store labels.
+
+## Step 1: Create the Event Series
+
+1. Open **Modules > Data Manager**.
+2. Create a new data object of type **Digital Event Series**.
+3. Name it clearly (for example: `lick_events`).
+
+## Step 2: Align Your Views
+
+1. Open the Media Viewer and Data Viewer side-by-side.
+2. Load the relevant analog/event/interval context series.
+3. Verify time synchronization before labeling.
+
+## Step 3: Add Event Labels
+
+1. Scrub frame-by-frame through candidate regions.
+2. Add an event marker at each onset time.
+3. Use one onset convention consistently across the full session.
+
+## Step 4: Clean Up and Validate
+
+- Remove false positives.
+- Add missed events.
+- Spot-check dense regions where near-duplicate events are common.
+
+::: {.callout-note}
+## Optional Bootstrap: Event Threshold Transform
+
+For high-volume datasets, you can generate a first-pass event series
+using **Analog Event Threshold**, then manually curate the result in the
+inspector.
+:::
+
+## Python Console for Custom Workflows
+
+Event features and their TimeFrames are available in Python for custom
+processing.
+
+- Get events with `dm.getData("your_event_key")`.
+- Get the associated time base with `dm.getTimeKey("your_event_key")`.
+
+## See Also
+
+- [Analog Event Threshold](../../user_guide/data_transformations/analog_event_threshold.qmd)
+- [Tutorial: Interval Series Labeling](interval_series_labeling.qmd)
+- [Python Console](../../user_guide/python_console.qmd)

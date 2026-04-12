@@ -1,0 +1,59 @@
+---
+title: "No Write Access and Non-Destructive Workflows"
+---
+
+In most analysis workflows, you want transforms and derived operations
+not to overwrite your source labels. This is the practical idea behind
+"no write access" workflows.
+
+## Core Principle
+
+Treat source data as immutable reference data. New operations should
+create new output features instead of replacing the original key.
+
+## How This Looks in Practice
+
+- Create and preserve source keys (for example `contact_raw`).
+- Write curated results to separate keys (for example
+  `contact_curated`).
+- Write transform outputs to new keys (for example
+  `contact_curated_grouped`).
+
+This gives you a clear lineage from raw -> curated -> derived.
+
+## Where Changes Happen
+
+- **Transforms**: usually produce a new output key.
+- **Inspectors**: edit the currently selected key directly.
+- **Media labeling**: writes to the currently enabled feature.
+
+Because direct edits exist, a non-destructive workflow depends on key
+separation and naming discipline.
+
+## Practical Rules
+
+1. Never use one key for raw, curated, and transformed data.
+2. Use suffixes such as `_raw`, `_curated`, `_v2`, `_ml`.
+3. Before heavy edits, duplicate to a new working key.
+4. Keep TimeFrame associations explicit when creating new outputs.
+
+## Python Console and Safe Derivation
+
+Python lets you script safe, explicit derivations:
+
+- Read source with `dm.getData("source_key")`.
+- Read time base with `dm.getTimeKey("source_key")`.
+- Write results to a new key with `dm.setData(...)`.
+
+## Why This Matters
+
+- Prevents accidental loss of human-labeled data.
+- Makes experiments reversible and comparable.
+- Improves reproducibility and auditability of results.
+
+## See Also
+
+- [Inspector vs Media Viewer vs Data Viewer vs Data Manager](interface_roles.qmd)
+- [TimeFrame](timeframe.qmd)
+- [Python Console](../user_guide/python_console.qmd)
+- [Tutorial: Performing Data Transforms](../learning-resources/tutorials/performing_data_transforms.qmd)

@@ -250,3 +250,4 @@ When recording videos intended for analysis in Neuralyzer:
 - [Video Loading Reference](../user_guide/data_loading/Video_Loading.qmd) - Complete reference documentation
 - [JSON Configuration Reference](../user_guide/data_loading/JSON_loading.qmd) - All JSON loading options
 - [Media Viewer Overview](../user_guide/media_viewer/overview.qmd) - Working with loaded video
+- [Media Transforms Reference](../user_guide/data_transformations/media_transforms_reference.qmd) - Media-input transform catalog

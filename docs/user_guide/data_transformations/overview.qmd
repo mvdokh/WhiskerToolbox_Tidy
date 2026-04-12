@@ -7,4 +7,12 @@ Data transformations are operations we perform on one kind of data that result i
 
 ![Figure: 1) Feature select from available loaded data 2) Tranformation select Dialog box; 3) Output name of new data created by transformation; 4) Execution Button; 5) Parameter window for selected transformation](images/clipboard-2963664009.png)
 
-### 
+## Reference Guides
+
+- [Mask Transforms Reference](mask_transforms_reference.qmd)
+- [Media Transforms Reference](media_transforms_reference.qmd)
+- [Point Transforms Reference](point_transforms_reference.qmd)
+- [Interval Transforms Reference](interval_transforms_reference.qmd)
+
+These pages are being expanded incrementally, starting with the mask
+transform family.
