@@ -4,8 +4,9 @@ project:
 
 website:
   title: "Neuralyzer" # Title of the website
- # favicon:
+  favicon: WhiskerToolbox.icns
   navbar:
+    logo: WhiskerToolbox.icns
     collapse-below: lg
     pinned: true
     right:
