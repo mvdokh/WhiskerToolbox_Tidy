@@ -313,14 +313,6 @@ website:
             - user_guide/media_viewer/intervals.qmd
             - user_guide/media_viewer/lines.qmd
             - user_guide/media_viewer/tensors.qmd
-        - section: "Image Processing"
-          href: user_guide/image_processing/index.qmd
-          contents:
-            - user_guide/image_processing/contrast.qmd
-            - user_guide/image_processing/gamma.qmd
-            - user_guide/image_processing/sharpening.qmd
-            - user_guide/image_processing/clahe.qmd
-            - user_guide/image_processing/bilateral_filter.qmd
         - section: "Data Viewer"
           contents:
             - user_guide/data_viewer/overview.qmd
@@ -352,28 +344,39 @@ website:
                 - user_guide/data_transformations/media_transforms_reference.qmd
                 - user_guide/data_transformations/point_transforms_reference.qmd
                 - user_guide/data_transformations/interval_transforms_reference.qmd
+            - section: "Transforms by Input Type"
+              contents:
+                - section: "Analog Input"
+                  contents:
+                    - user_guide/data_transformations/analog_filter.qmd
+                    - user_guide/data_transformations/analog_hilbert_phase.qmd
+                    - user_guide/data_transformations/analog_event_threshold.qmd
+                    - user_guide/data_transformations/analog_interval_threshold.qmd
+                - section: "Digital Interval Input"
+                  contents:
+                    - user_guide/data_transformations/digital_interval_group.qmd
+                - section: "Line Input"
+                  contents:
+                    - user_guide/data_transformations/line_angle.qmd
+                    - user_guide/data_transformations/line_clip.qmd
+                    - user_guide/data_transformations/line_curvature.qmd
+                    - user_guide/data_transformations/line_resample.qmd
+                    - user_guide/data_transformations/extract_line_subsegment.qmd
+                    - user_guide/data_transformations/calculate_line_to_point_distance.qmd
+                    - user_guide/data_transformations/extract_point_from_line.qmd
+                - section: "Mask Input"
+                  contents:
+                    - user_guide/data_transformations/mask_area.qmd
+                    - user_guide/data_transformations/mask_centroid.qmd
+                    - user_guide/data_transformations/calculate_mask_principal_axis.qmd
+                    - user_guide/data_transformations/remove_small_connected_components.qmd
+                    - user_guide/data_transformations/skeletonize_mask.qmd
+                    - user_guide/data_transformations/fill_mask_holes.qmd
+                    - user_guide/data_transformations/apply_median_filter.qmd
         - section: "Data Inspectors"
           contents:
             - text: "Tensor Inspector"
               href: user_guide/data_inspectors/tensor_inspector.qmd
-            - user_guide/data_transformations/analog_event_threshold.qmd
-            - user_guide/data_transformations/analog_interval_threshold.qmd
-            - user_guide/data_transformations/digital_interval_group.qmd
-            - user_guide/data_transformations/analog_hilbert_phase.qmd
-            - user_guide/data_transformations/line_angle.qmd
-            - user_guide/data_transformations/line_clip.qmd
-            - user_guide/data_transformations/line_curvature.qmd
-            - user_guide/data_transformations/line_resample.qmd
-            - user_guide/data_transformations/extract_line_subsegment.qmd
-            - user_guide/data_transformations/calculate_line_to_point_distance.qmd
-            - user_guide/data_transformations/extract_point_from_line.qmd
-            - user_guide/data_transformations/mask_area.qmd
-            - user_guide/data_transformations/mask_centroid.qmd
-            - user_guide/data_transformations/calculate_mask_principal_axis.qmd
-            - user_guide/data_transformations/remove_small_connected_components.qmd
-            - user_guide/data_transformations/skeletonize_mask.qmd
-            - user_guide/data_transformations/fill_mask_holes.qmd
-            - user_guide/data_transformations/apply_median_filter.qmd
         - section: "Deep Learning"
           contents:
             - user_guide/deep_learning/deep_learning_widget.qmd

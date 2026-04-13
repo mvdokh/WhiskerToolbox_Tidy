@@ -175,6 +175,138 @@
     ]
   },
   {
+    "objectID": "user_guide/media_viewer/masks.html",
+    "href": "user_guide/media_viewer/masks.html",
+    "title": "Mask Data",
+    "section": "",
+    "text": "Mask data represent regions in each frame rather than single coordinates.",
+    "crumbs": [
+      "Media Viewer",
+      "Mask Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/masks.html#how-mask-data-is-represented",
+    "href": "user_guide/media_viewer/masks.html#how-mask-data-is-represented",
+    "title": "Mask Data",
+    "section": "How Mask Data Is Represented",
+    "text": "How Mask Data Is Represented\nIn Neuralyzer, a mask is represented as a binary spatial region for a given frame/time index:\n\nPixels inside the object are foreground.\nPixels outside the object are background.\nA feature can have different mask geometry at different times.\n\nThis makes masks suitable when full object shape matters (for example tongue/body outlines, contact patches, segmented structures), not just point locations.",
+    "crumbs": [
+      "Media Viewer",
+      "Mask Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/masks.html#how-masks-appear-in-the-media-viewer",
+    "href": "user_guide/media_viewer/masks.html#how-masks-appear-in-the-media-viewer",
+    "title": "Mask Data",
+    "section": "How Masks Appear in the Media Viewer",
+    "text": "How Masks Appear in the Media Viewer\nWhen a mask feature is enabled, the Media Viewer draws it as a semi-transparent overlay on top of the media.\n\nColor and alpha control visibility and contrast against the image/video.\nMultiple mask features can be viewed together for comparison.\nThe rendered overlay is display-focused; exported data keeps the mask geometry representation.",
+    "crumbs": [
+      "Media Viewer",
+      "Mask Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/masks.html#temporal-behavior",
+    "href": "user_guide/media_viewer/masks.html#temporal-behavior",
+    "title": "Mask Data",
+    "section": "Temporal Behavior",
+    "text": "Temporal Behavior\nMasks are frame-aware and TimeFrame-aware:\n\nAt each current frame, the viewer displays the corresponding mask sample.\nIf no mask exists at a frame, nothing is drawn for that feature at that time.\nTimeFrame assignment controls synchronization with other modalities.",
+    "crumbs": [
+      "Media Viewer",
+      "Mask Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/masks.html#common-follow-up-transforms",
+    "href": "user_guide/media_viewer/masks.html#common-follow-up-transforms",
+    "title": "Mask Data",
+    "section": "Common Follow-up Transforms",
+    "text": "Common Follow-up Transforms\nMask data is often transformed into derived features:\n\nCalculate Mask Area\nCalculate Mask Centroid\nCalculate Mask Principal Axis\nConvert Mask To Line",
+    "crumbs": [
+      "Media Viewer",
+      "Mask Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/masks.html#practical-tip",
+    "href": "user_guide/media_viewer/masks.html#practical-tip",
+    "title": "Mask Data",
+    "section": "Practical Tip",
+    "text": "Practical Tip\nUse masks when your downstream analysis depends on shape, coverage, or boundary geometry. Use points when you only need one tracked location.",
+    "crumbs": [
+      "Media Viewer",
+      "Mask Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/intervals.html",
+    "href": "user_guide/media_viewer/intervals.html",
+    "title": "Interval Data",
+    "section": "",
+    "text": "Interval data represent time spans where something is active.",
+    "crumbs": [
+      "Media Viewer",
+      "Interval Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/intervals.html#how-interval-data-is-represented",
+    "href": "user_guide/media_viewer/intervals.html#how-interval-data-is-represented",
+    "title": "Interval Data",
+    "section": "How Interval Data Is Represented",
+    "text": "How Interval Data Is Represented\nIn Neuralyzer, intervals are represented as temporal boxes:\n\nEach interval has a start and end in a TimeFrame.\nIntervals may also carry an identifier/group label depending on workflow.\nThe representation is temporal first (ranges over time), not spatial geometry.\n\nThis is ideal for events with duration, such as contact epochs, licking bouts, stimulation windows, or behavioral states.",
+    "crumbs": [
+      "Media Viewer",
+      "Interval Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/intervals.html#how-intervals-appear-in-the-media-viewer",
+    "href": "user_guide/media_viewer/intervals.html#how-intervals-appear-in-the-media-viewer",
+    "title": "Interval Data",
+    "section": "How Intervals Appear in the Media Viewer",
+    "text": "How Intervals Appear in the Media Viewer\nWhen interval data are enabled, the viewer treats the current frame as either:\n\ninside an interval (active), or\noutside an interval (inactive).\n\nIn practical workflows, intervals are commonly reviewed together with media, points, masks, and lines to verify timing against visible behavior.",
+    "crumbs": [
+      "Media Viewer",
+      "Interval Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/intervals.html#temporal-behavior-and-timeframe",
+    "href": "user_guide/media_viewer/intervals.html#temporal-behavior-and-timeframe",
+    "title": "Interval Data",
+    "section": "Temporal Behavior and TimeFrame",
+    "text": "Temporal Behavior and TimeFrame\nIntervals depend directly on the assigned TimeFrame:\n\nCorrect TimeFrame assignment ensures interval boundaries line up with video/frame indices.\nIf clocks differ across modalities, use TimeFrame mapping before interpreting overlap.\n\nSee TimeFrame for synchronization details.",
+    "crumbs": [
+      "Media Viewer",
+      "Interval Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/intervals.html#common-follow-up-transforms",
+    "href": "user_guide/media_viewer/intervals.html#common-follow-up-transforms",
+    "title": "Interval Data",
+    "section": "Common Follow-up Transforms",
+    "text": "Common Follow-up Transforms\n\nDigital Interval Group\nInterval Transforms Reference",
+    "crumbs": [
+      "Media Viewer",
+      "Interval Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/intervals.html#practical-tip",
+    "href": "user_guide/media_viewer/intervals.html#practical-tip",
+    "title": "Interval Data",
+    "section": "Practical Tip",
+    "text": "Practical Tip\nUse interval data when you need durations and on/off windows. Use event data for instantaneous timestamps and point/line/mask data for spatial measurements.",
+    "crumbs": [
+      "Media Viewer",
+      "Interval Data"
+    ]
+  },
+  {
     "objectID": "user_guide/machine_learning/Naive_Bayes.html",
     "href": "user_guide/machine_learning/Naive_Bayes.html",
     "title": "Naive Bayes Classifier",
@@ -740,7 +872,9 @@
     "section": "",
     "text": "This transform removes small, isolated groups of pixels (connected components) from a binary mask, which is useful for cleaning up noise or irrelevant objects.\n\n\nIn image analysis, particularly with binary masks, it’s common to have small, spurious regions of interest that are not relevant to the main analysis. This transform uses a connected components algorithm to identify all distinct, contiguous regions of pixels in the mask. It then filters out any region whose total number of pixels is below a specified threshold.\nThis process helps to isolate and preserve only the most significant structures in the mask, making subsequent analysis, such as object tracking or morphological measurement, more robust. The connectivity analysis considers pixels to be connected if they touch at their edges or corners (8-connectivity).\nThis transform takes a mask as input and produces a new, cleaned-up mask as output.\n\n\n\n\n\nCalcium Imaging Cleanup: In two-photon or wide-field calcium imaging, masks representing active neurons or regions of interest (ROIs) can be noisy. This transform can remove small, spurious signals that are unlikely to be true neuronal activity, ensuring that only significant ROIs are kept for analysis.\nBehavioral Tracking: When tracking an animal’s position or posture using video, the resulting binary masks can contain noise from lighting changes or background artifacts. Removing small connected components can clean up the mask of the animal, leading to more accurate tracking of its centroid or body shape.\nHistology and Morphology: When analyzing images of tissue slices, automated segmentation can produce small, artifactual regions. This transform can be used to filter out these artifacts, leaving only the larger, more relevant structures like cell bodies or labeled tracts.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Remove Small Connected Components"
     ]
   },
@@ -751,7 +885,9 @@
     "section": "",
     "text": "This transform removes small, isolated groups of pixels (connected components) from a binary mask, which is useful for cleaning up noise or irrelevant objects.\n\n\nIn image analysis, particularly with binary masks, it’s common to have small, spurious regions of interest that are not relevant to the main analysis. This transform uses a connected components algorithm to identify all distinct, contiguous regions of pixels in the mask. It then filters out any region whose total number of pixels is below a specified threshold.\nThis process helps to isolate and preserve only the most significant structures in the mask, making subsequent analysis, such as object tracking or morphological measurement, more robust. The connectivity analysis considers pixels to be connected if they touch at their edges or corners (8-connectivity).\nThis transform takes a mask as input and produces a new, cleaned-up mask as output.\n\n\n\n\n\nCalcium Imaging Cleanup: In two-photon or wide-field calcium imaging, masks representing active neurons or regions of interest (ROIs) can be noisy. This transform can remove small, spurious signals that are unlikely to be true neuronal activity, ensuring that only significant ROIs are kept for analysis.\nBehavioral Tracking: When tracking an animal’s position or posture using video, the resulting binary masks can contain noise from lighting changes or background artifacts. Removing small connected components can clean up the mask of the animal, leading to more accurate tracking of its centroid or body shape.\nHistology and Morphology: When analyzing images of tissue slices, automated segmentation can produce small, artifactual regions. This transform can be used to filter out these artifacts, leaving only the larger, more relevant structures like cell bodies or labeled tracts.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Remove Small Connected Components"
     ]
   },
@@ -762,7 +898,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has a single parameter:\n\nthreshold: An integer value that specifies the minimum number of pixels a connected component must have to be preserved. Any component with a pixel count smaller than this value will be removed from the mask.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Remove Small Connected Components"
     ]
   },
@@ -773,7 +911,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation. This example loads a mask, removes all connected components with fewer than 3 pixels, and saves the result.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Mask Connected Component Pipeline\",\n            \"description\": \"Test connected component analysis on mask data\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Remove Small Connected Components\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"test_mask\",\n                \"output_key\": \"filtered_mask\",\n                \"parameters\": {\n                    \"threshold\": 3\n                }\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Remove Small Connected Components"
     ]
   },
@@ -782,7 +922,7 @@
     "href": "user_guide/data_transformations/overview.html",
     "title": "Data Transformations",
     "section": "",
-    "text": "Data transformations are operations we perform on one kind of data that result in another kind of data.",
+    "text": "Data transformations are operations that take one data modality as input and produce derived data for downstream analysis.",
     "crumbs": [
       "Data Transformations",
       "Data Transformations"
@@ -793,7 +933,29 @@
     "href": "user_guide/data_transformations/overview.html#reference-guides",
     "title": "Data Transformations",
     "section": "Reference Guides",
-    "text": "Reference Guides\n\nMask Transforms Reference\nMedia Transforms Reference\nPoint Transforms Reference\nInterval Transforms Reference\n\nThese pages are being expanded incrementally, starting with the mask transform family.",
+    "text": "Reference Guides\n\nMask Transforms Reference\nMedia Transforms Reference\nPoint Transforms Reference\nInterval Transforms Reference",
+    "crumbs": [
+      "Data Transformations",
+      "Data Transformations"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_transformations/overview.html#complete-transform-table-registry",
+    "href": "user_guide/data_transformations/overview.html#complete-transform-table-registry",
+    "title": "Data Transformations",
+    "section": "Complete Transform Table (Registry)",
+    "text": "Complete Transform Table (Registry)\nThe table below is derived from the transform registry in source: src/DataManager/transforms/TransformRegistry.cpp.\n\n\n\n\n\n\n\n\nInput Data\nTransform\nOutput Data\n\n\n\n\nAnalog Time Series\nFilter\nAnalog Time Series\n\n\nAnalog Time Series\nHilbert Phase\nAnalog Time Series\n\n\nAnalog Time Series\nScale and Normalize\nAnalog Time Series\n\n\nAnalog Time Series\nThreshold Event Detection\nDigital Event Series\n\n\nAnalog Time Series\nThreshold Interval Detection\nDigital Interval Series\n\n\nAnalog Time Series\nInterval Peak Detection\nDigital Event Series\n\n\nDigital Interval Series\nGroup Intervals\nDigital Interval Series\n\n\nDigital Interval Series\nBoolean Operation\nDigital Interval Series\n\n\nLine Data\nLine Alignment to Bright Features\nLine Data\n\n\nLine Data\nCalculate Line Angle\nAnalog Time Series\n\n\nLine Data\nCalculate Line to Point Distance\nAnalog Time Series\n\n\nLine Data\nLine Base Flip\nLine Data\n\n\nLine Data\nResample Line\nLine Data\n\n\nLine Data\nCalculate Line Curvature\nAnalog Time Series\n\n\nLine Data\nExtract Line Subsegment\nLine Data\n\n\nLine Data\nExtract Point from Line\nPoint Data\n\n\nLine Data\nClip Line by Reference Line\nLine Data\n\n\nLine Data\nGroup Lines by Proximity\nLine Data\n\n\nLine Data\nGroup Lines using Kalman Filtering\nLine Data\n\n\nLine Data\nLine Outlier Detection\nLine Data\n\n\nLine Data\nGroup Lines by Index\nLine Data\n\n\nLine Data\nLine Group to Digital Intervals\nDigital Interval Series\n\n\nMask Data\nCalculate Area\nAnalog Time Series\n\n\nMask Data\nCalculate Mask Centroid\nPoint Data\n\n\nMask Data\nRemove Small Connected Components\nMask Data\n\n\nMask Data\nFill Mask Holes\nMask Data\n\n\nMask Data\nApply Median Filter\nMask Data\n\n\nMask Data\nCalculate Mask Principal Axis\nLine Data\n\n\nMask Data\nConvert Mask To Line\nLine Data\n\n\nMask Data\nSkeletonize Mask\nMask Data\n\n\nPoint Data\nTrack Points Through Masks (Particle Filter)\nPoint Data\n\n\nMedia Data\nWhisker Tracing\nLine Data",
+    "crumbs": [
+      "Data Transformations",
+      "Data Transformations"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_transformations/overview.html#notes",
+    "href": "user_guide/data_transformations/overview.html#notes",
+    "title": "Data Transformations",
+    "section": "Notes",
+    "text": "Notes\n\nGrouping transforms (for example line grouping/outlier transforms) may preserve the Line Data modality while updating grouping assignments.\nSome registry transforms are listed here even if a dedicated user-guide page has not yet been written.",
     "crumbs": [
       "Data Transformations",
       "Data Transformations"
@@ -962,7 +1124,9 @@
     "section": "",
     "text": "This transform calculates the total area of all detected masks at each point in time, providing a measure of the overall size of masked regions.\n\n\nThis transformation processes a series of masks and, for each timestamp, calculates the total area covered by all masks at that specific time. The area is determined by summing the number of pixels (or voxels) that constitute each mask.\nThe result is an analog time series where the value at each point in time represents the total mask area for that moment. This is particularly useful for quantifying how the size of a region of interest (ROI) changes over time. Since this operation simply counts pixels within existing masks, it does not require any configuration parameters.\nThis transform takes a mask series as input and produces an analog time series as output.\n\n\n\n\nIn neuroscience research, quantifying the area of specific regions is a common requirement for analyzing imaging data:\n\nCell Swelling or Shrinking: When studying cellular dynamics, this transform can measure changes in the cross-sectional area of a cell over time, which might occur in response to a stimulus or pathological condition.\nPupilometry: In vision and cognitive neuroscience, tracking the area of the pupil provides insights into arousal, attention, and cognitive load. This transform can be applied to masks of the pupil from eye-tracking videos.\nLesion Sizing: In studies of brain injury or disease, this can be used to quantify the size of a lesion or a plaque from histological or in-vivo imaging data, tracking its progression over time.\nCalcium Imaging ROI Activity: For analyzing calcium imaging data, this transform can measure the area of a region of interest (ROI) that shows significant activity (e.g., above a certain brightness threshold), indicating the spatial extent of neural firing.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Calculate Mask Area"
     ]
   },
@@ -973,7 +1137,9 @@
     "section": "",
     "text": "This transform calculates the total area of all detected masks at each point in time, providing a measure of the overall size of masked regions.\n\n\nThis transformation processes a series of masks and, for each timestamp, calculates the total area covered by all masks at that specific time. The area is determined by summing the number of pixels (or voxels) that constitute each mask.\nThe result is an analog time series where the value at each point in time represents the total mask area for that moment. This is particularly useful for quantifying how the size of a region of interest (ROI) changes over time. Since this operation simply counts pixels within existing masks, it does not require any configuration parameters.\nThis transform takes a mask series as input and produces an analog time series as output.\n\n\n\n\nIn neuroscience research, quantifying the area of specific regions is a common requirement for analyzing imaging data:\n\nCell Swelling or Shrinking: When studying cellular dynamics, this transform can measure changes in the cross-sectional area of a cell over time, which might occur in response to a stimulus or pathological condition.\nPupilometry: In vision and cognitive neuroscience, tracking the area of the pupil provides insights into arousal, attention, and cognitive load. This transform can be applied to masks of the pupil from eye-tracking videos.\nLesion Sizing: In studies of brain injury or disease, this can be used to quantify the size of a lesion or a plaque from histological or in-vivo imaging data, tracking its progression over time.\nCalcium Imaging ROI Activity: For analyzing calcium imaging data, this transform can measure the area of a region of interest (ROI) that shows significant activity (e.g., above a certain brightness threshold), indicating the spatial extent of neural firing.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Calculate Mask Area"
     ]
   },
@@ -984,7 +1150,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform does not have any parameters that need to be configured. It directly calculates the area from the input mask data.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Calculate Mask Area"
     ]
   },
@@ -995,7 +1163,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to load mask data and run this transformation.\n[\n  {\n    \"transformations\": {\n      \"metadata\": {\n        \"name\": \"Mask Area Calculation Pipeline\",\n        \"description\": \"Test mask area calculation on mask data\",\n        \"version\": \"1.0\"\n      },\n      \"steps\": [\n        {\n          \"step_id\": \"1\",\n          \"transform_name\": \"Calculate Area\",\n          \"phase\": \"analysis\",\n          \"input_key\": \"test_mask_data\",\n          \"output_key\": \"calculated_areas\",\n          \"parameters\": {}\n        }\n      ]\n    }\n  }\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Calculate Mask Area"
     ]
   },
@@ -1006,7 +1176,9 @@
     "section": "",
     "text": "This transform calculates the curvature of a 2D line at a specified point. This is useful for analyzing the shape and tortuosity of lines, such as animal trajectories or neuronal processes.\n\n\nThe Line Curvature transform measures how much a line bends at a given point. It does this by fitting a parametric polynomial to the line’s (x, y) coordinates and then calculating the curvature of the fitted polynomial at a user-specified position along the line’s length.\nThe transform takes a LineData object (representing one or more lines over time) as input and produces an AnalogTimeSeries as output, where each value represents the calculated curvature at the corresponding time point.\nThis method allows for a smooth and robust estimation of curvature even when the underlying line data is noisy or unevenly sampled.\n\n\n\n\nIn neuroscience, analyzing the geometry of paths and structures is crucial for understanding behavior and neural architecture:\n\nAnimal Trajectory Analysis: The curvature of an animal’s path (e.g., a rat in a maze) can reveal changes in exploratory strategy, searching behavior, or the effects of neurological manipulations. High curvature might indicate turning or searching, while low curvature suggests straight-line travel.\nNeuronal Arborization: When analyzing the structure of neurons from microscope images, the curvature of dendrites or axons can be quantified to characterize their branching patterns and complexity. This is important for studying neuronal development, plasticity, and disease.\nAnalysis of Saccadic Eye Movements: The trajectory of saccadic eye movements is not perfectly straight. Analyzing the curvature of these paths can provide insights into the underlying motor control mechanisms.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Curvature"
     ]
   },
@@ -1017,7 +1189,9 @@
     "section": "",
     "text": "This transform calculates the curvature of a 2D line at a specified point. This is useful for analyzing the shape and tortuosity of lines, such as animal trajectories or neuronal processes.\n\n\nThe Line Curvature transform measures how much a line bends at a given point. It does this by fitting a parametric polynomial to the line’s (x, y) coordinates and then calculating the curvature of the fitted polynomial at a user-specified position along the line’s length.\nThe transform takes a LineData object (representing one or more lines over time) as input and produces an AnalogTimeSeries as output, where each value represents the calculated curvature at the corresponding time point.\nThis method allows for a smooth and robust estimation of curvature even when the underlying line data is noisy or unevenly sampled.\n\n\n\n\nIn neuroscience, analyzing the geometry of paths and structures is crucial for understanding behavior and neural architecture:\n\nAnimal Trajectory Analysis: The curvature of an animal’s path (e.g., a rat in a maze) can reveal changes in exploratory strategy, searching behavior, or the effects of neurological manipulations. High curvature might indicate turning or searching, while low curvature suggests straight-line travel.\nNeuronal Arborization: When analyzing the structure of neurons from microscope images, the curvature of dendrites or axons can be quantified to characterize their branching patterns and complexity. This is important for studying neuronal development, plasticity, and disease.\nAnalysis of Saccadic Eye Movements: The trajectory of saccadic eye movements is not perfectly straight. Analyzing the curvature of these paths can provide insights into the underlying motor control mechanisms.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Curvature"
     ]
   },
@@ -1028,7 +1202,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has the following parameters:\n\nposition: A fractional value between 0.0 and 1.0 indicating the point along the line’s total length at which to calculate the curvature. 0.0 is the start of the line, 0.5 is the midpoint, and 1.0 is the end.\nmethod: The algorithm to use for calculating curvature. Currently, only one option is available:\n\nPolynomialFit: Fits a parametric polynomial to the line data and calculates the analytical curvature.\n\npolynomial_order: The order of the polynomial to fit to the line data. A higher order can capture more complex curves but may be more sensitive to noise. A minimum of 2 is required for curvature calculation.\nfitting_window_percentage: The percentage (from 0.0 to 1.0) of the total line length to use for the polynomial fit, centered on the position parameter. A smaller window focuses the curvature calculation on the local shape, while a larger window provides a more global measure.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Curvature"
     ]
   },
@@ -1039,7 +1215,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation. This example calculates the curvature at the midpoint (0.5) of a line, using a 3rd-order polynomial fitted to 10% of the line’s data.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Line Curvature Pipeline\",\n            \"description\": \"Test line curvature calculation on a curved line\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Calculate Line Curvature\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"my_line_data\",\n                \"output_key\": \"calculated_curvature\",\n                \"parameters\": {\n                    \"position\": 0.5,\n                    \"method\": \"PolynomialFit\",\n                    \"polynomial_order\": 3,\n                    \"fitting_window_percentage\": 0.1\n                }\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Curvature"
     ]
   },
@@ -1050,7 +1228,9 @@
     "section": "",
     "text": "This transform calculates the angle of a line at a specific position along its length for each point in time.\n\n\nThe Line Angle transform provides a way to quantify the orientation of a line in a 2D space. This can be particularly useful for analyzing the movement or orientation of objects that are tracked as lines. The angle is measured relative to a customizable reference vector, which defaults to the positive x-axis (0 degrees).\nThere are two methods for calculating the angle:\n\nDirect Points: This method approximates the tangent at a given position by calculating the angle of the vector between the point at that position and the point immediately preceding it. This is a simple and fast method suitable for getting a local orientation.\nPolynomial Fit: This method fits a polynomial of a given order to the line’s points (parameterized by their cumulative distance). The angle is then calculated from the derivative of the polynomial at the specified position. This method can provide a more accurate estimate of the tangent angle at a specific point along a curved line.\n\n\n\n\n\nIn neuroscience, this transform can be used to analyze a variety of data:\n\nWhisker Tracking: The angle of a tracked whisker relative to the animal’s head can be calculated to study sensory input and motor control.\nLimb Tracking: The angle of a limb segment (e.g., the forearm) can be calculated to analyze reaching movements or other motor behaviors.\nTongue Tracking: The angle of the tongue during licking or other oral movements can be quantified.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Angle"
     ]
   },
@@ -1061,7 +1241,9 @@
     "section": "",
     "text": "This transform calculates the angle of a line at a specific position along its length for each point in time.\n\n\nThe Line Angle transform provides a way to quantify the orientation of a line in a 2D space. This can be particularly useful for analyzing the movement or orientation of objects that are tracked as lines. The angle is measured relative to a customizable reference vector, which defaults to the positive x-axis (0 degrees).\nThere are two methods for calculating the angle:\n\nDirect Points: This method approximates the tangent at a given position by calculating the angle of the vector between the point at that position and the point immediately preceding it. This is a simple and fast method suitable for getting a local orientation.\nPolynomial Fit: This method fits a polynomial of a given order to the line’s points (parameterized by their cumulative distance). The angle is then calculated from the derivative of the polynomial at the specified position. This method can provide a more accurate estimate of the tangent angle at a specific point along a curved line.\n\n\n\n\n\nIn neuroscience, this transform can be used to analyze a variety of data:\n\nWhisker Tracking: The angle of a tracked whisker relative to the animal’s head can be calculated to study sensory input and motor control.\nLimb Tracking: The angle of a limb segment (e.g., the forearm) can be calculated to analyze reaching movements or other motor behaviors.\nTongue Tracking: The angle of the tongue during licking or other oral movements can be quantified.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Angle"
     ]
   },
@@ -1072,7 +1254,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has the following parameters:\n\nposition: A value between 0.0 and 1.0 that specifies the point along the line at which to calculate the angle. For example, 0.5 would be the midpoint of the line.\nmethod: The calculation method to use.\n\nDirect Points: (Default) Calculates the angle based on the vector from the start of the line to the point at position.\nPolynomial Fit: Fits a polynomial to the line and calculates the angle from the derivative.\n\npolynomial_order: The order of the polynomial to fit to the line when using the Polynomial Fit method. A higher order can capture more complex curves but requires more points and can be prone to overfitting. A typical value is 2 or 3.\nreference_x: The x-component of the reference vector. Defaults to 1.0.\nreference_y: The y-component of the reference vector. Defaults to 0.0. The default vector (1.0, 0.0) corresponds to the positive x-axis, meaning angles are measured with 0 degrees pointing to the right.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Angle"
     ]
   },
@@ -1083,7 +1267,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation. This example calculates the angle at the midpoint of a line using the “Direct Points” method.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Line Angle Pipeline\",\n            \"description\": \"Test line angle calculation on line data\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Calculate Line Angle\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"test_line\",\n                \"output_key\": \"line_angles\",\n                \"parameters\": {\n                    \"position\": 0.5,\n                    \"method\": \"Direct Points\",\n                    \"polynomial_order\": 3,\n                    \"reference_x\": 1.0,\n                    \"reference_y\": 0.0\n                }\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Angle"
     ]
   },
@@ -1094,7 +1280,9 @@
     "section": "",
     "text": "This transform fills any enclosed holes within binary mask regions, which is useful for creating solid,contiguous masks from outlines or noisy data.\n\n\nIn image analysis, particularly with masks derived from object detection or segmentation, it’s common to have “holes” – background areas completely surrounded by foreground. This transform identifies and fills these holes.\nThe process works by identifying all background regions that are not connected to the edges of the image. Any such isolated background region is considered a hole and is filled in, effectively becoming part of the foreground mask. This is useful for cleaning up masks to ensure that objects are represented as solid shapes, which is often a prerequisite for accurate area, centroid, or morphological analysis.\n\n\n\n\n\nCell Body Segmentation: When segmenting neurons from imaging data, the detected outline of a cell might not be perfectly filled. This transform can be used to fill the interior of the cell body, ensuring it’s a solid mask for subsequent analysis like measuring cell size or fluorescence intensity.\nReceptive Field Mapping: In studies mapping receptive fields, a mask might be generated that outlines the field but contains small gaps or holes. Filling these holes can create a more accurate and solid representation of the receptive field.\nLesion Analysis: When analyzing images of tissue lesions, this transform can help create solid masks of the lesion areas, even if the initial segmentation is imperfect, allowing for more accurate measurement of lesion volume or area.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Fill Mask Holes"
     ]
   },
@@ -1105,7 +1293,9 @@
     "section": "",
     "text": "This transform fills any enclosed holes within binary mask regions, which is useful for creating solid,contiguous masks from outlines or noisy data.\n\n\nIn image analysis, particularly with masks derived from object detection or segmentation, it’s common to have “holes” – background areas completely surrounded by foreground. This transform identifies and fills these holes.\nThe process works by identifying all background regions that are not connected to the edges of the image. Any such isolated background region is considered a hole and is filled in, effectively becoming part of the foreground mask. This is useful for cleaning up masks to ensure that objects are represented as solid shapes, which is often a prerequisite for accurate area, centroid, or morphological analysis.\n\n\n\n\n\nCell Body Segmentation: When segmenting neurons from imaging data, the detected outline of a cell might not be perfectly filled. This transform can be used to fill the interior of the cell body, ensuring it’s a solid mask for subsequent analysis like measuring cell size or fluorescence intensity.\nReceptive Field Mapping: In studies mapping receptive fields, a mask might be generated that outlines the field but contains small gaps or holes. Filling these holes can create a more accurate and solid representation of the receptive field.\nLesion Analysis: When analyzing images of tissue lesions, this transform can help create solid masks of the lesion areas, even if the initial segmentation is imperfect, allowing for more accurate measurement of lesion volume or area.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Fill Mask Holes"
     ]
   },
@@ -1116,7 +1306,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has no parameters. It will automatically fill all enclosed holes in the provided masks.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Fill Mask Holes"
     ]
   },
@@ -1127,7 +1319,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Mask Hole Filling Pipeline\",\n            \"description\": \"Test mask hole filling on hollow rectangle\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Fill Mask Holes\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"test_mask\",\n                \"output_key\": \"filled_mask\",\n                \"parameters\": {}\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Fill Mask Holes"
     ]
   },
@@ -1138,7 +1332,9 @@
     "section": "",
     "text": "This transform extracts a portion of a line (a subsegment) based on specified start and end points.\n\n\nThis transformation allows for the precise extraction of a subsegment from a series of lines, such as those representing the movement of a tracked object over time. You can define the start and end of the subsegment as a fraction of the total line length. For example, you can extract the middle 50% of a line.\nThis is particularly useful for focusing analysis on a specific part of a trajectory or shape. For instance, in neuroscience, you might use this to analyze the movement of an animal’s limb, focusing only on the part of the movement where the limb is closest to a target.\n\nThe extraction can be done in two ways:\n\nDirect: This method pulls the original points from the line that fall within the specified subsegment. This is fast and preserves the original data points.\nParametric: This method fits a polynomial to the line and then generates a new, smooth subsegment with a specified number of points. This is useful for standardizing the length and spacing of the subsegment for further analysis, such as comparing shapes across different trials.\n\n\n\n\n\nWhisker Tracking: When analyzing whisker movements, you might want to extract only the portion of the whisker closest to an object it’s exploring.\nLimb Tracking: In studies of motor control, you could extract the segment of a limb’s trajectory during a specific phase of a reach-to-grasp movement.\nNeural Arborization: When analyzing the structure of neurons, this transform could be used to isolate specific dendritic or axonal segments for morphological analysis.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Extract Line Subsegment"
     ]
   },
@@ -1149,7 +1345,9 @@
     "section": "",
     "text": "This transform extracts a portion of a line (a subsegment) based on specified start and end points.\n\n\nThis transformation allows for the precise extraction of a subsegment from a series of lines, such as those representing the movement of a tracked object over time. You can define the start and end of the subsegment as a fraction of the total line length. For example, you can extract the middle 50% of a line.\nThis is particularly useful for focusing analysis on a specific part of a trajectory or shape. For instance, in neuroscience, you might use this to analyze the movement of an animal’s limb, focusing only on the part of the movement where the limb is closest to a target.\n\nThe extraction can be done in two ways:\n\nDirect: This method pulls the original points from the line that fall within the specified subsegment. This is fast and preserves the original data points.\nParametric: This method fits a polynomial to the line and then generates a new, smooth subsegment with a specified number of points. This is useful for standardizing the length and spacing of the subsegment for further analysis, such as comparing shapes across different trials.\n\n\n\n\n\nWhisker Tracking: When analyzing whisker movements, you might want to extract only the portion of the whisker closest to an object it’s exploring.\nLimb Tracking: In studies of motor control, you could extract the segment of a limb’s trajectory during a specific phase of a reach-to-grasp movement.\nNeural Arborization: When analyzing the structure of neurons, this transform could be used to isolate specific dendritic or axonal segments for morphological analysis.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Extract Line Subsegment"
     ]
   },
@@ -1160,7 +1358,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has the following parameters:\n\nstart_position: The starting point of the subsegment, as a fraction of the total line length (from 0.0 to 1.0).\nend_position: The ending point of the subsegment, as a fraction of the total line length (from 0.0 to 1.0).\nmethod: The extraction method to use. This can be:\n\nDirect: Directly extracts the original points within the subsegment range.\nParametric: Uses polynomial interpolation to create a new, smooth subsegment.\n\npolynomial_order: (Parametric method only) The order of the polynomial to fit to the line. A higher order can capture more complex curves but may also be more sensitive to noise.\noutput_points: (Parametric method only) The number of points to generate in the output subsegment.\npreserve_original_spacing: (Direct method only) If true, the subsegment will consist of the original points from the line that fall within the specified range. If false, the subsegment will be resampled to have evenly spaced points.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Extract Line Subsegment"
     ]
   },
@@ -1171,7 +1371,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation. This example extracts the subsegment from 20% to 80% of the line’s length using the Direct method.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Line Subsegment Extraction Pipeline\",\n            \"description\": \"Test line subsegment extraction\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Extract Line Subsegment\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"test_line\",\n                \"output_key\": \"extracted_subsegments\",\n                \"parameters\": {\n                    \"start_position\": 0.2,\n                    \"end_position\": 0.8,\n                    \"method\": \"Direct\",\n                    \"preserve_original_spacing\": true\n                }\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Extract Line Subsegment"
     ]
   },
@@ -1182,7 +1384,9 @@
     "section": "",
     "text": "This transform calculates the principal axis of a mask, which is a line that represents the primary orientation of the shape defined by the mask’s pixels.\n\n\nThis [Data Transform Operation] is used to determine the orientation of objects within a mask. It analyzes the distribution of pixels in a mask to find its principal axes. The major axis represents the longest dimension of the shape, indicating its primary orientation, while the minor axis is perpendicular to the major axis and represents the shortest dimension.\nThis is useful for quantifying the orientation of elongated objects. The output is a line segment that passes through the centroid of the mask and aligns with either the major or minor axis of pixel variance.\n\n\n\n\n\nCellular Morphology: In microscopy images, this can be used to quantify the orientation of cells, such as neurons or glia, which can be important for understanding tissue organization and cell migration.\nBehavioral Analysis: When tracking the posture of an animal, the principal axis of a body part’s mask (like a limb or tail) can provide a quantitative measure of its angle and movement over time.\nObject Interaction: It can be used to determine how an animal is oriented relative to an object in its environment, for example, by calculating the principal axis of the animal’s body mask.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Calculate Mask Principal Axis"
     ]
   },
@@ -1193,7 +1397,9 @@
     "section": "",
     "text": "This transform calculates the principal axis of a mask, which is a line that represents the primary orientation of the shape defined by the mask’s pixels.\n\n\nThis [Data Transform Operation] is used to determine the orientation of objects within a mask. It analyzes the distribution of pixels in a mask to find its principal axes. The major axis represents the longest dimension of the shape, indicating its primary orientation, while the minor axis is perpendicular to the major axis and represents the shortest dimension.\nThis is useful for quantifying the orientation of elongated objects. The output is a line segment that passes through the centroid of the mask and aligns with either the major or minor axis of pixel variance.\n\n\n\n\n\nCellular Morphology: In microscopy images, this can be used to quantify the orientation of cells, such as neurons or glia, which can be important for understanding tissue organization and cell migration.\nBehavioral Analysis: When tracking the posture of an animal, the principal axis of a body part’s mask (like a limb or tail) can provide a quantitative measure of its angle and movement over time.\nObject Interaction: It can be used to determine how an animal is oriented relative to an object in its environment, for example, by calculating the principal axis of the animal’s body mask.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Calculate Mask Principal Axis"
     ]
   },
@@ -1204,7 +1410,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has the following parameter:\n\naxis_type: Specifies which principal axis to calculate. This can be:\n\nMajor: The axis of greatest variance (the “longest” direction of the shape).\nMinor: The axis of least variance (the “shortest” direction of the shape), perpendicular to the major axis.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Calculate Mask Principal Axis"
     ]
   },
@@ -1215,7 +1423,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation. This example calculates the major principal axis for a mask.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Mask Principal Axis Pipeline\",\n            \"description\": \"Test mask principal axis calculation on mask data\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Calculate Mask Principal Axis\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"test_mask\",\n                \"output_key\": \"principal_axes\",\n                \"parameters\": {\n                    \"axis_type\": \"Major\"\n                }\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Calculate Mask Principal Axis"
     ]
   },
@@ -1226,7 +1436,9 @@
     "section": "",
     "text": "This transform applies a median filter to a binary mask, which is effective at removing “salt-and-pepper” noise and smoothing object boundaries.\n\n\nThe median filter is a non-linear digital filtering technique used to remove noise from an image or signal. For each pixel in the mask, the filter considers a square neighborhood of a specified size around it, finds the median of all the pixel values in that neighborhood, and replaces the central pixel with that median value.\nThis process is highly effective at removing isolated pixels of one color surrounded by pixels of another color (i.e., “salt-and-pepper” noise). It is also good at preserving sharp edges in the image while smoothing out noise, making it preferable to a standard blurring (mean) filter in many cases.\nThe figure below illustrates how the median filter removes isolated black and white pixels from a binary mask. Notice how a larger window size results in more aggressive smoothing.\n\n\n\n\nIn neuroscience, image processing is often a critical step in data analysis. The median filter is a valuable tool for pre-processing image-based data.\n\nCalcium Imaging Analysis: When segmenting active neurons from calcium imaging videos, the resulting binary masks can be noisy. A median filter can clean up these masks before further analysis, such as calculating cell centroids or areas, leading to more accurate results.\nMorphological Reconstruction: After tracing neurons from microscopy images, digital reconstructions can have small artifacts. Applying a median filter to a 2D projection (mask) of the reconstruction can help remove these artifacts before measuring morphological properties.\nWhisker Tracking: In behavioral neuroscience, tracking the position of an animal’s whiskers often produces binary images of the whisker. A median filter can smooth the whisker’s shape and remove spurious pixels from the background, improving the accuracy of tracking algorithms.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Apply Median Filter"
     ]
   },
@@ -1237,7 +1449,9 @@
     "section": "",
     "text": "This transform applies a median filter to a binary mask, which is effective at removing “salt-and-pepper” noise and smoothing object boundaries.\n\n\nThe median filter is a non-linear digital filtering technique used to remove noise from an image or signal. For each pixel in the mask, the filter considers a square neighborhood of a specified size around it, finds the median of all the pixel values in that neighborhood, and replaces the central pixel with that median value.\nThis process is highly effective at removing isolated pixels of one color surrounded by pixels of another color (i.e., “salt-and-pepper” noise). It is also good at preserving sharp edges in the image while smoothing out noise, making it preferable to a standard blurring (mean) filter in many cases.\nThe figure below illustrates how the median filter removes isolated black and white pixels from a binary mask. Notice how a larger window size results in more aggressive smoothing.\n\n\n\n\nIn neuroscience, image processing is often a critical step in data analysis. The median filter is a valuable tool for pre-processing image-based data.\n\nCalcium Imaging Analysis: When segmenting active neurons from calcium imaging videos, the resulting binary masks can be noisy. A median filter can clean up these masks before further analysis, such as calculating cell centroids or areas, leading to more accurate results.\nMorphological Reconstruction: After tracing neurons from microscopy images, digital reconstructions can have small artifacts. Applying a median filter to a 2D projection (mask) of the reconstruction can help remove these artifacts before measuring morphological properties.\nWhisker Tracking: In behavioral neuroscience, tracking the position of an animal’s whiskers often produces binary images of the whisker. A median filter can smooth the whisker’s shape and remove spurious pixels from the background, improving the accuracy of tracking algorithms.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Apply Median Filter"
     ]
   },
@@ -1248,7 +1462,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has the following parameter:\n\n\n\n\n\n\n\nName\nDescription\n\n\n\n\nwindow_size\nThe size of the square kernel used for filtering. The value must be a positive, odd integer (e.g., 3, 5, 7). A larger window size results in more aggressive smoothing but may also remove fine details from the mask.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Apply Median Filter"
     ]
   },
@@ -1259,7 +1475,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to load data and process it with a transformation pipeline that includes the “Apply Median Filter” step.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Median Filter Pipeline\",\n            \"description\": \"Test median filtering on mask data\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Apply Median Filter\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"test_mask\",\n                \"output_key\": \"filtered_mask\",\n                \"parameters\": {\n                    \"window_size\": 3\n                }\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Apply Median Filter"
     ]
   },
@@ -1270,7 +1488,9 @@
     "section": "",
     "text": "This transform calculates the instantaneous phase of an analog signal, which is useful for analyzing oscillations.\n\n\nThe Hilbert transform is a mathematical operation that shifts the phase of all positive frequency components of a signal by -90 degrees and all negative frequency components by +90 degrees. When this phase-shifted signal (the imaginary part) is combined with the original signal (the real part), it forms a complex-valued “analytic signal”.\nThe instantaneous phase is the angle of this complex number at each point in time. It provides a way to represent an oscillating signal in terms of its phase, which progresses from -π to +π for each cycle of the oscillation. This transform uses an efficient FFT-based method to compute the Hilbert transform.\n\n\n\n\n\nIn neuroscience, analyzing the phase of neural signals is crucial for understanding brain function. Some common applications include:\n\nRhythmic Behaviors: The phase of signals from sensors tracking rhythmic behaviors like whisking, sniffing, or licking can be extracted to correlate them with neural activity.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
       "Analog Hilbert Phase"
     ]
   },
@@ -1281,7 +1501,9 @@
     "section": "",
     "text": "This transform calculates the instantaneous phase of an analog signal, which is useful for analyzing oscillations.\n\n\nThe Hilbert transform is a mathematical operation that shifts the phase of all positive frequency components of a signal by -90 degrees and all negative frequency components by +90 degrees. When this phase-shifted signal (the imaginary part) is combined with the original signal (the real part), it forms a complex-valued “analytic signal”.\nThe instantaneous phase is the angle of this complex number at each point in time. It provides a way to represent an oscillating signal in terms of its phase, which progresses from -π to +π for each cycle of the oscillation. This transform uses an efficient FFT-based method to compute the Hilbert transform.\n\n\n\n\n\nIn neuroscience, analyzing the phase of neural signals is crucial for understanding brain function. Some common applications include:\n\nRhythmic Behaviors: The phase of signals from sensors tracking rhythmic behaviors like whisking, sniffing, or licking can be extracted to correlate them with neural activity.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
       "Analog Hilbert Phase"
     ]
   },
@@ -1292,7 +1514,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has the following parameters:\n\nlow_frequency: The low-cut frequency for the bandpass filter, in Hertz. This determines the lower end of the frequency range you want to analyze.\nhigh_frequency: The high-cut frequency for the bandpass filter, in Hertz. This determines the upper end of the frequency range you want to analyze.\ndiscontinuity_threshold: A time gap, in samples, above which the signal is considered to have a break. The transform will process the continuous segments separately. This is useful for data with missing samples or interruptions.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
       "Analog Hilbert Phase"
     ]
   },
@@ -1303,7 +1527,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that loads data and applies the Analog Hilbert Phase transform.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Hilbert Phase Pipeline\",\n            \"description\": \"Test Hilbert phase calculation on analog signal\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Hilbert Phase\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"test_signal\",\n                \"output_key\": \"phase_signal\",\n                \"parameters\": {\n                    \"low_frequency\": 5.0,\n                    \"high_frequency\": 15.0,\n                    \"discontinuity_threshold\": 1000\n                }\n            }\n        ]\n    }\n}\n]\n\nReferences\nHill, D.N., Curtis, J.C., Moore, J.D., Kleinfeld, D., 2011. Primary motor cortex reports efferent control of vibrissa motion on multiple timescales. Neuron 72, 344–356. https://doi.org/10.1016/j.neuron.2011.09.020",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
       "Analog Hilbert Phase"
     ]
   },
@@ -1314,7 +1540,9 @@
     "section": "",
     "text": "This transform detects moments in time (events) when an analog signal crosses a specified value, which is useful for identifying significant occurrences in the data.\n\n\nThresholding is a fundamental method for event detection in time-series data. This operation identifies every point in time where the signal’s amplitude crosses a defined threshold in a specific direction (either rising above it, falling below it, or crossing it in either direction).\nA “lockout” period can also be set. After an event is detected, the algorithm will ignore any further threshold crossings for the duration of this period, which helps prevent a single, noisy event from being counted multiple times.\nThis transform takes an analog time series as input and produces a digital event series as output, where each event corresponds to a single point in time when a threshold crossing was detected.\n\n\n\n\n\nIn neuroscience, thresholding is a common technique for identifying meaningful events in continuous data streams:\n\nSpike Detection: In extracellular recordings, thresholding can be used to identify action potentials (spikes) that stand out from the background noise. A lockout time is critical here to avoid detecting the same spike multiple times as it repolarizes.\nBehavioral Event Marking: For data from sensors like accelerometers or force transducers, thresholding can mark the onset of specific behaviors, such as a mouse starting to run on a wheel or a bird pecking a key.\nCalcium Imaging Analysis: In calcium imaging data, which reflects neural activity, thresholding can be used to detect significant calcium transients that indicate a neuron or a group of neurons are firing.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
       "Analog Event Threshold"
     ]
   },
@@ -1325,7 +1553,9 @@
     "section": "",
     "text": "This transform detects moments in time (events) when an analog signal crosses a specified value, which is useful for identifying significant occurrences in the data.\n\n\nThresholding is a fundamental method for event detection in time-series data. This operation identifies every point in time where the signal’s amplitude crosses a defined threshold in a specific direction (either rising above it, falling below it, or crossing it in either direction).\nA “lockout” period can also be set. After an event is detected, the algorithm will ignore any further threshold crossings for the duration of this period, which helps prevent a single, noisy event from being counted multiple times.\nThis transform takes an analog time series as input and produces a digital event series as output, where each event corresponds to a single point in time when a threshold crossing was detected.\n\n\n\n\n\nIn neuroscience, thresholding is a common technique for identifying meaningful events in continuous data streams:\n\nSpike Detection: In extracellular recordings, thresholding can be used to identify action potentials (spikes) that stand out from the background noise. A lockout time is critical here to avoid detecting the same spike multiple times as it repolarizes.\nBehavioral Event Marking: For data from sensors like accelerometers or force transducers, thresholding can mark the onset of specific behaviors, such as a mouse starting to run on a wheel or a bird pecking a key.\nCalcium Imaging Analysis: In calcium imaging data, which reflects neural activity, thresholding can be used to detect significant calcium transients that indicate a neuron or a group of neurons are firing.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
       "Analog Event Threshold"
     ]
   },
@@ -1336,7 +1566,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has the following parameters:\n\nthreshold_value: The amplitude value the signal must cross to be considered an event.\ndirection: Specifies the direction of the crossing required to trigger an event. This can be:\n\nPositive (Rising): An event is detected when the signal crosses the threshold from a lower to a higher value.\nNegative (Falling): An event is detected when the signal crosses the threshold from a higher to a lower value.\nAbsolute: An event is detected whenever the absolute value of the signal crosses the threshold value (useful for detecting deviations from baseline in either direction).\n\nlockout_time: A duration (in the same time units as the data, e.g., seconds) after each detected event during which no new events will be registered. This is useful for preventing multiple detections of a single, noisy event.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
       "Analog Event Threshold"
     ]
   },
@@ -1347,7 +1579,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation. This example detects events where the signal rises above an amplitude of 1.0, with no lockout period.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Threshold Detection Pipeline\",\n            \"description\": \"Test threshold event detection on analog signal\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Analog Event Threshold\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"test_signal\",\n                \"output_key\": \"detected_events\",\n                \"parameters\": {\n                    \"threshold_value\": 1.0,\n                    \"direction\": \"Positive\",\n                    \"lockout_time\": 0.0\n                }\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
       "Analog Event Threshold"
     ]
   },
@@ -17864,11 +18098,11 @@
     ]
   },
   {
-    "objectID": "examples/keypoint_labeling.html#step-1-load-video-or-existing-labels",
-    "href": "examples/keypoint_labeling.html#step-1-load-video-or-existing-labels",
+    "objectID": "examples/keypoint_labeling.html#full-video",
+    "href": "examples/keypoint_labeling.html#full-video",
     "title": "Keypoint Video Labeling",
-    "section": "Step 1: Load Video or Existing Labels",
-    "text": "Step 1: Load Video or Existing Labels\n\n\n\n\n\nTo begin labeling:\n\nOpen the application and navigate to File &gt; Load Data.\nSelect the video you intend to annotate.\n\nAlternatively, if you’ve already created keypoints and want to review or update them:\n\nSelect File &gt; Load JSON Configuration and choose your .json file.\n\n\n\n\n\n\n\nTip\n\n\n\nSee: Setting up a JSON File for more on configuration options.",
+    "section": "Full Video",
+    "text": "Full Video\nWatch the complete keypoint labeling workflow from start to finish:\n\n\nYour browser does not support the video tag. You can download the video here: keypoint_example.mp4.",
     "crumbs": [
       "Learning Resources",
       "Tutorials",
@@ -17876,11 +18110,11 @@
     ]
   },
   {
-    "objectID": "examples/keypoint_labeling.html#step-2-open-the-data-manager",
-    "href": "examples/keypoint_labeling.html#step-2-open-the-data-manager",
+    "objectID": "examples/keypoint_labeling.html#step-by-step",
+    "href": "examples/keypoint_labeling.html#step-by-step",
     "title": "Keypoint Video Labeling",
-    "section": "Step 2: Open the Data Manager",
-    "text": "Step 2: Open the Data Manager\n\n\n\n\n\nTo create or manage point data:\n\nNavigate to Modules &gt; Data Manager to open the Data Manager Module.",
+    "section": "Step-by-Step",
+    "text": "Step-by-Step\n\nStep 1: Load Video or Existing Labels\n\n\n\n\n\nTo begin labeling:\n\nOpen the application and navigate to File &gt; Load Data.\nSelect the video you intend to annotate.\n\nAlternatively, if you’ve already created keypoints and want to review or update them:\n\nSelect File &gt; Load JSON Configuration and choose your .json file.\n\n\n\n\n\n\n\nTip\n\n\n\nSee: Setting up a JSON File for more on configuration options.\n\n\n\n\n\nStep 2: Open the Data Manager\n\n\n\n\n\nTo create or manage point data:\n\nNavigate to Modules &gt; Data Manager to open the Data Manager Module.\n\n\n\n\nStep 3: Create a New Keypoint Feature\n\n\n\n\n\nIn the Data Manager:\n\nSet the Output Directory: This is where your labeled data (CSV) will be saved.\n\nExample: C:/Users/wanglab/Desktop/Cartoon_Mouse\n\nCreate New Data:\n\nType: point\nTime Frame: Select based on your analysis requirements (e.g., time for temporal tracking).\nName: Choose a descriptive name (e.g., jaw, nose, or paw).\n\n\nClick Create New Data to add the new feature.\n\n\n\nStep 4: Edit and Add Keypoints in the Media Widget\n\n\n\n\n\nOnce the point feature is created:\n\nEnable the Feature: Select the feature in the media widget to activate the keypoint editor.\nCustomize Appearance:\n\nChoose a color using the hex selector.\nAdjust the opacity (Alpha) for better contrast against the video.\nModify the size and shape of the marker if needed.\n\nBegin Labeling:\n\nSwitch mouse mode to “Select Point”.\nClick anywhere in the video frame to add a point.\nClicking on an existing point will move it.\n\n\n\n\n\n\n\n\n\n\n\n\n\nImportant\n\n\n\nNote: The keypoint is recorded as a single-pixel coordinate. Visual shape and style are only for display and are not saved.\n\n\n\n\n\nStep 5: Review and Export Your Labels\n\n\n\n\n\nAfter labeling:\n\nSelect your feature (e.g., jaw) in the Data Manager.\nYou’ll see a spreadsheet with:\n\nFrame indices\n(x, y) coordinates for each labeled keypoint\n\n\n\n\nExport Options:\n\nFile Name: Choose a meaningful name for your CSV.\nDelimiter: (e.g., comma , or tab \\t) – separates columns.\nLine Ending: Select line break style (\\n, \\r\\n, etc.).\nHeader: Optionally include a header row with custom labels.\n\n\n\n\nOptional: Export Matching Media Frames\n\n\n\n\n\nYou can export the video frames where keypoints were labeled:\n\nCheck Export Matching Media Frames.\nChoose from export options:\n\nSave by Frame Name\nFrame ID Padding\nImage Name Prefix\nSubfolder for Images\nOverwrite Existing Files\n\n\n\n\n\n\n\n\nWarning\n\n\n\nKeypoints will not be drawn on these frames. Only raw frames are exported.\n\n\n\n\n\nStep 6: Save to CSV\n\n\n\n\n\nOnce you’ve reviewed your labels:\n\nClick “Save to CSV”\n\nA confirmation will appear showing the file path.\nYour labeled keypoint data is now saved and ready for further analysis.",
     "crumbs": [
       "Learning Resources",
       "Tutorials",
@@ -17888,11 +18122,11 @@
     ]
   },
   {
-    "objectID": "examples/keypoint_labeling.html#step-3-create-a-new-keypoint-feature",
-    "href": "examples/keypoint_labeling.html#step-3-create-a-new-keypoint-feature",
+    "objectID": "examples/keypoint_labeling.html#summary",
+    "href": "examples/keypoint_labeling.html#summary",
     "title": "Keypoint Video Labeling",
-    "section": "Step 3: Create a New Keypoint Feature",
-    "text": "Step 3: Create a New Keypoint Feature\n\n\n\n\n\nIn the Data Manager:\n\nSet the Output Directory: This is where your labeled data (CSV) will be saved.\n\nExample: C:/Users/wanglab/Desktop/Cartoon_Mouse\n\nCreate New Data:\n\nType: point\nTime Frame: Select based on your analysis requirements (e.g., time for temporal tracking).\nName: Choose a descriptive name (e.g., jaw, nose, or paw).\n\n\nClick Create New Data to add the new feature.",
+    "section": "Summary",
+    "text": "Summary\nThis tutorial demonstrated how to:\n\nLoad a video or keypoint configuration\nCreate and configure keypoint data\nAnnotate frames with feature coordinates\nExport label data and relevant frames",
     "crumbs": [
       "Learning Resources",
       "Tutorials",
@@ -17900,47 +18134,11 @@
     ]
   },
   {
-    "objectID": "examples/keypoint_labeling.html#step-4-edit-and-add-keypoints-in-the-media-widget",
-    "href": "examples/keypoint_labeling.html#step-4-edit-and-add-keypoints-in-the-media-widget",
+    "objectID": "examples/keypoint_labeling.html#see-also",
+    "href": "examples/keypoint_labeling.html#see-also",
     "title": "Keypoint Video Labeling",
-    "section": "Step 4: Edit and Add Keypoints in the Media Widget",
-    "text": "Step 4: Edit and Add Keypoints in the Media Widget\n\n\n\n\n\nOnce the point feature is created:\n\nEnable the Feature: Select the feature in the media widget to activate the keypoint editor.\nCustomize Appearance:\n\nChoose a color using the hex selector.\nAdjust the opacity (Alpha) for better contrast against the video.\nModify the size and shape of the marker if needed.\n\nBegin Labeling:\n\nSwitch mouse mode to “Select Point”.\nClick anywhere in the video frame to add a point.\nClicking on an existing point will move it.\n\n\n\n\n\n\n\n\n\n\n\n\n\nImportant\n\n\n\nNote: The keypoint is recorded as a single-pixel coordinate. Visual shape and style are only for display and are not saved.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Keypoint Labeling"
-    ]
-  },
-  {
-    "objectID": "examples/keypoint_labeling.html#step-5-review-and-export-your-labels",
-    "href": "examples/keypoint_labeling.html#step-5-review-and-export-your-labels",
-    "title": "Keypoint Video Labeling",
-    "section": "Step 5: Review and Export Your Labels",
-    "text": "Step 5: Review and Export Your Labels\n\n\n\n\n\nAfter labeling:\n\nSelect your feature (e.g., jaw) in the Data Manager.\nYou’ll see a spreadsheet with:\n\nFrame indices\n(x, y) coordinates for each labeled keypoint\n\n\n\nExport Options:\n\nFile Name: Choose a meaningful name for your CSV.\nDelimiter: (e.g., comma , or tab \\t) – separates columns.\nLine Ending: Select line break style (\\n, \\r\\n, etc.).\nHeader: Optionally include a header row with custom labels.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Keypoint Labeling"
-    ]
-  },
-  {
-    "objectID": "examples/keypoint_labeling.html#optional-export-matching-media-frames",
-    "href": "examples/keypoint_labeling.html#optional-export-matching-media-frames",
-    "title": "Keypoint Video Labeling",
-    "section": "Optional: Export Matching Media Frames",
-    "text": "Optional: Export Matching Media Frames\n\n\n\n\n\nYou can export the video frames where keypoints were labeled:\n\nCheck Export Matching Media Frames.\nChoose from export options:\n\nSave by Frame Name\nFrame ID Padding\nImage Name Prefix\nSubfolder for Images\nOverwrite Existing Files\n\n\n\n\n\n\n\n\nWarning\n\n\n\nKeypoints will not be drawn on these frames. Only raw frames are exported.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Keypoint Labeling"
-    ]
-  },
-  {
-    "objectID": "examples/keypoint_labeling.html#step-6-save-to-csv",
-    "href": "examples/keypoint_labeling.html#step-6-save-to-csv",
-    "title": "Keypoint Video Labeling",
-    "section": "Step 6: Save to CSV",
-    "text": "Step 6: Save to CSV\n\n\n\n\n\nOnce you’ve reviewed your labels:\n\nClick “Save to CSV”\n\nA confirmation will appear showing the file path.\nYour labeled keypoint data is now saved and ready for further analysis.\n\n\nSummary\nThis tutorial demonstrated how to:\n\nLoad a video or keypoint configuration\nCreate and configure keypoint data\nAnnotate frames with feature coordinates\nExport label data and relevant frames\n\n\n\nSee Also\n\nPoint Transforms Reference",
+    "section": "See Also",
+    "text": "See Also\n\nPoint Transforms Reference",
     "crumbs": [
       "Learning Resources",
       "Tutorials",
@@ -18993,35 +19191,65 @@
     "href": "user_guide/data_transformations/analog_filter.html",
     "title": "Analog Filter",
     "section": "",
-    "text": "The Analog Filter transform applies a digital filter to an AnalogTimeSeries. This can be used to remove noise, isolate specific frequency bands, or perform other signal processing tasks."
+    "text": "The Analog Filter transform applies a digital filter to an AnalogTimeSeries. This can be used to remove noise, isolate specific frequency bands, or perform other signal processing tasks.",
+    "crumbs": [
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
+      "Analog Filter"
+    ]
   },
   {
     "objectID": "user_guide/data_transformations/analog_filter.html#purpose",
     "href": "user_guide/data_transformations/analog_filter.html#purpose",
     "title": "Analog Filter",
     "section": "",
-    "text": "The Analog Filter transform applies a digital filter to an AnalogTimeSeries. This can be used to remove noise, isolate specific frequency bands, or perform other signal processing tasks."
+    "text": "The Analog Filter transform applies a digital filter to an AnalogTimeSeries. This can be used to remove noise, isolate specific frequency bands, or perform other signal processing tasks.",
+    "crumbs": [
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
+      "Analog Filter"
+    ]
   },
   {
     "objectID": "user_guide/data_transformations/analog_filter.html#parameters",
     "href": "user_guide/data_transformations/analog_filter.html#parameters",
     "title": "Analog Filter",
     "section": "Parameters",
-    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilter_type\nstring\nThe type of filter to apply. One of “lowpass”, “highpass”, “bandpass”, “bandstop”.\n“lowpass”\n\n\ncutoff_frequency\ndouble\nThe cutoff frequency for lowpass and highpass filters, or the lower cutoff frequency for bandpass and bandstop filters.\n10.0\n\n\ncutoff_frequency2\ndouble\nThe upper cutoff frequency for bandpass and bandstop filters.\n0.0\n\n\norder\ninteger\nThe order of the filter. Must be between 1 and 8.\n4\n\n\nripple\ndouble\nThe ripple for Chebyshev filters (in dB). Not used for Butterworth filters.\n0.0\n\n\nzero_phase\nboolean\nIf true, applies the filter forward and backward to eliminate phase distortion.\nfalse"
+    "text": "Parameters\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\nDefault\n\n\n\n\nfilter_type\nstring\nThe type of filter to apply. One of “lowpass”, “highpass”, “bandpass”, “bandstop”.\n“lowpass”\n\n\ncutoff_frequency\ndouble\nThe cutoff frequency for lowpass and highpass filters, or the lower cutoff frequency for bandpass and bandstop filters.\n10.0\n\n\ncutoff_frequency2\ndouble\nThe upper cutoff frequency for bandpass and bandstop filters.\n0.0\n\n\norder\ninteger\nThe order of the filter. Must be between 1 and 8.\n4\n\n\nripple\ndouble\nThe ripple for Chebyshev filters (in dB). Not used for Butterworth filters.\n0.0\n\n\nzero_phase\nboolean\nIf true, applies the filter forward and backward to eliminate phase distortion.\nfalse",
+    "crumbs": [
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
+      "Analog Filter"
+    ]
   },
   {
     "objectID": "user_guide/data_transformations/analog_filter.html#json-schema",
     "href": "user_guide/data_transformations/analog_filter.html#json-schema",
     "title": "Analog Filter",
     "section": "JSON Schema",
-    "text": "JSON Schema\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"transform\": {\n      \"type\": \"string\",\n      \"const\": \"Analog Filter\"\n    },\n    \"input\": {\n      \"type\": \"string\"\n    },\n    \"output\": {\n      \"type\": \"string\"\n    },\n    \"params\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"filter_type\": {\n          \"type\": \"string\",\n          \"enum\": [\"lowpass\", \"highpass\", \"bandpass\", \"bandstop\"]\n        },\n        \"cutoff_frequency\": {\n          \"type\": \"number\"\n        },\n        \"cutoff_frequency2\": {\n          \"type\": \"number\"\n        },\n        \"order\": {\n          \"type\": \"integer\",\n          \"minimum\": 1,\n          \"maximum\": 8\n        },\n        \"ripple\": {\n          \"type\": \"number\"\n        },\n        \"zero_phase\": {\n          \"type\": \"boolean\"\n        }\n      },\n      \"required\": [\"filter_type\", \"cutoff_frequency\", \"order\"]\n    }\n  },\n  \"required\": [\"transform\", \"input\", \"output\", \"params\"]\n}"
+    "text": "JSON Schema\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"transform\": {\n      \"type\": \"string\",\n      \"const\": \"Analog Filter\"\n    },\n    \"input\": {\n      \"type\": \"string\"\n    },\n    \"output\": {\n      \"type\": \"string\"\n    },\n    \"params\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"filter_type\": {\n          \"type\": \"string\",\n          \"enum\": [\"lowpass\", \"highpass\", \"bandpass\", \"bandstop\"]\n        },\n        \"cutoff_frequency\": {\n          \"type\": \"number\"\n        },\n        \"cutoff_frequency2\": {\n          \"type\": \"number\"\n        },\n        \"order\": {\n          \"type\": \"integer\",\n          \"minimum\": 1,\n          \"maximum\": 8\n        },\n        \"ripple\": {\n          \"type\": \"number\"\n        },\n        \"zero_phase\": {\n          \"type\": \"boolean\"\n        }\n      },\n      \"required\": [\"filter_type\", \"cutoff_frequency\", \"order\"]\n    }\n  },\n  \"required\": [\"transform\", \"input\", \"output\", \"params\"]\n}",
+    "crumbs": [
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
+      "Analog Filter"
+    ]
   },
   {
     "objectID": "user_guide/data_transformations/analog_filter.html#minimal-example",
     "href": "user_guide/data_transformations/analog_filter.html#minimal-example",
     "title": "Analog Filter",
     "section": "Minimal Example",
-    "text": "Minimal Example\nThis example applies a 4th order lowpass Butterworth filter at 100 Hz.\n{\n  \"transform\": \"Analog Filter\",\n  \"input\": \"my_analog_series\",\n  \"output\": \"filtered_series\",\n  \"params\": {\n    \"filter_type\": \"lowpass\",\n    \"cutoff_frequency\": 100,\n    \"order\": 4\n  }\n}"
+    "text": "Minimal Example\nThis example applies a 4th order lowpass Butterworth filter at 100 Hz.\n{\n  \"transform\": \"Analog Filter\",\n  \"input\": \"my_analog_series\",\n  \"output\": \"filtered_series\",\n  \"params\": {\n    \"filter_type\": \"lowpass\",\n    \"cutoff_frequency\": 100,\n    \"order\": 4\n  }\n}",
+    "crumbs": [
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
+      "Analog Filter"
+    ]
   },
   {
     "objectID": "user_guide/data_transformations/analog_interval_threshold.html",
@@ -19030,7 +19258,9 @@
     "section": "",
     "text": "This transform detects continuous time intervals during which an analog signal’s value meets a specified threshold condition (e.g., staying above a value).\n\n\nThis transformation is used to identify continuous periods, or “intervals,” where a signal’s amplitude meets certain criteria. Unlike event detection, which marks a single point in time, interval detection finds the start and end times of periods that satisfy the condition.\nThe user can define a threshold and specify whether the signal must be above (Positive), below (Negative), or have its absolute value exceed (Absolute) that threshold.\nAdditionally, two timing parameters help refine the detection: - A lockout_time prevents the detection of new intervals for a set duration after the start of a previous interval. - A min_duration ensures that only intervals lasting longer than a specified duration are included in the final output.\nThis transform is useful for isolating epochs of interest in a continuous signal for further analysis. It takes an analog time series as input and produces a digital interval series as output.\n\n\n\n\nThis transform is particularly useful for identifying specific “states” or “epochs” in neural or behavioral data.\n\nIdentifying Periods of Movement: From accelerometer or video tracking data, one can find intervals of high activity that correspond to an animal moving, versus periods of rest.\nAnalyzing Muscle Activation: In electromyography (EMG), this can be used to determine the duration of muscle contractions by finding intervals where the rectified signal remains above a certain level of activity.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
       "Analog Interval Threshold"
     ]
   },
@@ -19041,7 +19271,9 @@
     "section": "",
     "text": "This transform detects continuous time intervals during which an analog signal’s value meets a specified threshold condition (e.g., staying above a value).\n\n\nThis transformation is used to identify continuous periods, or “intervals,” where a signal’s amplitude meets certain criteria. Unlike event detection, which marks a single point in time, interval detection finds the start and end times of periods that satisfy the condition.\nThe user can define a threshold and specify whether the signal must be above (Positive), below (Negative), or have its absolute value exceed (Absolute) that threshold.\nAdditionally, two timing parameters help refine the detection: - A lockout_time prevents the detection of new intervals for a set duration after the start of a previous interval. - A min_duration ensures that only intervals lasting longer than a specified duration are included in the final output.\nThis transform is useful for isolating epochs of interest in a continuous signal for further analysis. It takes an analog time series as input and produces a digital interval series as output.\n\n\n\n\nThis transform is particularly useful for identifying specific “states” or “epochs” in neural or behavioral data.\n\nIdentifying Periods of Movement: From accelerometer or video tracking data, one can find intervals of high activity that correspond to an animal moving, versus periods of rest.\nAnalyzing Muscle Activation: In electromyography (EMG), this can be used to determine the duration of muscle contractions by finding intervals where the rectified signal remains above a certain level of activity.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
       "Analog Interval Threshold"
     ]
   },
@@ -19052,7 +19284,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has the following parameters:\n\nthreshold_value: The amplitude value the signal must be above/below for the duration of the interval.\ndirection: Specifies the condition the signal must meet. Valid options are: \"Positive\", \"Negative\", or \"Absolute\".\nlockout_time: A duration (in the same time units as the data) after the start of a detected interval, during which no new intervals can begin. This is useful for isolating the onset of distinct episodes of activity.\nmin_duration: The minimum required length of an interval. Any detected period that is shorter than this value will be discarded.\nmissing_data_mode: Defines how to handle non-consecutive time points in the signal.\n\nTreat as Zero: Missing time points are treated as if the signal’s value is zero. This can terminate an interval if zero does not meet the threshold condition.\nIgnore: The algorithm proceeds to the next available data point, effectively ignoring the time gap.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
       "Analog Interval Threshold"
     ]
   },
@@ -19063,7 +19297,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation. This example finds all intervals where a signal named “LFP_channel_1” remains above 1.5 for at least 50 milliseconds.\n[\n  {\n    \"transformations\": {\n      \"metadata\": {\n        \"name\": \"Interval Threshold Detection Pipeline\",\n        \"description\": \"Detects intervals of high activity in an LFP signal.\",\n        \"version\": \"1.0\"\n      },\n      \"steps\": [\n        {\n          \"step_id\": \"1\",\n          \"transform_name\": \"Threshold Interval Detection\",\n          \"phase\": \"analysis\",\n          \"input_key\": \"LFP_channel_1\",\n          \"output_key\": \"detected_activity_intervals\",\n          \"parameters\": {\n            \"threshold_value\": 1.5,\n            \"direction\": \"Positive\",\n            \"lockout_time\": 0.0,\n            \"min_duration\": 0.050,\n            \"missing_data_mode\": \"Treat as Zero\"\n          }\n        }\n      ]\n    }\n  }\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Analog Input",
       "Analog Interval Threshold"
     ]
   },
@@ -19074,7 +19310,9 @@
     "section": "",
     "text": "This transform calculates the minimum distance from a set of points to a line for each moment in time, which is useful for quantifying the spatial relationship between different tracked objects.\n\n\nThis operation computes the shortest Euclidean distance between a line (composed of connected segments) and one or more points at each corresponding timestamp. If multiple points are present at a single timestamp, the transform identifies the minimum distance among all points to the line. The calculation finds the closest point on any segment of the line to each of the provided points and returns the smallest distance found.\nIf the line and points are associated with different spatial scales (i.e., different image sizes), the points will be automatically scaled to the line’s coordinate system before the distance is computed. The output is an analog time series where the value at each time point is the calculated minimum distance.\n\n\n\n\nThis transformation is valuable for analyzing the interaction between different elements in behavioral or physiological experiments:\n\nWhisker Tracking: In studies of rodent behavior, one might track the position of a whisker (as a line) and the location of an object (as a point). This transform can precisely measure the distance from the whisker to the object at each frame of a video, helping to identify moments of contact or near-contact.\nLimb and Body Coordination: When tracking the movement of an animal’s limb (represented as a line) relative to a target or another body part (represented as a point), this transform can quantify their spatial relationship over time. This is useful for studies of motor control and coordination.\nNeural Prosthetics and Brain-Computer Interfaces: In experiments where an animal controls a cursor or robotic arm, this transform could be used to measure the distance from the effector (the line) to a target (the point), providing a continuous measure of performance.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Calculate Line to Point Distance"
     ]
   },
@@ -19085,7 +19323,9 @@
     "section": "",
     "text": "This transform calculates the minimum distance from a set of points to a line for each moment in time, which is useful for quantifying the spatial relationship between different tracked objects.\n\n\nThis operation computes the shortest Euclidean distance between a line (composed of connected segments) and one or more points at each corresponding timestamp. If multiple points are present at a single timestamp, the transform identifies the minimum distance among all points to the line. The calculation finds the closest point on any segment of the line to each of the provided points and returns the smallest distance found.\nIf the line and points are associated with different spatial scales (i.e., different image sizes), the points will be automatically scaled to the line’s coordinate system before the distance is computed. The output is an analog time series where the value at each time point is the calculated minimum distance.\n\n\n\n\nThis transformation is valuable for analyzing the interaction between different elements in behavioral or physiological experiments:\n\nWhisker Tracking: In studies of rodent behavior, one might track the position of a whisker (as a line) and the location of an object (as a point). This transform can precisely measure the distance from the whisker to the object at each frame of a video, helping to identify moments of contact or near-contact.\nLimb and Body Coordination: When tracking the movement of an animal’s limb (represented as a line) relative to a target or another body part (represented as a point), this transform can quantify their spatial relationship over time. This is useful for studies of motor control and coordination.\nNeural Prosthetics and Brain-Computer Interfaces: In experiments where an animal controls a cursor or robotic arm, this transform could be used to measure the distance from the effector (the line) to a target (the point), providing a continuous measure of performance.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Calculate Line to Point Distance"
     ]
   },
@@ -19096,7 +19336,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has the following parameter:\n\npoint_data: The key of the PointData object in the DataManager. This object contains the set of points from which the minimum distance to the line will be calculated at each timestamp.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Calculate Line to Point Distance"
     ]
   },
@@ -19107,7 +19349,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation. This example calculates the distance between a line stored with the key test_line and a set of points stored with the key test_points.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Line to Point Distance Pipeline\",\n            \"description\": \"Test line to point minimum distance calculation\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Calculate Line to Point Distance\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"test_line\",\n                \"output_key\": \"line_point_distances\",\n                \"parameters\": {\n                    \"point_data\": \"test_points\"\n                }\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Calculate Line to Point Distance"
     ]
   },
@@ -19118,7 +19362,9 @@
     "section": "",
     "text": "This transform groups nearby intervals in a digital interval series based on a specified maximum spacing, which is useful for consolidating fragmented temporal events.\n\n\nThis transform merges digital intervals that are close to each other. If the gap between the end of one interval and the start of the next is less than or equal to the max_spacing value, the two intervals are combined into a single, larger interval. This process is repeated until no more intervals can be grouped.\nThis is particularly useful for cleaning up data where a single continuous event might be recorded as multiple, closely-spaced but separate intervals due to noise or transient interruptions in signal detection.\n\n\n\n\nIn neuroscience, this transform can be applied to refine event data:\n\nBout Analysis: When analyzing behaviors that occur in bouts (e.g., sniffing, grooming, vocalizations), this transform can merge closely spaced, individual instances into a single, continuous behavioral bout. For example, a series of short sniffs could be grouped into one “sniffing bout”.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Digital Interval Input",
       "Digital Interval Group"
     ]
   },
@@ -19129,7 +19375,9 @@
     "section": "",
     "text": "This transform groups nearby intervals in a digital interval series based on a specified maximum spacing, which is useful for consolidating fragmented temporal events.\n\n\nThis transform merges digital intervals that are close to each other. If the gap between the end of one interval and the start of the next is less than or equal to the max_spacing value, the two intervals are combined into a single, larger interval. This process is repeated until no more intervals can be grouped.\nThis is particularly useful for cleaning up data where a single continuous event might be recorded as multiple, closely-spaced but separate intervals due to noise or transient interruptions in signal detection.\n\n\n\n\nIn neuroscience, this transform can be applied to refine event data:\n\nBout Analysis: When analyzing behaviors that occur in bouts (e.g., sniffing, grooming, vocalizations), this transform can merge closely spaced, individual instances into a single, continuous behavioral bout. For example, a series of short sniffs could be grouped into one “sniffing bout”.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Digital Interval Input",
       "Digital Interval Group"
     ]
   },
@@ -19140,7 +19388,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has the following parameter:\n\nmax_spacing: The maximum allowed gap between two consecutive intervals for them to be merged. The time unit should be consistent with the data’s time representation (e.g., seconds or frames). If the gap is greater than this value, the intervals remain separate.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Digital Interval Input",
       "Digital Interval Group"
     ]
   },
@@ -19151,7 +19401,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation. This example groups intervals that are separated by 3.0 time units or less.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Interval Grouping Pipeline\",\n            \"description\": \"Test interval grouping on digital interval series\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Group Intervals\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"test_intervals\",\n                \"output_key\": \"grouped_intervals\",\n                \"parameters\": {\n                    \"max_spacing\": 3.0\n                }\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Digital Interval Input",
       "Digital Interval Group"
     ]
   },
@@ -19162,7 +19414,9 @@
     "section": "",
     "text": "This transform extracts a specific point from a line at a given fractional position. This is useful for isolating a single point of interest along a tracked object, such as the tip, base, or midpoint of a whisker or limb.\n\n\nThis operation pinpoints and extracts the coordinates of a single point along a line for each time step. The position of the point is determined by a fractional value from 0.0 (the start of the line) to 1.0 (the end of the line). Two different methods are available for extracting the point:\n\nDirect Method: This method calculates the cumulative length of the line’s segments and finds the point that lies at the specified fractional distance along this length. If use_interpolation is enabled, it will linearly interpolate between two adjacent vertices of the line to find the exact position. If disabled, it will select the nearest vertex.\nParametric Method: This method fits a polynomial to the line’s x and y coordinates separately as a function of the parametric distance along the line. It then evaluates the polynomial at the specified fractional position to determine the point’s coordinates. This can be useful for smoothing out irregularities in the line.\n\nThe output is a PointData object containing the extracted point for each time step.\n\n\n\n\nThis transformation is particularly useful for detailed analysis of movement and morphology:\n\nWhisker Analysis: Researchers can extract the tip (position 1.0), base (position 0.0), or any other consistent point along a tracked whisker. This allows for precise analysis of whisker contact, bending, or movement relative to other objects or whiskers.\nLimb Tracking: In studies of locomotion or reaching, this transform can isolate specific points on a limb, such as the endpoint (e.g., a hand or paw) or a joint (e.g., an elbow), to analyze trajectories and kinematics.\nMorphological Measurement: For organisms that change shape, like larvae or worms, this transform can be used to track specific points on the body midline to quantify bending or undulation.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Extract Point from Line"
     ]
   },
@@ -19173,7 +19427,9 @@
     "section": "",
     "text": "This transform extracts a specific point from a line at a given fractional position. This is useful for isolating a single point of interest along a tracked object, such as the tip, base, or midpoint of a whisker or limb.\n\n\nThis operation pinpoints and extracts the coordinates of a single point along a line for each time step. The position of the point is determined by a fractional value from 0.0 (the start of the line) to 1.0 (the end of the line). Two different methods are available for extracting the point:\n\nDirect Method: This method calculates the cumulative length of the line’s segments and finds the point that lies at the specified fractional distance along this length. If use_interpolation is enabled, it will linearly interpolate between two adjacent vertices of the line to find the exact position. If disabled, it will select the nearest vertex.\nParametric Method: This method fits a polynomial to the line’s x and y coordinates separately as a function of the parametric distance along the line. It then evaluates the polynomial at the specified fractional position to determine the point’s coordinates. This can be useful for smoothing out irregularities in the line.\n\nThe output is a PointData object containing the extracted point for each time step.\n\n\n\n\nThis transformation is particularly useful for detailed analysis of movement and morphology:\n\nWhisker Analysis: Researchers can extract the tip (position 1.0), base (position 0.0), or any other consistent point along a tracked whisker. This allows for precise analysis of whisker contact, bending, or movement relative to other objects or whiskers.\nLimb Tracking: In studies of locomotion or reaching, this transform can isolate specific points on a limb, such as the endpoint (e.g., a hand or paw) or a joint (e.g., an elbow), to analyze trajectories and kinematics.\nMorphological Measurement: For organisms that change shape, like larvae or worms, this transform can be used to track specific points on the body midline to quantify bending or undulation.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Extract Point from Line"
     ]
   },
@@ -19184,7 +19440,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has the following parameters:\n\nposition (float): The fractional distance along the line where the point should be extracted. Must be between 0.0 (start) and 1.0 (end).\nmethod (string): The method to use for point extraction. Can be either \"Direct\" or \"Parametric\".\npolynomial_order (integer, optional): The order of the polynomial to fit to the line if using the Parametric method. Defaults to 3.\nuse_interpolation (boolean, optional): Whether to use linear interpolation to find the exact point when using the Direct method. If false, the nearest vertex on the line is returned. Defaults to true.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Extract Point from Line"
     ]
   },
@@ -19195,7 +19453,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation. This example extracts the point at the 75% position along a line stored with the key whisker_1.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Whisker Tip Extraction Pipeline\",\n            \"description\": \"Extracts the tip of a whisker from line data.\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Extract Point from Line\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"whisker_1\",\n                \"output_key\": \"whisker_1_tip\",\n                \"parameters\": {\n                    \"position\": 0.75,\n                    \"method\": \"Direct\",\n                    \"use_interpolation\": true\n                }\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Extract Point from Line"
     ]
   },
@@ -19254,7 +19514,9 @@
     "section": "",
     "text": "This transform clips a set of lines based on where they intersect with a single, user-defined reference line.\n\n\nThis transformation is used to shorten or trim lines at the point where they cross a specified reference line. For each line in the input data, the algorithm finds the first point of intersection with the reference line. Based on the clip_side parameter, it then keeps either the segment of the line from its start to the intersection point (KeepBase) or the segment from the intersection point to its end (KeepDistal).\nIf a line does not intersect the reference line, it remains unchanged in the output. This is useful for standardizing line data, for example, by trimming all lines to a common boundary.\n\n\n\n\n\nStandardizing Whisker Tracking Data: In neuroscience experiments involving whisker tracking, it’s often necessary to analyze the whisker’s movement relative to a fixed point, like the edge of a pole or object. This transform can clip all tracked whisker lines at the boundary of that object, ensuring that only the relevant segment of the whisker is considered for analysis.\nAnalyzing Neurite Outgrowth: When studying neurite or axon growth in microscopy images, researchers might want to measure growth only up to a certain landmark or boundary. This transform can be used to clip the traced neurites at that boundary.\nPath Analysis in Behavioral Studies: In studies of animal behavior, if an animal’s path is tracked, this transform could be used to clip the path at the entrance to a specific zone or maze arm, isolating the behavior within or outside that area.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Clip by Reference Line"
     ]
   },
@@ -19265,7 +19527,9 @@
     "section": "",
     "text": "This transform clips a set of lines based on where they intersect with a single, user-defined reference line.\n\n\nThis transformation is used to shorten or trim lines at the point where they cross a specified reference line. For each line in the input data, the algorithm finds the first point of intersection with the reference line. Based on the clip_side parameter, it then keeps either the segment of the line from its start to the intersection point (KeepBase) or the segment from the intersection point to its end (KeepDistal).\nIf a line does not intersect the reference line, it remains unchanged in the output. This is useful for standardizing line data, for example, by trimming all lines to a common boundary.\n\n\n\n\n\nStandardizing Whisker Tracking Data: In neuroscience experiments involving whisker tracking, it’s often necessary to analyze the whisker’s movement relative to a fixed point, like the edge of a pole or object. This transform can clip all tracked whisker lines at the boundary of that object, ensuring that only the relevant segment of the whisker is considered for analysis.\nAnalyzing Neurite Outgrowth: When studying neurite or axon growth in microscopy images, researchers might want to measure growth only up to a certain landmark or boundary. This transform can be used to clip the traced neurites at that boundary.\nPath Analysis in Behavioral Studies: In studies of animal behavior, if an animal’s path is tracked, this transform could be used to clip the path at the entrance to a specific zone or maze arm, isolating the behavior within or outside that area.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Clip by Reference Line"
     ]
   },
@@ -19276,7 +19540,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has the following parameters:\n\nreference_line_data_name: The key identifying the LineData object in the data manager that will be used as the reference for clipping.\nreference_frame: The specific time frame within the reference line data to use for clipping. All lines in the input data will be clipped against this single frame of the reference line.\nclip_side: Determines which part of the line to keep after clipping.\n\nKeepBase: Keeps the portion of the line from its starting point to the intersection point.\nKeepDistal: Keeps the portion of the line from the intersection point to its end point.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Clip by Reference Line"
     ]
   },
@@ -19287,7 +19553,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation. This example clips a set of lines against a reference line, keeping the base segment of each line.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Line Clip Pipeline\",\n            \"description\": \"Test line clipping on line data\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Clip Line by Reference Line\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"test_line\",\n                \"output_key\": \"clipped_lines\",\n                \"parameters\": {\n                    \"reference_line_data_name\": \"reference_line\",\n                    \"reference_frame\": 0,\n                    \"clip_side\": \"KeepBase\"\n                }\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Clip by Reference Line"
     ]
   },
@@ -19298,7 +19566,9 @@
     "section": "",
     "text": "This transform resamples a line to either simplify its geometry or to ensure it has points that are evenly spaced.\n\n\nLine resampling is a common operation in data processing, used to either reduce the number of points in a line (simplification) or to create a new line with a specific number of points or spacing. This transform provides two different algorithms for resampling:\n\nFixed Spacing: This algorithm creates a new line with points that are a fixed distance apart. This is useful for standardizing the number of points in a line, or for preparing a line for further analysis that requires a uniform distribution of points.\nDouglas-Peucker: This algorithm simplifies a line by removing points that are close to the line segment. This is useful for reducing the complexity of a line while preserving its overall shape.\n\n\n\n\n\nIn neuroscience, line resampling can be used in a variety of applications:\n\nWhisker Tracking: When tracking the movement of a whisker, the output is often a line with a variable number of points. Resampling the line to a fixed number of points can be useful for standardizing the data for further analysis, such as calculating the curvature or angle of the whisker over time.\nDendrite Tracing: When tracing the path of a dendrite from a neuron, the resulting line can be very complex. The Douglas-Peucker algorithm can be used to simplify the line, making it easier to visualize and analyze the overall shape of the dendrite.\nAnimal Tracking: When tracking the path of an animal in an open field, the resulting line can be very long and detailed. Resampling the line can help to smooth out the path and reduce the amount of data that needs to be processed.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Resample"
     ]
   },
@@ -19309,7 +19579,9 @@
     "section": "",
     "text": "This transform resamples a line to either simplify its geometry or to ensure it has points that are evenly spaced.\n\n\nLine resampling is a common operation in data processing, used to either reduce the number of points in a line (simplification) or to create a new line with a specific number of points or spacing. This transform provides two different algorithms for resampling:\n\nFixed Spacing: This algorithm creates a new line with points that are a fixed distance apart. This is useful for standardizing the number of points in a line, or for preparing a line for further analysis that requires a uniform distribution of points.\nDouglas-Peucker: This algorithm simplifies a line by removing points that are close to the line segment. This is useful for reducing the complexity of a line while preserving its overall shape.\n\n\n\n\n\nIn neuroscience, line resampling can be used in a variety of applications:\n\nWhisker Tracking: When tracking the movement of a whisker, the output is often a line with a variable number of points. Resampling the line to a fixed number of points can be useful for standardizing the data for further analysis, such as calculating the curvature or angle of the whisker over time.\nDendrite Tracing: When tracing the path of a dendrite from a neuron, the resulting line can be very complex. The Douglas-Peucker algorithm can be used to simplify the line, making it easier to visualize and analyze the overall shape of the dendrite.\nAnimal Tracking: When tracking the path of an animal in an open field, the resulting line can be very long and detailed. Resampling the line can help to smooth out the path and reduce the amount of data that needs to be processed.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Resample"
     ]
   },
@@ -19320,7 +19592,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform has the following parameters:\n\nalgorithm: The resampling algorithm to use. This can be one of the following:\n\nFixedSpacing: Resamples the line to have points that are a fixed distance apart.\nDouglasPeucker: Simplifies the line using the Douglas-Peucker algorithm.\n\ntarget_spacing: The desired distance between points in the resampled line. This parameter is only used when the algorithm is set to FixedSpacing.\nepsilon: The tolerance for the Douglas-Peucker algorithm. This parameter is only used when the algorithm is set to DouglasPeucker. A larger value of epsilon will result in a more simplified line.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Resample"
     ]
   },
@@ -19331,7 +19605,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation. This example resamples a line to have points that are 15 pixels apart.\n[\n    {\n        \"transformations\": {\n            \"metadata\": {\n                \"name\": \"Line Resample Pipeline\",\n                \"description\": \"Test line resampling on line data\",\n                \"version\": \"1.0\"\n            },\n            \"steps\": [\n                {\n                    \"step_id\": \"1\",\n                    \"transform_name\": \"Resample Line\",\n                    \"phase\": \"analysis\",\n                    \"input_key\": \"test_lines\",\n                    \"output_key\": \"resampled_lines\",\n                    \"parameters\": {\n                        \"algorithm\": \"FixedSpacing\",\n                        \"target_spacing\": 15.0,\n                        \"epsilon\": 2.0\n                    }\n                }\n            ]\n        }\n    }\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Line Input",
       "Line Resample"
     ]
   },
@@ -19342,7 +19618,9 @@
     "section": "",
     "text": "This transform calculates the centroid (geometric center) for each mask in a dataset.\n\n\nThis transformation processes mask data, which represents regions of interest, and for each individual mask at each point in time, it computes the center of mass. The output is a series of points, where each point represents the calculated centroid of a corresponding mask. This is a common operation for summarizing a spatial distribution of pixels with a single representative point.\nThe calculation is purely geometric; it finds the average of the x and y coordinates of all the points within the mask. This means that for some non-convex (hollow or U-shaped) masks, the centroid can fall outside the mask itself, as shown in the examples below.\n\n\n\n\n\nTracking Cell Bodies: If a mask outlines a neuron’s soma, its centroid provides a consistent point for tracking the cell’s position over time, even if the cell’s shape changes slightly.\nAnalyzing Animal Behavior: When tracking an animal in a video, a mask might be generated around the animal’s body. The centroid of this mask can serve as a simplified representation of the animal’s location for trajectory analysis.\nQuantifying Limb Position: For masks drawn around an animal’s limbs, the centroid can be used to approximate the position of the limb for kinematic studies.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Calculate Mask Centroid"
     ]
   },
@@ -19353,7 +19631,9 @@
     "section": "",
     "text": "This transform calculates the centroid (geometric center) for each mask in a dataset.\n\n\nThis transformation processes mask data, which represents regions of interest, and for each individual mask at each point in time, it computes the center of mass. The output is a series of points, where each point represents the calculated centroid of a corresponding mask. This is a common operation for summarizing a spatial distribution of pixels with a single representative point.\nThe calculation is purely geometric; it finds the average of the x and y coordinates of all the points within the mask. This means that for some non-convex (hollow or U-shaped) masks, the centroid can fall outside the mask itself, as shown in the examples below.\n\n\n\n\n\nTracking Cell Bodies: If a mask outlines a neuron’s soma, its centroid provides a consistent point for tracking the cell’s position over time, even if the cell’s shape changes slightly.\nAnalyzing Animal Behavior: When tracking an animal in a video, a mask might be generated around the animal’s body. The centroid of this mask can serve as a simplified representation of the animal’s location for trajectory analysis.\nQuantifying Limb Position: For masks drawn around an animal’s limbs, the centroid can be used to approximate the position of the limb for kinematic studies.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Calculate Mask Centroid"
     ]
   },
@@ -19364,7 +19644,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform does not have any configurable parameters. It calculates the standard geometric centroid for each mask.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Calculate Mask Centroid"
     ]
   },
@@ -19375,7 +19657,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to run this transformation.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Mask Centroid Pipeline\",\n            \"description\": \"Test mask centroid calculation on mask data\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Calculate Mask Centroid\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"test_masks\",\n                \"output_key\": \"mask_centroids\",\n                \"parameters\": {}\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Calculate Mask Centroid"
     ]
   },
@@ -19482,7 +19766,9 @@
     "section": "",
     "text": "This transform reduces a binary mask to a single-pixel-wide representation, preserving the essential structure of the shape.\n\n\nThis [Data Transform Operation] uses an algorithm to find the “skeleton” of a mask. The skeleton is a thinned version of the original shape that is equidistant from its boundaries. This process is useful for simplifying complex shapes into a more straightforward representation, like converting a blob into a line or a set of lines. This operation is parameter-free.\nThe skeletonization process is applied to each time frame of the mask data independently.\n\n\n\n\n\nDendritic and Axonal Tracing: In microscopy images of neurons, skeletonization can simplify the complex structures of dendrites and axons into simple lines. This allows for easier analysis of branching patterns, length measurements, and tracing of neural pathways.\nVessel Analysis: When analyzing blood vessels in the brain (angiography), skeletonization can reduce the vessels to their centerlines, which simplifies the measurement of vessel length, tortuosity, and branching angles.\nAnimal Tracking: When tracking the shape of an animal’s body or tail from video, skeletonization can provide a simplified representation that is easier to analyze for postural changes or movements over time.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Skeletonize Mask"
     ]
   },
@@ -19493,7 +19779,9 @@
     "section": "",
     "text": "This transform reduces a binary mask to a single-pixel-wide representation, preserving the essential structure of the shape.\n\n\nThis [Data Transform Operation] uses an algorithm to find the “skeleton” of a mask. The skeleton is a thinned version of the original shape that is equidistant from its boundaries. This process is useful for simplifying complex shapes into a more straightforward representation, like converting a blob into a line or a set of lines. This operation is parameter-free.\nThe skeletonization process is applied to each time frame of the mask data independently.\n\n\n\n\n\nDendritic and Axonal Tracing: In microscopy images of neurons, skeletonization can simplify the complex structures of dendrites and axons into simple lines. This allows for easier analysis of branching patterns, length measurements, and tracing of neural pathways.\nVessel Analysis: When analyzing blood vessels in the brain (angiography), skeletonization can reduce the vessels to their centerlines, which simplifies the measurement of vessel length, tortuosity, and branching angles.\nAnimal Tracking: When tracking the shape of an animal’s body or tail from video, skeletonization can provide a simplified representation that is easier to analyze for postural changes or movements over time.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Skeletonize Mask"
     ]
   },
@@ -19504,7 +19792,9 @@
     "section": "Parameters",
     "text": "Parameters\nThis transform does not have any parameters. The underlying skeletonization algorithm is applied with default settings.",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Skeletonize Mask"
     ]
   },
@@ -19515,7 +19805,9 @@
     "section": "Example Configuration",
     "text": "Example Configuration\nHere is a complete example of a JSON configuration file that could be used to load mask data and then apply the skeletonization transform.\n[\n{\n    \"transformations\": {\n        \"metadata\": {\n            \"name\": \"Mask Skeletonization Pipeline\",\n            \"description\": \"Test mask skeletonization on rectangular mask\",\n            \"version\": \"1.0\"\n        },\n        \"steps\": [\n            {\n                \"step_id\": \"1\",\n                \"transform_name\": \"Skeletonize Mask\",\n                \"phase\": \"analysis\",\n                \"input_key\": \"test_mask\",\n                \"output_key\": \"skeletonized_mask\",\n                \"parameters\": {}\n            }\n        ]\n    }\n}\n]",
     "crumbs": [
-      "Data Inspectors",
+      "Data Transformations",
+      "Transforms by Input Type",
+      "Mask Input",
       "Skeletonize Mask"
     ]
   },
@@ -19678,33 +19970,21 @@
     "href": "user_guide/image_processing/bilateral_filter.html",
     "title": "Bilateral Filter",
     "section": "",
-    "text": "https://docs.opencv.org/4.x/js_filtering_bilateralFilter.html\nhttps://docs.opencv.org/4.x/d4/d86/group__imgproc__filter.html#ga9d7064d478c95d60003cf839430737ed\nhttps://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_COPIES/MANDUCHI1/Bilateral_Filtering.html",
-    "crumbs": [
-      "Image Processing",
-      "Bilateral Filter"
-    ]
+    "text": "https://docs.opencv.org/4.x/js_filtering_bilateralFilter.html\nhttps://docs.opencv.org/4.x/d4/d86/group__imgproc__filter.html#ga9d7064d478c95d60003cf839430737ed\nhttps://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_COPIES/MANDUCHI1/Bilateral_Filtering.html"
   },
   {
     "objectID": "user_guide/image_processing/bilateral_filter.html#references",
     "href": "user_guide/image_processing/bilateral_filter.html#references",
     "title": "Bilateral Filter",
     "section": "",
-    "text": "https://docs.opencv.org/4.x/js_filtering_bilateralFilter.html\nhttps://docs.opencv.org/4.x/d4/d86/group__imgproc__filter.html#ga9d7064d478c95d60003cf839430737ed\nhttps://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_COPIES/MANDUCHI1/Bilateral_Filtering.html",
-    "crumbs": [
-      "Image Processing",
-      "Bilateral Filter"
-    ]
+    "text": "https://docs.opencv.org/4.x/js_filtering_bilateralFilter.html\nhttps://docs.opencv.org/4.x/d4/d86/group__imgproc__filter.html#ga9d7064d478c95d60003cf839430737ed\nhttps://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_COPIES/MANDUCHI1/Bilateral_Filtering.html"
   },
   {
     "objectID": "user_guide/image_processing/contrast.html",
     "href": "user_guide/image_processing/contrast.html",
     "title": "Contrast and Brightness Adjustment",
     "section": "",
-    "text": "These two filters are implemented with a single linear transform taking parameters “alpha” (\\(\\alpha\\)) and “beta” (\\(\\beta\\)). Pixel values are multiplied by \\(\\alpha\\) to adjust contrast, then have \\(\\beta\\) added to adjust brightness: \\[\ng(x) = \\alpha f(x) + \\beta\n\\] In effect the magnitude of \\(\\alpha\\) corresponds to the amount of contrast and the magnitude of \\(\\beta\\) corresponds to the amount of brightness.",
-    "crumbs": [
-      "Image Processing",
-      "Contrast and Brightness Adjustment"
-    ]
+    "text": "These two filters are implemented with a single linear transform taking parameters “alpha” (\\(\\alpha\\)) and “beta” (\\(\\beta\\)). Pixel values are multiplied by \\(\\alpha\\) to adjust contrast, then have \\(\\beta\\) added to adjust brightness: \\[\ng(x) = \\alpha f(x) + \\beta\n\\] In effect the magnitude of \\(\\alpha\\) corresponds to the amount of contrast and the magnitude of \\(\\beta\\) corresponds to the amount of brightness."
   },
   {
     "objectID": "user_guide/index.html",
@@ -19767,16 +20047,6 @@
     ]
   },
   {
-    "objectID": "user_guide/index.html#image-processing",
-    "href": "user_guide/index.html#image-processing",
-    "title": "User Guide",
-    "section": "Image Processing",
-    "text": "Image Processing\n\nOverview\nContrast\nGamma\nSharpening\nCLAHE\nBilateral Filter",
-    "crumbs": [
-      "Introduction"
-    ]
-  },
-  {
     "objectID": "user_guide/index.html#data-viewer",
     "href": "user_guide/index.html#data-viewer",
     "title": "User Guide",
@@ -19811,7 +20081,7 @@
     "href": "user_guide/index.html#data-transformations",
     "title": "User Guide",
     "section": "Data Transformations",
-    "text": "Data Transformations\n\nOverview\nTransform Widget\n\n\nReference Guides\n\nMask Transforms Reference\nMedia Transforms Reference\nPoint Transforms Reference\nInterval Transforms Reference",
+    "text": "Data Transformations\n\nOverview\nTransform Widget\n\n\nReference Guides\n\nMask Transforms Reference\nMedia Transforms Reference\nPoint Transforms Reference\nInterval Transforms Reference\n\n\n\nTransforms by Input Type\n\nAnalog Input\n\nAnalog Filter\nAnalog Hilbert Phase\nAnalog Event Threshold\nAnalog Interval Threshold\n\n\n\nDigital Interval Input\n\nDigital Interval Group\n\n\n\nLine Input\n\nLine Angle\nLine Clip\nLine Curvature\nLine Resample\nExtract Line Subsegment\nCalculate Line-to-Point Distance\nExtract Point from Line\n\n\n\nMask Input\n\nMask Area\nMask Centroid\nCalculate Mask Principal Axis\nRemove Small Connected Components\nSkeletonize Mask\nFill Mask Holes\nApply Median Filter",
     "crumbs": [
       "Introduction"
     ]
@@ -19821,7 +20091,7 @@
     "href": "user_guide/index.html#data-inspectors",
     "title": "User Guide",
     "section": "Data Inspectors",
-    "text": "Data Inspectors\n\nTensor Inspector\nAnalog Event Threshold\nAnalog Interval Threshold\nDigital Interval Group\nAnalog Hilbert Phase\nLine Angle\nLine Clip\nLine Curvature\nLine Resample\nExtract Line Subsegment\nCalculate Line-to-Point Distance\nExtract Point from Line\nMask Area\nMask Centroid\nCalculate Mask Principal Axis\nRemove Small Connected Components\nSkeletonize Mask\nFill Mask Holes\nApply Median Filter",
+    "text": "Data Inspectors\n\nTensor Inspector",
     "crumbs": [
       "Introduction"
     ]
@@ -20181,6 +20451,72 @@
     ]
   },
   {
+    "objectID": "user_guide/media_viewer/lines.html",
+    "href": "user_guide/media_viewer/lines.html",
+    "title": "Line Data",
+    "section": "",
+    "text": "Line data represent elongated structures as connected geometry.",
+    "crumbs": [
+      "Media Viewer",
+      "Line Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/lines.html#how-line-data-is-represented",
+    "href": "user_guide/media_viewer/lines.html#how-line-data-is-represented",
+    "title": "Line Data",
+    "section": "How Line Data Is Represented",
+    "text": "How Line Data Is Represented\nIn Neuralyzer, a line is represented as an ordered set of connected points (a polyline):\n\nPoint order defines path direction along the structure.\nAdjacent points are treated as connected segments.\nA line can include a base/reference end, which is important for orientation-sensitive analysis.\n\nThis representation works well for whiskers, contours, centerlines, and other curvilinear features.",
+    "crumbs": [
+      "Media Viewer",
+      "Line Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/lines.html#how-lines-appear-in-the-media-viewer",
+    "href": "user_guide/media_viewer/lines.html#how-lines-appear-in-the-media-viewer",
+    "title": "Line Data",
+    "section": "How Lines Appear in the Media Viewer",
+    "text": "How Lines Appear in the Media Viewer\nWhen enabled, lines are drawn as overlays on the media:\n\nYou can visually inspect shape, continuity, and frame-to-frame motion.\nMultiple line features can be shown at once.\nStyling (color/opacity/width) affects display only, not geometric measurements.",
+    "crumbs": [
+      "Media Viewer",
+      "Line Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/lines.html#temporal-behavior",
+    "href": "user_guide/media_viewer/lines.html#temporal-behavior",
+    "title": "Line Data",
+    "section": "Temporal Behavior",
+    "text": "Temporal Behavior\nLike other tracked features, line geometry can vary by frame:\n\nAt each frame, the viewer displays the line sample for that timestamp.\nMissing frames can be filled or regularized with transforms when appropriate.",
+    "crumbs": [
+      "Media Viewer",
+      "Line Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/lines.html#common-follow-up-transforms",
+    "href": "user_guide/media_viewer/lines.html#common-follow-up-transforms",
+    "title": "Line Data",
+    "section": "Common Follow-up Transforms",
+    "text": "Common Follow-up Transforms\n\nLine Angle\nLine Curvature\nLine Resample\nExtract Point from Line",
+    "crumbs": [
+      "Media Viewer",
+      "Line Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/lines.html#practical-tip",
+    "href": "user_guide/media_viewer/lines.html#practical-tip",
+    "title": "Line Data",
+    "section": "Practical Tip",
+    "text": "Practical Tip\nKeep line endpoint conventions consistent (base/tip) across sessions. Consistent ordering makes angle, curvature, and grouping outputs far easier to interpret.",
+    "crumbs": [
+      "Media Viewer",
+      "Line Data"
+    ]
+  },
+  {
     "objectID": "user_guide/media_viewer/overview.html",
     "href": "user_guide/media_viewer/overview.html",
     "title": "Media Viewer Overview",
@@ -20464,54 +20800,6 @@
     "crumbs": [
       "Python Console",
       "Python Console"
-    ]
-  },
-  {
-    "objectID": "examples/keypoint_labeling.html#full-video",
-    "href": "examples/keypoint_labeling.html#full-video",
-    "title": "Keypoint Video Labeling",
-    "section": "Full Video",
-    "text": "Full Video\nWatch the complete keypoint labeling workflow from start to finish:\n\n\nYour browser does not support the video tag. You can download the video here: keypoint_example.mp4.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Keypoint Labeling"
-    ]
-  },
-  {
-    "objectID": "examples/keypoint_labeling.html#step-by-step",
-    "href": "examples/keypoint_labeling.html#step-by-step",
-    "title": "Keypoint Video Labeling",
-    "section": "Step-by-Step",
-    "text": "Step-by-Step\n\nStep 1: Load Video or Existing Labels\n\n\n\n\n\nTo begin labeling:\n\nOpen the application and navigate to File &gt; Load Data.\nSelect the video you intend to annotate.\n\nAlternatively, if you’ve already created keypoints and want to review or update them:\n\nSelect File &gt; Load JSON Configuration and choose your .json file.\n\n\n\n\n\n\n\nTip\n\n\n\nSee: Setting up a JSON File for more on configuration options.\n\n\n\n\n\nStep 2: Open the Data Manager\n\n\n\n\n\nTo create or manage point data:\n\nNavigate to Modules &gt; Data Manager to open the Data Manager Module.\n\n\n\n\nStep 3: Create a New Keypoint Feature\n\n\n\n\n\nIn the Data Manager:\n\nSet the Output Directory: This is where your labeled data (CSV) will be saved.\n\nExample: C:/Users/wanglab/Desktop/Cartoon_Mouse\n\nCreate New Data:\n\nType: point\nTime Frame: Select based on your analysis requirements (e.g., time for temporal tracking).\nName: Choose a descriptive name (e.g., jaw, nose, or paw).\n\n\nClick Create New Data to add the new feature.\n\n\n\nStep 4: Edit and Add Keypoints in the Media Widget\n\n\n\n\n\nOnce the point feature is created:\n\nEnable the Feature: Select the feature in the media widget to activate the keypoint editor.\nCustomize Appearance:\n\nChoose a color using the hex selector.\nAdjust the opacity (Alpha) for better contrast against the video.\nModify the size and shape of the marker if needed.\n\nBegin Labeling:\n\nSwitch mouse mode to “Select Point”.\nClick anywhere in the video frame to add a point.\nClicking on an existing point will move it.\n\n\n\n\n\n\n\n\n\n\n\n\n\nImportant\n\n\n\nNote: The keypoint is recorded as a single-pixel coordinate. Visual shape and style are only for display and are not saved.\n\n\n\n\n\nStep 5: Review and Export Your Labels\n\n\n\n\n\nAfter labeling:\n\nSelect your feature (e.g., jaw) in the Data Manager.\nYou’ll see a spreadsheet with:\n\nFrame indices\n(x, y) coordinates for each labeled keypoint\n\n\n\n\nExport Options:\n\nFile Name: Choose a meaningful name for your CSV.\nDelimiter: (e.g., comma , or tab \\t) – separates columns.\nLine Ending: Select line break style (\\n, \\r\\n, etc.).\nHeader: Optionally include a header row with custom labels.\n\n\n\n\nOptional: Export Matching Media Frames\n\n\n\n\n\nYou can export the video frames where keypoints were labeled:\n\nCheck Export Matching Media Frames.\nChoose from export options:\n\nSave by Frame Name\nFrame ID Padding\nImage Name Prefix\nSubfolder for Images\nOverwrite Existing Files\n\n\n\n\n\n\n\n\nWarning\n\n\n\nKeypoints will not be drawn on these frames. Only raw frames are exported.\n\n\n\n\n\nStep 6: Save to CSV\n\n\n\n\n\nOnce you’ve reviewed your labels:\n\nClick “Save to CSV”\n\nA confirmation will appear showing the file path.\nYour labeled keypoint data is now saved and ready for further analysis.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Keypoint Labeling"
-    ]
-  },
-  {
-    "objectID": "examples/keypoint_labeling.html#summary",
-    "href": "examples/keypoint_labeling.html#summary",
-    "title": "Keypoint Video Labeling",
-    "section": "Summary",
-    "text": "Summary\nThis tutorial demonstrated how to:\n\nLoad a video or keypoint configuration\nCreate and configure keypoint data\nAnnotate frames with feature coordinates\nExport label data and relevant frames",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Keypoint Labeling"
-    ]
-  },
-  {
-    "objectID": "examples/keypoint_labeling.html#see-also",
-    "href": "examples/keypoint_labeling.html#see-also",
-    "title": "Keypoint Video Labeling",
-    "section": "See Also",
-    "text": "See Also\n\nPoint Transforms Reference",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Keypoint Labeling"
     ]
   }
 ]

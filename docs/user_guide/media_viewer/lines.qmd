@@ -1,4 +1,43 @@
 ---
 title: "Line Data"
 format: html
+toc: true
 ---
+
+Line data represent elongated structures as connected geometry.
+
+## How Line Data Is Represented
+
+In Neuralyzer, a line is represented as an **ordered set of connected points** (a polyline):
+
+- Point order defines path direction along the structure.
+- Adjacent points are treated as connected segments.
+- A line can include a **base/reference end**, which is important for orientation-sensitive analysis.
+
+This representation works well for whiskers, contours, centerlines, and other curvilinear features.
+
+## How Lines Appear in the Media Viewer
+
+When enabled, lines are drawn as overlays on the media:
+
+- You can visually inspect shape, continuity, and frame-to-frame motion.
+- Multiple line features can be shown at once.
+- Styling (color/opacity/width) affects display only, not geometric measurements.
+
+## Temporal Behavior
+
+Like other tracked features, line geometry can vary by frame:
+
+- At each frame, the viewer displays the line sample for that timestamp.
+- Missing frames can be filled or regularized with transforms when appropriate.
+
+## Common Follow-up Transforms
+
+- [Line Angle](../data_transformations/line_angle.qmd)
+- [Line Curvature](../data_transformations/line_curvature.qmd)
+- [Line Resample](../data_transformations/line_resample.qmd)
+- [Extract Point from Line](../data_transformations/extract_point_from_line.qmd)
+
+## Practical Tip
+
+Keep line endpoint conventions consistent (base/tip) across sessions. Consistent ordering makes angle, curvature, and grouping outputs far easier to interpret.

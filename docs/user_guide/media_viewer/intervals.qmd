@@ -1,4 +1,44 @@
 ---
 title: "Interval Data"
 format: html
+toc: true
 ---
+
+Interval data represent **time spans** where something is active.
+
+## How Interval Data Is Represented
+
+In Neuralyzer, intervals are represented as **temporal boxes**:
+
+- Each interval has a **start** and **end** in a TimeFrame.
+- Intervals may also carry an identifier/group label depending on workflow.
+- The representation is temporal first (ranges over time), not spatial geometry.
+
+This is ideal for events with duration, such as contact epochs, licking bouts, stimulation windows, or behavioral states.
+
+## How Intervals Appear in the Media Viewer
+
+When interval data are enabled, the viewer treats the current frame as either:
+
+- **inside** an interval (active), or
+- **outside** an interval (inactive).
+
+In practical workflows, intervals are commonly reviewed together with media, points, masks, and lines to verify timing against visible behavior.
+
+## Temporal Behavior and TimeFrame
+
+Intervals depend directly on the assigned TimeFrame:
+
+- Correct TimeFrame assignment ensures interval boundaries line up with video/frame indices.
+- If clocks differ across modalities, use TimeFrame mapping before interpreting overlap.
+
+See [TimeFrame](../../concepts/timeframe.qmd) for synchronization details.
+
+## Common Follow-up Transforms
+
+- [Digital Interval Group](../data_transformations/digital_interval_group.qmd)
+- [Interval Transforms Reference](../data_transformations/interval_transforms_reference.qmd)
+
+## Practical Tip
+
+Use interval data when you need **durations** and **on/off windows**. Use event data for instantaneous timestamps and point/line/mask data for spatial measurements.

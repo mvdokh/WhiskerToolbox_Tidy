@@ -3,7 +3,8 @@ title: "Data Transformations"
 format: html
 ---
 
-Data transformations are operations we perform on one kind of data that result in another kind of data.
+Data transformations are operations that take one data modality as input
+and produce derived data for downstream analysis.
 
 ![Figure: 1) Feature select from available loaded data 2) Tranformation select Dialog box; 3) Output name of new data created by transformation; 4) Execution Button; 5) Parameter window for selected transformation](images/clipboard-2963664009.png)
 
@@ -14,5 +15,49 @@ Data transformations are operations we perform on one kind of data that result i
 - [Point Transforms Reference](point_transforms_reference.qmd)
 - [Interval Transforms Reference](interval_transforms_reference.qmd)
 
-These pages are being expanded incrementally, starting with the mask
-transform family.
+## Complete Transform Table (Registry)
+
+The table below is derived from the transform registry in source:
+`src/DataManager/transforms/TransformRegistry.cpp`.
+
+| Input Data | Transform | Output Data |
+|---|---|---|
+| Analog Time Series | Filter | Analog Time Series |
+| Analog Time Series | Hilbert Phase | Analog Time Series |
+| Analog Time Series | Scale and Normalize | Analog Time Series |
+| Analog Time Series | Threshold Event Detection | Digital Event Series |
+| Analog Time Series | Threshold Interval Detection | Digital Interval Series |
+| Analog Time Series | Interval Peak Detection | Digital Event Series |
+| Digital Interval Series | Group Intervals | Digital Interval Series |
+| Digital Interval Series | Boolean Operation | Digital Interval Series |
+| Line Data | Line Alignment to Bright Features | Line Data |
+| Line Data | Calculate Line Angle | Analog Time Series |
+| Line Data | Calculate Line to Point Distance | Analog Time Series |
+| Line Data | Line Base Flip | Line Data |
+| Line Data | Resample Line | Line Data |
+| Line Data | Calculate Line Curvature | Analog Time Series |
+| Line Data | Extract Line Subsegment | Line Data |
+| Line Data | Extract Point from Line | Point Data |
+| Line Data | Clip Line by Reference Line | Line Data |
+| Line Data | Group Lines by Proximity | Line Data |
+| Line Data | Group Lines using Kalman Filtering | Line Data |
+| Line Data | Line Outlier Detection | Line Data |
+| Line Data | Group Lines by Index | Line Data |
+| Line Data | Line Group to Digital Intervals | Digital Interval Series |
+| Mask Data | Calculate Area | Analog Time Series |
+| Mask Data | Calculate Mask Centroid | Point Data |
+| Mask Data | Remove Small Connected Components | Mask Data |
+| Mask Data | Fill Mask Holes | Mask Data |
+| Mask Data | Apply Median Filter | Mask Data |
+| Mask Data | Calculate Mask Principal Axis | Line Data |
+| Mask Data | Convert Mask To Line | Line Data |
+| Mask Data | Skeletonize Mask | Mask Data |
+| Point Data | Track Points Through Masks (Particle Filter) | Point Data |
+| Media Data | Whisker Tracing | Line Data |
+
+## Notes
+
+- Grouping transforms (for example line grouping/outlier transforms) may
+	preserve the `Line Data` modality while updating grouping assignments.
+- Some registry transforms are listed here even if a dedicated user-guide
+	page has not yet been written.

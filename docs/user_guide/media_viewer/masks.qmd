@@ -1,4 +1,46 @@
 ---
 title: "Mask Data"
 format: html
+toc: true
 ---
+
+Mask data represent **regions** in each frame rather than single coordinates.
+
+## How Mask Data Is Represented
+
+In Neuralyzer, a mask is represented as a **binary spatial region** for a given frame/time index:
+
+- Pixels inside the object are foreground.
+- Pixels outside the object are background.
+- A feature can have different mask geometry at different times.
+
+This makes masks suitable when full object shape matters (for example tongue/body outlines, contact patches, segmented structures), not just point locations.
+
+## How Masks Appear in the Media Viewer
+
+When a mask feature is enabled, the Media Viewer draws it as a semi-transparent overlay on top of the media.
+
+- **Color and alpha** control visibility and contrast against the image/video.
+- Multiple mask features can be viewed together for comparison.
+- The rendered overlay is display-focused; exported data keeps the mask geometry representation.
+
+## Temporal Behavior
+
+Masks are frame-aware and TimeFrame-aware:
+
+- At each current frame, the viewer displays the corresponding mask sample.
+- If no mask exists at a frame, nothing is drawn for that feature at that time.
+- TimeFrame assignment controls synchronization with other modalities.
+
+## Common Follow-up Transforms
+
+Mask data is often transformed into derived features:
+
+- [Calculate Mask Area](../data_transformations/mask_area.qmd)
+- [Calculate Mask Centroid](../data_transformations/mask_centroid.qmd)
+- [Calculate Mask Principal Axis](../data_transformations/calculate_mask_principal_axis.qmd)
+- [Convert Mask To Line](../data_transformations/mask_transforms_reference.qmd#convert-mask-to-line)
+
+## Practical Tip
+
+Use masks when your downstream analysis depends on **shape**, **coverage**, or **boundary geometry**. Use points when you only need one tracked location.
