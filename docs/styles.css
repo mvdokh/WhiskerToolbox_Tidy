@@ -10,3 +10,13 @@
 	transform: scale(2);
 	transform-origin: left center;
 }
+
+/* Apply a subtle shadow to content images and GIFs across docs pages. */
+main img {
+	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+/* Keep the homepage hero image shadow-free. */
+main img[src*="hero.png"] {
+	box-shadow: none;
+}

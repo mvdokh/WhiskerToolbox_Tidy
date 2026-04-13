@@ -20444,5 +20444,17 @@
       "Python Console",
       "Python Console"
     ]
+  },
+  {
+    "objectID": "concepts/timeframe.html#assigning-a-timeframe-to-a-new-data-feature",
+    "href": "concepts/timeframe.html#assigning-a-timeframe-to-a-new-data-feature",
+    "title": "TimeFrame",
+    "section": "Assigning a TimeFrame to a New Data Feature",
+    "text": "Assigning a TimeFrame to a New Data Feature\nWhen you create a new feature in Data Manager, you can assign either a TimeFrame that was loaded from source data or one you created yourself.\n\nOpen Modules &gt; Data Manager.\nIn Create New Data, enter the new feature key and data type.\nIn the TimeFrame dropdown, select the desired TimeFrame.\nClick Create to register the new feature.\n\n\n\n\nAssigning a loaded or newly created TimeFrame to a new data feature in the Data Manager.\n\n\nThis assignment determines how the new feature synchronizes with other modalities in plots, labeling workflows, and transforms.",
+    "crumbs": [
+      "Learning Resources",
+      "Concepts",
+      "TimeFrame"
+    ]
   }
 ]

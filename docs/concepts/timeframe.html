@@ -506,8 +506,8 @@ window.Quarto = {
   <li><a href="#why-timeframes-matter" id="toc-why-timeframes-matter" class="nav-link active" data-scroll-target="#why-timeframes-matter">Why TimeFrames Matter</a></li>
   <li><a href="#data-types-and-their-time-bases" id="toc-data-types-and-their-time-bases" class="nav-link" data-scroll-target="#data-types-and-their-time-bases">Data Types and Their Time Bases</a></li>
   <li><a href="#sampling-and-index-conversion" id="toc-sampling-and-index-conversion" class="nav-link" data-scroll-target="#sampling-and-index-conversion">Sampling and Index Conversion</a></li>
+  <li><a href="#assigning-a-timeframe-to-a-new-data-feature" id="toc-assigning-a-timeframe-to-a-new-data-feature" class="nav-link" data-scroll-target="#assigning-a-timeframe-to-a-new-data-feature">Assigning a TimeFrame to a New Data Feature</a></li>
   <li><a href="#creating-your-own-timeframe-in-the-app" id="toc-creating-your-own-timeframe-in-the-app" class="nav-link" data-scroll-target="#creating-your-own-timeframe-in-the-app">Creating Your Own TimeFrame in the App</a></li>
-  <li><a href="#assigning-timeframes-to-new-features" id="toc-assigning-timeframes-to-new-features" class="nav-link" data-scroll-target="#assigning-timeframes-to-new-features">Assigning TimeFrames to New Features</a></li>
   <li><a href="#python-console-integration" id="toc-python-console-integration" class="nav-link" data-scroll-target="#python-console-integration">Python Console Integration</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   </ul>
@@ -584,6 +584,23 @@ t = \frac{i}{f_s}
 \]</span></p>
 <p>So index <code>15000</code> at 30 kHz and index <code>250</code> at 500 Hz both correspond to <span class="math inline">\(t = 0.5\)</span> seconds.</p>
 </section>
+<section id="assigning-a-timeframe-to-a-new-data-feature" class="level2">
+<h2 class="anchored" data-anchor-id="assigning-a-timeframe-to-a-new-data-feature">Assigning a TimeFrame to a New Data Feature</h2>
+<p>When you create a new feature in Data Manager, you can assign either a TimeFrame that was loaded from source data or one you created yourself.</p>
+<ol type="1">
+<li>Open <strong>Modules &gt; Data Manager</strong>.</li>
+<li>In <strong>Create New Data</strong>, enter the new feature key and data type.</li>
+<li>In the <strong>TimeFrame</strong> dropdown, select the desired TimeFrame.</li>
+<li>Click <strong>Create</strong> to register the new feature.</li>
+</ol>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/assign_timeframe.png" class="img-fluid figure-img"></p>
+<figcaption>Assigning a loaded or newly created TimeFrame to a new data feature in the Data Manager.</figcaption>
+</figure>
+</div>
+<p>This assignment determines how the new feature synchronizes with other modalities in plots, labeling workflows, and transforms.</p>
+</section>
 <section id="creating-your-own-timeframe-in-the-app" class="level2">
 <h2 class="anchored" data-anchor-id="creating-your-own-timeframe-in-the-app">Creating Your Own TimeFrame in the App</h2>
 <p>You can create a custom derived TimeFrame directly in the Data Manager:</p>
@@ -606,10 +623,6 @@ t = \frac{i}{f_s}
 N_{out} = (N_{in} - 1) \cdot \text{factor} + 1
 \]</span></p>
 <p>After creation, the new TimeFrame appears in the TimeFrame table and in the TimeFrame selector when creating new data features.</p>
-</section>
-<section id="assigning-timeframes-to-new-features" class="level2">
-<h2 class="anchored" data-anchor-id="assigning-timeframes-to-new-features">Assigning TimeFrames to New Features</h2>
-<p>When creating data in Data Manager (<strong>Create New Data</strong>), choose the feature’s TimeFrame from the dropdown. This keeps labels, transforms, and plots on the intended temporal grid.</p>
 </section>
 <section id="python-console-integration" class="level2">
 <h2 class="anchored" data-anchor-id="python-console-integration">Python Console Integration</h2>
