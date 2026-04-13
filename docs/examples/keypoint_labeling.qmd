@@ -2,7 +2,7 @@
 title: "Keypoint Video Labeling"
 ---
 
-![](gif.gif){fig-align="center"}
+![](../images/tongue0001-1000.gif){fig-align="center" width="760"}
 
 Keypoint labeling is a powerful method to systematically study motion, behavior, and anatomical positioning over time. By marking and tracking specific locations on subjects across frames in a video, you can extract detailed data about the dynamics of movement.
 

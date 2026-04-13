@@ -5,6 +5,8 @@ editor:
     wrap: 72
 ---
 
+![](../../images/0001-1000.gif){fig-align="center"}
+
 ## Overview
 
 Mask labeling is useful when you need full object shapes (not just

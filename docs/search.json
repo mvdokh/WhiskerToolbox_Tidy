@@ -1792,23 +1792,11 @@
     ]
   },
   {
-    "objectID": "learning-resources/tutorials/mask_labeling.html",
-    "href": "learning-resources/tutorials/mask_labeling.html",
-    "title": "Tutorial: Mask Labeling",
-    "section": "",
-    "text": "Mask labeling is useful when you need full object shapes (not just single points) across time. This tutorial walks through a practical workflow for creating and refining masks in video data.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Mask Labeling"
-    ]
-  },
-  {
     "objectID": "learning-resources/tutorials/mask_labeling.html#overview",
     "href": "learning-resources/tutorials/mask_labeling.html#overview",
     "title": "Tutorial: Mask Labeling",
-    "section": "",
-    "text": "Mask labeling is useful when you need full object shapes (not just single points) across time. This tutorial walks through a practical workflow for creating and refining masks in video data.",
+    "section": "Overview",
+    "text": "Overview\nMask labeling is useful when you need full object shapes (not just single points) across time. This tutorial walks through a practical workflow for creating and refining masks in video data.",
     "crumbs": [
       "Learning Resources",
       "Tutorials",
