@@ -4,11 +4,11 @@ page-layout: full
 toc: false
 ---
 
-# Complex Neuroscience Analysis. No Coding Required.
-
 ::: {.text-center}
-![](images/hero.png)
+![](images/hero.png){width="60%"}
 :::
+
+# Complex Neuroscience Analysis. No Coding Required.
 
 **A powerful, cross-platform toolkit for visualizing and analyzing experimental data.**
 
