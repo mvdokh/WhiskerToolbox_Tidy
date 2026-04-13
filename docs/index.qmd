@@ -6,6 +6,10 @@ toc: false
 
 # Complex Neuroscience Analysis. No Coding Required.
 
+::: {.text-center}
+![](images/hero.png)
+:::
+
 **A powerful, cross-platform toolkit for visualizing and analyzing experimental data.**
 
 [Get Started](getting-started.qmd){.btn .btn-primary .btn-lg role="button"} [Download](https://github.com/paulmthompson/WhiskerToolbox/releases/latest){.btn .btn-outline-primary .btn-lg role="button"}
