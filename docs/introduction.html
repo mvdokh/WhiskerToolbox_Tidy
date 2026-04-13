@@ -319,6 +319,7 @@ ul.task-list li input[type="checkbox"] {
   <ul class="collapse">
   <li><a href="#core-capabilities" id="toc-core-capabilities" class="nav-link" data-scroll-target="#core-capabilities">Core capabilities</a></li>
   <li><a href="#typical-use-cases" id="toc-typical-use-cases" class="nav-link" data-scroll-target="#typical-use-cases">Typical use cases</a></li>
+  <li><a href="#example-workflow-tongue-masks-with-optogenetic-events" id="toc-example-workflow-tongue-masks-with-optogenetic-events" class="nav-link" data-scroll-target="#example-workflow-tongue-masks-with-optogenetic-events">Example workflow: tongue masks with optogenetic events</a></li>
   </ul></li>
   <li><a href="#how-it-is-written" id="toc-how-it-is-written" class="nav-link" data-scroll-target="#how-it-is-written">How It Is Written</a></li>
   <li><a href="#architecture-overview" id="toc-architecture-overview" class="nav-link" data-scroll-target="#architecture-overview">Architecture Overview</a>
@@ -331,7 +332,7 @@ ul.task-list li input[type="checkbox"] {
   <ul class="collapse">
   <li><a href="#read-first-write-intentionally" id="toc-read-first-write-intentionally" class="nav-link" data-scroll-target="#read-first-write-intentionally">Read-first, write-intentionally</a></li>
   <li><a href="#scientific-ergonomics-over-novelty" id="toc-scientific-ergonomics-over-novelty" class="nav-link" data-scroll-target="#scientific-ergonomics-over-novelty">Scientific ergonomics over novelty</a></li>
-  <li><a href="#performance-with-clarity" id="toc-performance-with-clarity" class="nav-link" data-scroll-target="#performance-with-clarity">Performance with clarity</a></li>
+  <li><a href="#speed-first-with-clarity" id="toc-speed-first-with-clarity" class="nav-link" data-scroll-target="#speed-first-with-clarity">Speed-first with clarity</a></li>
   </ul></li>
   <li><a href="#who-this-is-for" id="toc-who-this-is-for" class="nav-link" data-scroll-target="#who-this-is-for">Who This Is For</a></li>
   </ul>
@@ -360,8 +361,8 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>WhiskerToolbox is a desktop platform for neural and behavioral data analysis. It helps researchers load diverse datasets, inspect signals over time, run transforms, build reproducible analysis workflows, and visualize results in a way that is fast enough for real data and clear enough for day-to-day decisions.</p>
-<p>WhiskerToolbox is designed around a practical problem in scientific workflows: it is often hard to <em>see</em> and <em>interact with</em> all of your data in one place. Instead of jumping between separate tools for signals, events, labels, media, and model outputs, the platform gives you a unified workspace where those views stay connected and time-aligned.</p>
+<p>Neuralyzer (WhiskerToolbox) is an open-source desktop platform for neural and behavioral data analysis, developed by neuroscientists who use it every day. Its primary purpose is to act as both a reproducibility machine and a practical toolkit for data exploration.</p>
+<p>In real experiments, it is hard to align all your data and visualize everything together. Doing this repeatedly across many concurrent data modalities can become complex and tedious. Neuralyzer is built as a workbench for behavioral and neural recordings so those multimodal workflows stay connected, time-aligned, and manageable.</p>
 <div class="callout callout-style-default callout-note callout-titled" title="At a glance">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -401,6 +402,11 @@ ul.task-list li input[type="checkbox"] {
 <li>Exporting publication-ready summaries and plot-derived tables.</li>
 </ul>
 </section>
+<section id="example-workflow-tongue-masks-with-optogenetic-events" class="level3">
+<h3 class="anchored" data-anchor-id="example-workflow-tongue-masks-with-optogenetic-events">Example workflow: tongue masks with optogenetic events</h3>
+<p>Suppose you want to load a video of a mouse licking a spout and also load predicted tongue masks so you can track tongue area while optogenetic stimulation is being recorded.</p>
+<p>In Neuralyzer, you can load all of these modalities, run transforms to compute mask area, derive intervals where licking occurs, and then measure how many licks fall inside each optogenetic stimulus event. Even when TTL events were recorded on a different acquisition path and may live in a different TimeFrame, the platform is designed to make this cross-modal analysis straightforward and easy to perform in one place.</p>
+</section>
 </section>
 <section id="how-it-is-written" class="level2">
 <h2 class="anchored" data-anchor-id="how-it-is-written">How It Is Written</h2>
@@ -415,6 +421,7 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Build system:</strong> CMake presets</li>
 <li><strong>Testing:</strong> Catch2 (plus dedicated fuzz-test targets)</li>
 </ul>
+<p>Speed is the primary reason the core platform is written in C++. The goal is to keep interaction responsive on large videos, high-rate neural streams, dense labels, and many concurrent modalities without sacrificing correctness or reproducibility.</p>
 <p>The codebase is split into focused libraries, then composed into the main application. This separation keeps the UI responsive while protecting core logic from GUI coupling.</p>
 </section>
 <section id="library-design" class="level3">
@@ -467,20 +474,23 @@ ul.task-list li input[type="checkbox"] {
 <li>and reproducibility under real lab constraints.</li>
 </ul>
 </section>
-<section id="performance-with-clarity" class="level3">
-<h3 class="anchored" data-anchor-id="performance-with-clarity">Performance with clarity</h3>
-<p>The implementation aims for strong runtime behavior while preserving understandable abstractions. The goal is not only speed, but speed that remains maintainable by research and engineering teams over time.</p>
+<section id="speed-first-with-clarity" class="level3">
+<h3 class="anchored" data-anchor-id="speed-first-with-clarity">Speed-first with clarity</h3>
+<p>The implementation targets high throughput and low-latency interaction while preserving understandable abstractions. The goal is speed that remains maintainable by research and engineering teams over time.</p>
 </section>
 </section>
 <section id="who-this-is-for" class="level2">
 <h2 class="anchored" data-anchor-id="who-this-is-for">Who This Is For</h2>
-<p>WhiskerToolbox is meant for researchers and engineers who need one place to:</p>
+<p>WhiskerToolbox is meant for people who need one environment to inspect heterogeneous data, connect manual review with algorithmic processing, and move from raw recordings to defensible results.</p>
+<p>This includes:</p>
 <ul>
-<li>inspect heterogeneous experimental data,</li>
-<li>connect manual review with algorithmic processing,</li>
-<li>and move from raw recordings to defensible results.</li>
+<li>Experimental neuroscientists working with synchronized video, electrophysiology, behavior labels, and stimulation events.</li>
+<li>Behavioral scientists who need to annotate, curate, and quantify structure in long recordings.</li>
+<li>Lab engineers and analysts building reproducible pipelines that can be rerun across cohorts and sessions.</li>
+<li>Computational researchers who want to compare model outputs against raw data in the same interface.</li>
+<li>Trainees and students who benefit from a visual, end-to-end workflow instead of stitching together many scripts and tools.</li>
 </ul>
-<p>If your workflow includes time-synchronized signals, behavioral labels, media streams, and model-driven feature analysis, this platform is built for that intersection.</p>
+<p>If your workflow spans media, labels, events, intervals, analog traces, and derived features, this platform is built for that intersection.</p>
 
 
 </section>

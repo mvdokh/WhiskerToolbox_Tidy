@@ -2,9 +2,9 @@
 title: "Introduction"
 ---
 
-WhiskerToolbox is a desktop platform for neural and behavioral data analysis. It helps researchers load diverse datasets, inspect signals over time, run transforms, build reproducible analysis workflows, and visualize results in a way that is fast enough for real data and clear enough for day-to-day decisions.
+Neuralyzer (WhiskerToolbox) is an open-source desktop platform for neural and behavioral data analysis, developed by neuroscientists who use it every day. Its primary purpose is to act as both a reproducibility machine and a practical toolkit for data exploration.
 
-WhiskerToolbox is designed around a practical problem in scientific workflows: it is often hard to *see* and *interact with* all of your data in one place. Instead of jumping between separate tools for signals, events, labels, media, and model outputs, the platform gives you a unified workspace where those views stay connected and time-aligned.
+In real experiments, it is hard to align all your data and visualize everything together. Doing this repeatedly across many concurrent data modalities can become complex and tedious. Neuralyzer is built as a workbench for behavioral and neural recordings so those multimodal workflows stay connected, time-aligned, and manageable.
 
 ::: {.callout-note title="At a glance"}
 - Built for neural time-series, media, spatial annotations, and derived features.
@@ -30,6 +30,12 @@ WhiskerToolbox is designed around a practical problem in scientific workflows: i
 - Comparing model outputs against raw signals and labels.
 - Exporting publication-ready summaries and plot-derived tables.
 
+### Example workflow: tongue masks with optogenetic events
+
+Suppose you want to load a video of a mouse licking a spout and also load predicted tongue masks so you can track tongue area while optogenetic stimulation is being recorded.
+
+In Neuralyzer, you can load all of these modalities, run transforms to compute mask area, derive intervals where licking occurs, and then measure how many licks fall inside each optogenetic stimulus event. Even when TTL events were recorded on a different acquisition path and may live in a different TimeFrame, the platform is designed to make this cross-modal analysis straightforward and easy to perform in one place.
+
 ## How It Is Written
 
 ## Architecture Overview {.tabset}
@@ -40,6 +46,8 @@ WhiskerToolbox is designed around a practical problem in scientific workflows: i
 - **GUI framework:** Qt6
 - **Build system:** CMake presets
 - **Testing:** Catch2 (plus dedicated fuzz-test targets)
+
+Speed is the primary reason the core platform is written in C++. The goal is to keep interaction responsive on large videos, high-rate neural streams, dense labels, and many concurrent modalities without sacrificing correctness or reproducibility.
 
 The codebase is split into focused libraries, then composed into the main application. This separation keeps the UI responsive while protecting core logic from GUI coupling.
 
@@ -81,16 +89,20 @@ The interface and APIs prioritize:
 - high signal-to-noise visual feedback,
 - and reproducibility under real lab constraints.
 
-### Performance with clarity
+### Speed-first with clarity
 
-The implementation aims for strong runtime behavior while preserving understandable abstractions. The goal is not only speed, but speed that remains maintainable by research and engineering teams over time.
+The implementation targets high throughput and low-latency interaction while preserving understandable abstractions. The goal is speed that remains maintainable by research and engineering teams over time.
 
 ## Who This Is For
 
-WhiskerToolbox is meant for researchers and engineers who need one place to:
+WhiskerToolbox is meant for people who need one environment to inspect heterogeneous data, connect manual review with algorithmic processing, and move from raw recordings to defensible results.
 
-- inspect heterogeneous experimental data,
-- connect manual review with algorithmic processing,
-- and move from raw recordings to defensible results.
+This includes:
 
-If your workflow includes time-synchronized signals, behavioral labels, media streams, and model-driven feature analysis, this platform is built for that intersection.
+- Experimental neuroscientists working with synchronized video, electrophysiology, behavior labels, and stimulation events.
+- Behavioral scientists who need to annotate, curate, and quantify structure in long recordings.
+- Lab engineers and analysts building reproducible pipelines that can be rerun across cohorts and sessions.
+- Computational researchers who want to compare model outputs against raw data in the same interface.
+- Trainees and students who benefit from a visual, end-to-end workflow instead of stitching together many scripts and tools.
+
+If your workflow spans media, labels, events, intervals, analog traces, and derived features, this platform is built for that intersection.
