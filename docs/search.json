@@ -18053,23 +18053,23 @@
   {
     "objectID": "getting-started.html",
     "href": "getting-started.html",
-    "title": "Getting Started",
+    "title": "F&Q",
     "section": "",
     "text": "Ready to start analyzing? Follow these simple steps to get Neuralyzer running on your system."
   },
   {
     "objectID": "getting-started.html#download",
     "href": "getting-started.html#download",
-    "title": "Getting Started",
+    "title": "F&Q",
     "section": "1. Download",
     "text": "1. Download\nThe latest version of Neuralyzer is available on our GitHub Releases page.\nDownload Latest Release\nSelect the appropriate file for your operating system:\n\nWindows: Neuralyzer-Windows-x64.zip\nmacOS: Neuralyzer-macOS.dmg\nLinux: Neuralyzer-Linux.tar.gz"
   },
   {
     "objectID": "getting-started.html#install-run",
     "href": "getting-started.html#install-run",
-    "title": "Getting Started",
+    "title": "F&Q",
     "section": "2. Install & Run",
-    "text": "2. Install & Run\n\nWindowsmacOSLinux\n\n\n\nUnzip the downloaded Run_WhiskerToolbox_Windows.zip file to your preferred location.\nOpen the extracted folder and navigate to the bin directory.\nDouble-click WhiskerToolbox.exe to launch the application.\n\nNote: You may update your desktop shortcut to point to this executable for easier access.\n\n\n\nDouble-click the downloaded .dmg file to mount it.\nDrag and drop the Neuralyzer application icon into your Applications folder.\nOpen your Applications folder and launch Neuralyzer.\n\nNote: On the first launch, you may need to approve the application in your security settings if it’s not notarized.\n\n\n\nExtract the downloaded archive: bash     tar -xzf Neuralyzer-Linux.tar.gz\nNavigate to the binary directory: bash     cd Neuralyzer/bin\nRun the executable: bash     ./WhiskerToolbox"
+    "text": "2. Install & Run\n\nWindowsmacOSLinux\n\n\n\nUnzip the downloaded Run_WhiskerToolbox_Windows.zip file to your preferred location.\nOpen the extracted folder and navigate to the bin directory.\nDouble-click WhiskerToolbox.exe to launch the application.\n\nNote: You may update your desktop shortcut to point to this executable for easier access.\n\n\n\nDouble-click the downloaded .dmg file to mount it.\nDrag and drop the Neuralyzer application icon into your Applications folder.\nOpen your Applications folder and launch Neuralyzer.\n\nNote: On the first launch, you may need to approve the application in your security settings if it’s not notarized.\n\n\n\nExtract the downloaded archive: bash     tar -xzf Neuralyzer-Linux.tar.gz\nNavigate to the binary directory: bash     cd Neuralyzer/bin\nRun the executable: bash     ./WhiskerToolbox\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nNeed guided walkthroughs? See Learning Resources. For frequently asked questions, see F&Q.\n\n\n\n\nThis page collects common setup and workflow questions."
   },
   {
     "objectID": "introduction.html",
@@ -20472,5 +20472,19 @@
       "Python Console",
       "Python Console"
     ]
+  },
+  {
+    "objectID": "getting-started.html#installation-and-startup",
+    "href": "getting-started.html#installation-and-startup",
+    "title": "F&Q",
+    "section": "Installation and Startup",
+    "text": "Installation and Startup\n\n\n\n\n\n\nNoteWhere do I download Neuralyzer?\n\n\n\n\n\nUse the latest release from GitHub: Download Latest Release\nFor platform-specific steps, see Getting Started.\n\n\n\n\n\n\n\n\n\nNoteThe app opens, but I am not sure what to do first. What should I load?\n\n\n\n\n\nA practical first workflow is:\n\nLoad media (video or image stack).\nLoad one or more features (points, masks, lines, events, or intervals).\nConfirm TimeFrame alignment in Data Viewer.\nUse transforms to derive analysis-ready features.\n\nFor tutorials, see Learning Resources."
+  },
+  {
+    "objectID": "getting-started.html#data-and-workflows",
+    "href": "getting-started.html#data-and-workflows",
+    "title": "F&Q",
+    "section": "Data and Workflows",
+    "text": "Data and Workflows\n\n\n\n\n\n\nNoteWhat if my modalities use different sampling rates or clocks?\n\n\n\n\n\nUse explicit TimeFrames and assign each feature to the correct time base. Neuralyzer is designed to handle cross-modal synchronization across TimeFrames.\nSee TimeFrame.\n\n\n\n\n\n\n\n\n\nNoteWhere should I edit labels versus inspect traces?\n\n\n\n\n\nUse this rule of thumb:\n\nMedia Viewer for spatial edits (points, lines, masks).\nData Viewer for timeline interpretation across signals/events/intervals.\nData Inspector for table-centric curation and export workflows.\n\nSee Interacting with Your Data.\n\n\n\n\n\n\n\n\n\nNoteHow do I keep my workflow reproducible?\n\n\n\n\n\nKeep source and derived outputs in separate keys, and write transform results to new keys.\nSee Non-Destructive Workflows."
   }
 ]

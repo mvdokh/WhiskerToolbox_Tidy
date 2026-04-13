@@ -6,14 +6,17 @@ This page collects common setup and workflow questions.
 
 ## Installation and Startup
 
-### Where do I download Neuralyzer?
+::: {.callout-note collapse="true"}
+## Where do I download Neuralyzer?
 
 Use the latest release from GitHub:
 [Download Latest Release](https://github.com/paulmthompson/WhiskerToolbox/releases/latest)
 
 For platform-specific steps, see [Getting Started](getting-started.qmd).
+:::
 
-### The app opens, but I am not sure what to do first. What should I load?
+::: {.callout-note collapse="true"}
+## The app opens, but I am not sure what to do first. What should I load?
 
 A practical first workflow is:
 
@@ -23,18 +26,22 @@ A practical first workflow is:
 4. Use transforms to derive analysis-ready features.
 
 For tutorials, see [Learning Resources](learning-resources/index.qmd).
+:::
 
 ## Data and Workflows
 
-### What if my modalities use different sampling rates or clocks?
+::: {.callout-note collapse="true"}
+## What if my modalities use different sampling rates or clocks?
 
 Use explicit TimeFrames and assign each feature to the correct time base.
 Neuralyzer is designed to handle cross-modal synchronization across
 TimeFrames.
 
 See [TimeFrame](concepts/timeframe.qmd).
+:::
 
-### Where should I edit labels versus inspect traces?
+::: {.callout-note collapse="true"}
+## Where should I edit labels versus inspect traces?
 
 Use this rule of thumb:
 
@@ -43,26 +50,13 @@ Use this rule of thumb:
 - Data Inspector for table-centric curation and export workflows.
 
 See [Interacting with Your Data](concepts/interface_roles.qmd).
+:::
 
-### How do I keep my workflow reproducible?
+::: {.callout-note collapse="true"}
+## How do I keep my workflow reproducible?
 
 Keep source and derived outputs in separate keys, and write transform
 results to new keys.
 
 See [Non-Destructive Workflows](concepts/no_write_access.qmd).
-
-## Troubleshooting
-
-### Quarto says "quarto" command is not recognized in PowerShell
-
-Use the full executable path:
-
-`"C:\Program Files\Quarto\bin\quarto.exe" render`
-
-If needed, update PATH for the current shell session.
-
-### Why do I sometimes see PowerShell "NativeCommandError" text during render?
-
-PowerShell can wrap native stderr output as an error record even when
-rendering succeeds. Check the actual process exit code and whether output
-files were created.
+:::
