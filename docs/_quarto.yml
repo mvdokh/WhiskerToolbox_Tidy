@@ -233,11 +233,20 @@ website:
         - learning-resources/index.qmd
         - section: "Concepts"
           contents: 
-            - concepts/timeframe.qmd
-            - concepts/interface_roles.qmd
-            - concepts/no_write_access.qmd
+            - text: "TimeFrame"
+              href: concepts/timeframe.qmd
+            - text: "Non-Destructive Workflows"
+              href: concepts/no_write_access.qmd
+            - text: "Data Types"
+              href: concepts/data_types.qmd
+            - text: "Interacting with Your Data"
+              href: concepts/interface_roles.qmd
         - section: "Tutorials"
           contents:
+            - text: "Video Import"
+              href: examples/video_import.qmd
+            - text: "Image Stack Import"
+              href: examples/image_stack_import.qmd
             - text: "Keypoint Labeling"
               href: examples/keypoint_labeling.qmd
             - text: "Mask Labeling"
@@ -252,10 +261,6 @@ website:
               href: learning-resources/tutorials/performing_data_transforms.qmd
             - text: "HMM Behavioral Epoch Prediction"
               href: learning-resources/tutorials/hmm_behavioral_epochs.qmd
-            - text: "Video Import"
-              href: examples/video_import.qmd
-            - text: "Image Stack Import"
-              href: examples/image_stack_import.qmd
             - text: "Load Tabular Binary Events"
               href: examples/tabular_binary_events.qmd
             - text: "Triage Line Data"

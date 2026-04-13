@@ -7,13 +7,16 @@ title: "Learning Resources"
 Deep dive into the core concepts and theory behind Neuralyzer.
 
 - [TimeFrame](../concepts/timeframe.qmd)
-- [Inspector vs Media Viewer vs Data Viewer vs Data Manager](../concepts/interface_roles.qmd)
-- [No Write Access and Non-Destructive Workflows](../concepts/no_write_access.qmd)
+- [Non-Destructive Workflows](../concepts/no_write_access.qmd)
+- [Data Types](../concepts/data_types.qmd)
+- [Interacting with Your Data](../concepts/interface_roles.qmd)
 
 ## Tutorials
 
 Detailed step-by-step guides to help you learn the basics.
 
+- [Video Import](../examples/video_import.qmd)
+- [Image Stack Import](../examples/image_stack_import.qmd)
 - [Keypoint Labeling](../examples/keypoint_labeling.qmd)
 - [Mask Labeling](tutorials/mask_labeling.qmd)
 - [Interval Series Labeling](tutorials/interval_series_labeling.qmd)
@@ -23,8 +26,6 @@ Detailed step-by-step guides to help you learn the basics.
 - [Using a Hidden Markov Model to Predict Behavioral Epochs with Deep Learning Features](tutorials/hmm_behavioral_epochs.qmd)
 - [Is this neuron real? Following a signal between results and raw data](tutorials/is_this_neuron_real_tutorial.qmd)
 - [Identifying Clusters in High Dimensional Data](tutorials/clustering_tutorial.qmd)
-- [Video Import](../examples/video_import.qmd)
-- [Image Stack Import](../examples/image_stack_import.qmd)
 - [Load Tabular Binary Events](../examples/tabular_binary_events.qmd)
 - [Exporting Pytorch Models for Neuralyzer](how-to/exporting_aoti_encoder.qmd)
 - [Using NeuroSAM for Object Segmentation](how-to/neurosam_howto.qmd)

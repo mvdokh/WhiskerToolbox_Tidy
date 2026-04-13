@@ -2132,7 +2132,7 @@
     "href": "learning-resources/index.html",
     "title": "Learning Resources",
     "section": "",
-    "text": "Deep dive into the core concepts and theory behind Neuralyzer.\n\nTimeFrame\nInspector vs Media Viewer vs Data Viewer vs Data Manager\nNo Write Access and Non-Destructive Workflows",
+    "text": "Deep dive into the core concepts and theory behind Neuralyzer.\n\nTimeFrame\nNon-Destructive Workflows\nData Types\nInteracting with Your Data",
     "crumbs": [
       "Learning Resources"
     ]
@@ -2142,7 +2142,7 @@
     "href": "learning-resources/index.html#concepts",
     "title": "Learning Resources",
     "section": "",
-    "text": "Deep dive into the core concepts and theory behind Neuralyzer.\n\nTimeFrame\nInspector vs Media Viewer vs Data Viewer vs Data Manager\nNo Write Access and Non-Destructive Workflows",
+    "text": "Deep dive into the core concepts and theory behind Neuralyzer.\n\nTimeFrame\nNon-Destructive Workflows\nData Types\nInteracting with Your Data",
     "crumbs": [
       "Learning Resources"
     ]
@@ -2152,7 +2152,7 @@
     "href": "learning-resources/index.html#tutorials",
     "title": "Learning Resources",
     "section": "Tutorials",
-    "text": "Tutorials\nDetailed step-by-step guides to help you learn the basics.\n\nKeypoint Labeling\nMask Labeling\nInterval Series Labeling\nEvent Labeling\nUsing the Data Viewer\nPerforming Data Transforms\nUsing a Hidden Markov Model to Predict Behavioral Epochs with Deep Learning Features\nIs this neuron real? Following a signal between results and raw data\nIdentifying Clusters in High Dimensional Data\nVideo Import\nImage Stack Import\nLoad Tabular Binary Events\nExporting Pytorch Models for Neuralyzer\nUsing NeuroSAM for Object Segmentation\nTriage Line Data — review predictions and move correct lines to ground truth\nLabel Video Intervals — inspect scattered video regions and record what you reviewed",
+    "text": "Tutorials\nDetailed step-by-step guides to help you learn the basics.\n\nVideo Import\nImage Stack Import\nKeypoint Labeling\nMask Labeling\nInterval Series Labeling\nEvent Labeling\nUsing the Data Viewer\nPerforming Data Transforms\nUsing a Hidden Markov Model to Predict Behavioral Epochs with Deep Learning Features\nIs this neuron real? Following a signal between results and raw data\nIdentifying Clusters in High Dimensional Data\nLoad Tabular Binary Events\nExporting Pytorch Models for Neuralyzer\nUsing NeuroSAM for Object Segmentation\nTriage Line Data — review predictions and move correct lines to ground truth\nLabel Video Intervals — inspect scattered video regions and record what you reviewed",
     "crumbs": [
       "Learning Resources"
     ]
@@ -9397,93 +9397,86 @@
   {
     "objectID": "concepts/interface_roles.html",
     "href": "concepts/interface_roles.html",
-    "title": "Inspector vs Media Viewer vs Data Viewer vs Data Manager",
+    "title": "Interacting with Your Data",
     "section": "",
     "text": "This concept page gives a practical model of where to create and edit features, where to visualize them, and where to curate labels.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "Inspector vs Media Viewer vs Data Viewer vs Data Manager"
+      "Interacting with Your Data"
     ]
   },
   {
     "objectID": "concepts/interface_roles.html#the-short-version",
     "href": "concepts/interface_roles.html#the-short-version",
-    "title": "Inspector vs Media Viewer vs Data Viewer vs Data Manager",
+    "title": "Interacting with Your Data",
     "section": "The Short Version",
     "text": "The Short Version\n\nData Manager: create data objects and assign TimeFrames.\nMedia Viewer: spatial annotation and frame-level editing on image/video.\nData Viewer: timeline-based visualization of analog, event, and interval data.\nData Inspector: precise per-feature editing, curation, and table-driven operations.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "Inspector vs Media Viewer vs Data Viewer vs Data Manager"
+      "Interacting with Your Data"
     ]
   },
   {
     "objectID": "concepts/interface_roles.html#what-each-tool-is-best-for",
     "href": "concepts/interface_roles.html#what-each-tool-is-best-for",
-    "title": "Inspector vs Media Viewer vs Data Viewer vs Data Manager",
+    "title": "Interacting with Your Data",
     "section": "What Each Tool Is Best For",
     "text": "What Each Tool Is Best For\n\n\n\n\n\n\n\n\nTool\nPrimary role\nTypical actions\n\n\n\n\nData Manager\nData orchestration\nCreate keys, choose data type, assign TimeFrame, organize features\n\n\nMedia Viewer\nSpatial labeling\nDraw/edit points, masks, and lines on frames\n\n\nData Viewer\nTemporal visualization\nCompare traces with events and intervals across time\n\n\nData Inspector\nData curation and correction\nCreate/remove/extend/merge intervals, clean event series, inspect table rows",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "Inspector vs Media Viewer vs Data Viewer vs Data Manager"
+      "Interacting with Your Data"
     ]
   },
   {
     "objectID": "concepts/interface_roles.html#mental-model-for-daily-work",
     "href": "concepts/interface_roles.html#mental-model-for-daily-work",
-    "title": "Inspector vs Media Viewer vs Data Viewer vs Data Manager",
+    "title": "Interacting with Your Data",
     "section": "Mental Model for Daily Work",
     "text": "Mental Model for Daily Work\n\nStart in Data Manager to create the target feature and choose its TimeFrame.\nUse Media Viewer when your edits are spatial and frame-based.\nUse Data Inspector when your edits are object-level and curation-heavy (for example interval operations).\nUse Data Viewer to validate timing consistency across modalities.\nUse transforms or Python for derived features after manual curation.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "Inspector vs Media Viewer vs Data Viewer vs Data Manager"
+      "Interacting with Your Data"
     ]
   },
   {
     "objectID": "concepts/interface_roles.html#common-patterns",
     "href": "concepts/interface_roles.html#common-patterns",
-    "title": "Inspector vs Media Viewer vs Data Viewer vs Data Manager",
+    "title": "Interacting with Your Data",
     "section": "Common Patterns",
     "text": "Common Patterns\n\nPattern A: Spatial Labeling\n\nCreate mask/point/line key in Data Manager.\nLabel in Media Viewer.\nValidate temporal behavior in Data Viewer.\nCurate edge cases in Data Inspector.\n\n\n\nPattern B: Event and Interval Curation\n\nCreate event/interval keys in Data Manager.\nEdit and curate in Data Inspector.\nValidate against analog traces in Data Viewer.\n\n\n\nPattern C: Feature Engineering\n\nKeep raw and curated features separate.\nDerive outputs with transforms or Python.\nCompare source and output in Data Viewer.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "Inspector vs Media Viewer vs Data Viewer vs Data Manager"
+      "Interacting with Your Data"
     ]
   },
   {
     "objectID": "concepts/interface_roles.html#why-this-separation-helps",
     "href": "concepts/interface_roles.html#why-this-separation-helps",
-    "title": "Inspector vs Media Viewer vs Data Viewer vs Data Manager",
+    "title": "Interacting with Your Data",
     "section": "Why This Separation Helps",
     "text": "Why This Separation Helps\n\nReduces accidental edits in the wrong context.\nKeeps workflows reproducible and easier to audit.\nMakes it clear which widget is authoritative for each kind of action.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "Inspector vs Media Viewer vs Data Viewer vs Data Manager"
+      "Interacting with Your Data"
     ]
   },
   {
     "objectID": "concepts/interface_roles.html#see-also",
     "href": "concepts/interface_roles.html#see-also",
-    "title": "Inspector vs Media Viewer vs Data Viewer vs Data Manager",
+    "title": "Interacting with Your Data",
     "section": "See Also",
     "text": "See Also\n\nTimeFrame\nPython Console\nTutorial: Using the Data Viewer\nTutorial: Interval Series Labeling",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "Inspector vs Media Viewer vs Data Viewer vs Data Manager"
+      "Interacting with Your Data"
     ]
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "About this site"
   },
   {
     "objectID": "api_reference.html",
@@ -9536,99 +9529,190 @@
     ]
   },
   {
-    "objectID": "concepts/no_write_access.html",
-    "href": "concepts/no_write_access.html",
-    "title": "No Write Access and Non-Destructive Workflows",
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
     "section": "",
-    "text": "In most analysis workflows, you want transforms and derived operations not to overwrite your source labels. This is the practical idea behind “no write access” workflows.",
+    "text": "About this site"
+  },
+  {
+    "objectID": "concepts/data_types.html",
+    "href": "concepts/data_types.html",
+    "title": "Data Types",
+    "section": "",
+    "text": "Neuralyzer organizes loaded and derived data as typed objects in the Data Manager.\nEach feature in the Data Manager has three parts:\nThis is what enables synchronized multi-modal visualization across video, signals, events, intervals, and model outputs.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "No Write Access and Non-Destructive Workflows"
+      "Data Types"
+    ]
+  },
+  {
+    "objectID": "concepts/data_types.html#core-data-type-families",
+    "href": "concepts/data_types.html#core-data-type-families",
+    "title": "Data Types",
+    "section": "Core Data Type Families",
+    "text": "Core Data Type Families\n\n\n\n\n\n\n\n\n\nFamily\nCore types\nWhat they represent\nTypical workflows\n\n\n\n\nMedia\nMediaData\nVideo or image sequences\nPlayback, visual context, overlaying labels\n\n\nSpatial annotations\nPointData, LineData, MaskData\nPositions, ordered contours, segmented regions over time\nManual labeling, curation, geometry transforms\n\n\nContinuous and sparse time series\nAnalogTimeSeries, DigitalEventSeries, DigitalIntervalSeries\nContinuous values, point-in-time events, and start/end intervals\nSignal analysis, event alignment, behavioral epoch marking\n\n\nMulti-dimensional arrays\nTensorData\nN-dimensional features and model outputs\nDeep learning features, tensor inspection, ML pipelines",
+    "crumbs": [
+      "Learning Resources",
+      "Concepts",
+      "Data Types"
+    ]
+  },
+  {
+    "objectID": "concepts/data_types.html#spatial-types-vs-time-series-types",
+    "href": "concepts/data_types.html#spatial-types-vs-time-series-types",
+    "title": "Data Types",
+    "section": "Spatial Types vs Time-Series Types",
+    "text": "Spatial Types vs Time-Series Types\nFrom the developer-side architecture, point/line/mask objects are ragged in time: multiple entities can exist at the same time index, and entities can be tracked and grouped across time.\nTime-series types are optimized for signal/event semantics:\n\nAnalogTimeSeries: dense or sparse scalar values over a TimeFrame.\nDigitalEventSeries: discrete timestamps.\nDigitalIntervalSeries: intervals with start/end boundaries.",
+    "crumbs": [
+      "Learning Resources",
+      "Concepts",
+      "Data Types"
+    ]
+  },
+  {
+    "objectID": "concepts/data_types.html#how-to-choose-the-right-type",
+    "href": "concepts/data_types.html#how-to-choose-the-right-type",
+    "title": "Data Types",
+    "section": "How to Choose the Right Type",
+    "text": "How to Choose the Right Type\nUse these rules of thumb:\n\nUse PointData when each object is a location (x, y).\nUse LineData when order along the shape matters (curves, traces, contours).\nUse MaskData when full object shape/region is needed.\nUse AnalogTimeSeries for continuous-valued trajectories.\nUse DigitalEventSeries for instantaneous markers (spikes, triggers, contacts).\nUse DigitalIntervalSeries for epochs (trial windows, behavior bouts).\nUse TensorData for model features or any N-D numeric output.\nUse MediaData as the base visual stream that other types align to.",
+    "crumbs": [
+      "Learning Resources",
+      "Concepts",
+      "Data Types"
+    ]
+  },
+  {
+    "objectID": "concepts/data_types.html#where-you-interact-with-each-type",
+    "href": "concepts/data_types.html#where-you-interact-with-each-type",
+    "title": "Data Types",
+    "section": "Where You Interact with Each Type",
+    "text": "Where You Interact with Each Type\n\n\n\n\n\n\n\nTool\nBest for\n\n\n\n\nData Manager\nCreating keys, assigning data type, assigning TimeFrame\n\n\nData Import Widget\nLoading the correct type from file formats\n\n\nMedia Viewer\nSpatial editing (points, lines, masks) and visual overlays\n\n\nData Viewer\nTemporal validation of analog/event/interval alignment\n\n\nData Inspector\nCuration and table-like editing workflows\n\n\nTransform Widget\nType-safe conversion and feature extraction pipelines\n\n\nPython Console\nProgrammatic access and custom derived outputs",
+    "crumbs": [
+      "Learning Resources",
+      "Concepts",
+      "Data Types"
+    ]
+  },
+  {
+    "objectID": "concepts/data_types.html#transforming-between-types",
+    "href": "concepts/data_types.html#transforming-between-types",
+    "title": "Data Types",
+    "section": "Transforming Between Types",
+    "text": "Transforming Between Types\nTransforms map one type to another while preserving data lineage through new output keys. Examples include:\n\nMaskData -&gt; AnalogTimeSeries (area)\nMaskData -&gt; PointData (centroid)\nMaskData -&gt; LineData (mask-to-line conversion)\nAnalog thresholding -&gt; digital event/interval outputs\n\nA practical pattern is to keep source keys immutable and write each transform output to a new key.",
+    "crumbs": [
+      "Learning Resources",
+      "Concepts",
+      "Data Types"
+    ]
+  },
+  {
+    "objectID": "concepts/data_types.html#see-also",
+    "href": "concepts/data_types.html#see-also",
+    "title": "Data Types",
+    "section": "See Also",
+    "text": "See Also\n\nTimeFrame\nNon-Destructive Workflows\nInteracting with Your Data\nData Loading Overview\nData Manager (Developer)\nData Structure Performance (Developer)",
+    "crumbs": [
+      "Learning Resources",
+      "Concepts",
+      "Data Types"
+    ]
+  },
+  {
+    "objectID": "concepts/no_write_access.html",
+    "href": "concepts/no_write_access.html",
+    "title": "Non-Destructive Workflows",
+    "section": "",
+    "text": "In most analysis workflows, you want transforms and derived operations not to overwrite your source labels. This is the practical idea behind non-destructive workflows (sometimes called “no write access” workflows).",
+    "crumbs": [
+      "Learning Resources",
+      "Concepts",
+      "Non-Destructive Workflows"
     ]
   },
   {
     "objectID": "concepts/no_write_access.html#core-principle",
     "href": "concepts/no_write_access.html#core-principle",
-    "title": "No Write Access and Non-Destructive Workflows",
+    "title": "Non-Destructive Workflows",
     "section": "Core Principle",
     "text": "Core Principle\nTreat source data as immutable reference data. New operations should create new output features instead of replacing the original key.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "No Write Access and Non-Destructive Workflows"
+      "Non-Destructive Workflows"
     ]
   },
   {
     "objectID": "concepts/no_write_access.html#how-this-looks-in-practice",
     "href": "concepts/no_write_access.html#how-this-looks-in-practice",
-    "title": "No Write Access and Non-Destructive Workflows",
+    "title": "Non-Destructive Workflows",
     "section": "How This Looks in Practice",
     "text": "How This Looks in Practice\n\nCreate and preserve source keys (for example contact_raw).\nWrite curated results to separate keys (for example contact_curated).\nWrite transform outputs to new keys (for example contact_curated_grouped).\n\nThis gives you a clear lineage from raw -&gt; curated -&gt; derived.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "No Write Access and Non-Destructive Workflows"
+      "Non-Destructive Workflows"
     ]
   },
   {
     "objectID": "concepts/no_write_access.html#where-changes-happen",
     "href": "concepts/no_write_access.html#where-changes-happen",
-    "title": "No Write Access and Non-Destructive Workflows",
+    "title": "Non-Destructive Workflows",
     "section": "Where Changes Happen",
     "text": "Where Changes Happen\n\nTransforms: usually produce a new output key.\nInspectors: edit the currently selected key directly.\nMedia labeling: writes to the currently enabled feature.\n\nBecause direct edits exist, a non-destructive workflow depends on key separation and naming discipline.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "No Write Access and Non-Destructive Workflows"
+      "Non-Destructive Workflows"
     ]
   },
   {
     "objectID": "concepts/no_write_access.html#practical-rules",
     "href": "concepts/no_write_access.html#practical-rules",
-    "title": "No Write Access and Non-Destructive Workflows",
+    "title": "Non-Destructive Workflows",
     "section": "Practical Rules",
     "text": "Practical Rules\n\nNever use one key for raw, curated, and transformed data.\nUse suffixes such as _raw, _curated, _v2, _ml.\nBefore heavy edits, duplicate to a new working key.\nKeep TimeFrame associations explicit when creating new outputs.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "No Write Access and Non-Destructive Workflows"
+      "Non-Destructive Workflows"
     ]
   },
   {
     "objectID": "concepts/no_write_access.html#python-console-and-safe-derivation",
     "href": "concepts/no_write_access.html#python-console-and-safe-derivation",
-    "title": "No Write Access and Non-Destructive Workflows",
+    "title": "Non-Destructive Workflows",
     "section": "Python Console and Safe Derivation",
     "text": "Python Console and Safe Derivation\nPython lets you script safe, explicit derivations:\n\nRead source with dm.getData(\"source_key\").\nRead time base with dm.getTimeKey(\"source_key\").\nWrite results to a new key with dm.setData(...).",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "No Write Access and Non-Destructive Workflows"
+      "Non-Destructive Workflows"
     ]
   },
   {
     "objectID": "concepts/no_write_access.html#why-this-matters",
     "href": "concepts/no_write_access.html#why-this-matters",
-    "title": "No Write Access and Non-Destructive Workflows",
+    "title": "Non-Destructive Workflows",
     "section": "Why This Matters",
     "text": "Why This Matters\n\nPrevents accidental loss of human-labeled data.\nMakes experiments reversible and comparable.\nImproves reproducibility and auditability of results.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "No Write Access and Non-Destructive Workflows"
+      "Non-Destructive Workflows"
     ]
   },
   {
     "objectID": "concepts/no_write_access.html#see-also",
     "href": "concepts/no_write_access.html#see-also",
-    "title": "No Write Access and Non-Destructive Workflows",
+    "title": "Non-Destructive Workflows",
     "section": "See Also",
-    "text": "See Also\n\nInspector vs Media Viewer vs Data Viewer vs Data Manager\nTimeFrame\nPython Console\nTutorial: Performing Data Transforms",
+    "text": "See Also\n\nInteracting with Your Data\nTimeFrame\nPython Console\nTutorial: Performing Data Transforms",
     "crumbs": [
       "Learning Resources",
       "Concepts",
-      "No Write Access and Non-Destructive Workflows"
+      "Non-Destructive Workflows"
     ]
   },
   {

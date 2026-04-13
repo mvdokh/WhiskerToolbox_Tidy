@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Tutorial: Using the Data Viewer – Neuralyzer</title>
+<title>Data Types – Neuralyzer</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,27 +26,27 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../../">
-<link href="../../images/WhiskerToolbox-logo.png" rel="icon" type="image/png">
-<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/popper.min.js"></script>
-<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
-<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-a06d91ce84fd25668039cca5222332b2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-1beb5789083f19f8fb5f954f886869a9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-a06d91ce84fd25668039cca5222332b2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../images/WhiskerToolbox-logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-a06d91ce84fd25668039cca5222332b2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1beb5789083f19f8fb5f954f886869a9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-a06d91ce84fd25668039cca5222332b2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -76,7 +76,7 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="../styles.css">
 </head>
 
 <body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -248,11 +248,11 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    <img src="../../images/WhiskerToolbox-logo.png" alt="" class="navbar-logo light-content">
-    <img src="../../images/WhiskerToolbox-logo.png" alt="" class="navbar-logo dark-content">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../images/WhiskerToolbox-logo.png" alt="" class="navbar-logo light-content">
+    <img src="../images/WhiskerToolbox-logo.png" alt="" class="navbar-logo dark-content">
     </a>
-    <a class="navbar-brand" href="../../index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">Neuralyzer</span>
     </a>
   </div>
@@ -263,15 +263,15 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../introduction.html"> 
+    <a class="nav-link" href="../introduction.html"> 
 <span class="menu-text">Introduction</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../getting-started.html"> 
+    <a class="nav-link" href="../getting-started.html"> 
 <span class="menu-text">Getting Started</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../../learning-resources/index.html" aria-current="page"> 
+    <a class="nav-link active" href="../learning-resources/index.html" aria-current="page"> 
 <span class="menu-text">Learning Resources</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -280,15 +280,15 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-reference-guides">    
         <li>
-    <a class="dropdown-item" href="../../user_guide/index.html">
+    <a class="dropdown-item" href="../user_guide/index.html">
  <span class="dropdown-text">User Guide</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../developer/index.html">
+    <a class="dropdown-item" href="../developer/index.html">
  <span class="dropdown-text">Developer Guide</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../api_reference.html">
+    <a class="dropdown-item" href="../api_reference.html">
  <span class="dropdown-text">API Reference</span></a>
   </li>  
     </ul>
@@ -310,7 +310,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../examples/video_import.html">Tutorials</a></li><li class="breadcrumb-item"><a href="../../learning-resources/tutorials/using_data_viewer.html">Using the Data Viewer</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../concepts/timeframe.html">Concepts</a></li><li class="breadcrumb-item"><a href="../concepts/data_types.html">Data Types</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -324,7 +324,7 @@ ul.task-list li input[type="checkbox"] {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../learning-resources/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../learning-resources/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Learning Resources</span></a>
   </div>
 </li>
@@ -339,25 +339,25 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../concepts/timeframe.html" class="sidebar-item-text sidebar-link">
+  <a href="../concepts/timeframe.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">TimeFrame</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../concepts/no_write_access.html" class="sidebar-item-text sidebar-link">
+  <a href="../concepts/no_write_access.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Non-Destructive Workflows</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../concepts/data_types.html" class="sidebar-item-text sidebar-link">
+  <a href="../concepts/data_types.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Data Types</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../concepts/interface_roles.html" class="sidebar-item-text sidebar-link">
+  <a href="../concepts/interface_roles.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Interacting with Your Data</span></a>
   </div>
 </li>
@@ -374,91 +374,91 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../examples/video_import.html" class="sidebar-item-text sidebar-link">
+  <a href="../examples/video_import.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Video Import</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../examples/image_stack_import.html" class="sidebar-item-text sidebar-link">
+  <a href="../examples/image_stack_import.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Image Stack Import</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../examples/keypoint_labeling.html" class="sidebar-item-text sidebar-link">
+  <a href="../examples/keypoint_labeling.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Keypoint Labeling</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../learning-resources/tutorials/mask_labeling.html" class="sidebar-item-text sidebar-link">
+  <a href="../learning-resources/tutorials/mask_labeling.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Mask Labeling</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../learning-resources/tutorials/interval_series_labeling.html" class="sidebar-item-text sidebar-link">
+  <a href="../learning-resources/tutorials/interval_series_labeling.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Interval Series Labeling</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../learning-resources/tutorials/event_labeling.html" class="sidebar-item-text sidebar-link">
+  <a href="../learning-resources/tutorials/event_labeling.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Event Labeling</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../learning-resources/tutorials/using_data_viewer.html" class="sidebar-item-text sidebar-link active">
+  <a href="../learning-resources/tutorials/using_data_viewer.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Using the Data Viewer</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../learning-resources/tutorials/performing_data_transforms.html" class="sidebar-item-text sidebar-link">
+  <a href="../learning-resources/tutorials/performing_data_transforms.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Performing Data Transforms</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../learning-resources/tutorials/hmm_behavioral_epochs.html" class="sidebar-item-text sidebar-link">
+  <a href="../learning-resources/tutorials/hmm_behavioral_epochs.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">HMM Behavioral Epoch Prediction</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../examples/tabular_binary_events.html" class="sidebar-item-text sidebar-link">
+  <a href="../examples/tabular_binary_events.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Load Tabular Binary Events</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../learning-resources/how-to/triage_line_data.html" class="sidebar-item-text sidebar-link">
+  <a href="../learning-resources/how-to/triage_line_data.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Triage Line Data</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../learning-resources/how-to/label_video_intervals.html" class="sidebar-item-text sidebar-link">
+  <a href="../learning-resources/how-to/label_video_intervals.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Label Video Intervals</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../learning-resources/how-to/exporting_aoti_encoder.html" class="sidebar-item-text sidebar-link">
+  <a href="../learning-resources/how-to/exporting_aoti_encoder.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Export an AOTI Encoder Model</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../learning-resources/how-to/glm_hmm_ssm.html" class="sidebar-item-text sidebar-link">
+  <a href="../learning-resources/how-to/glm_hmm_ssm.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">GLM-HMM Contact Detection (ssm)</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../learning-resources/how-to/glm_hmm_dynamax.html" class="sidebar-item-text sidebar-link">
+  <a href="../learning-resources/how-to/glm_hmm_dynamax.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">GLM-HMM Contact Detection (dynamax)</span></a>
   </div>
 </li>
@@ -474,14 +474,11 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link" data-scroll-target="#prerequisites">Prerequisites</a></li>
-  <li><a href="#step-1-open-the-data-viewer" id="toc-step-1-open-the-data-viewer" class="nav-link" data-scroll-target="#step-1-open-the-data-viewer">Step 1: Open the Data Viewer</a></li>
-  <li><a href="#step-2-configure-what-you-see" id="toc-step-2-configure-what-you-see" class="nav-link" data-scroll-target="#step-2-configure-what-you-see">Step 2: Configure What You See</a></li>
-  <li><a href="#step-3-navigate-time" id="toc-step-3-navigate-time" class="nav-link" data-scroll-target="#step-3-navigate-time">Step 3: Navigate Time</a></li>
-  <li><a href="#step-4-compare-across-modalities" id="toc-step-4-compare-across-modalities" class="nav-link" data-scroll-target="#step-4-compare-across-modalities">Step 4: Compare Across Modalities</a></li>
-  <li><a href="#step-5-export-or-hand-off" id="toc-step-5-export-or-hand-off" class="nav-link" data-scroll-target="#step-5-export-or-hand-off">Step 5: Export or Hand Off</a></li>
-  <li><a href="#python-console-handoff" id="toc-python-console-handoff" class="nav-link" data-scroll-target="#python-console-handoff">Python Console Handoff</a></li>
+  <li><a href="#core-data-type-families" id="toc-core-data-type-families" class="nav-link active" data-scroll-target="#core-data-type-families">Core Data Type Families</a></li>
+  <li><a href="#spatial-types-vs-time-series-types" id="toc-spatial-types-vs-time-series-types" class="nav-link" data-scroll-target="#spatial-types-vs-time-series-types">Spatial Types vs Time-Series Types</a></li>
+  <li><a href="#how-to-choose-the-right-type" id="toc-how-to-choose-the-right-type" class="nav-link" data-scroll-target="#how-to-choose-the-right-type">How to Choose the Right Type</a></li>
+  <li><a href="#where-you-interact-with-each-type" id="toc-where-you-interact-with-each-type" class="nav-link" data-scroll-target="#where-you-interact-with-each-type">Where You Interact with Each Type</a></li>
+  <li><a href="#transforming-between-types" id="toc-transforming-between-types" class="nav-link" data-scroll-target="#transforming-between-types">Transforming Between Types</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   </ul>
 </nav>
@@ -490,9 +487,9 @@ ul.task-list li input[type="checkbox"] {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../examples/video_import.html">Tutorials</a></li><li class="breadcrumb-item"><a href="../../learning-resources/tutorials/using_data_viewer.html">Using the Data Viewer</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../concepts/timeframe.html">Concepts</a></li><li class="breadcrumb-item"><a href="../concepts/data_types.html">Data Types</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Tutorial: Using the Data Viewer</h1>
+<h1 class="title">Data Types</h1>
 </div>
 
 
@@ -509,69 +506,148 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>The Data Viewer is the main place to inspect analog time series, digital event series, and digital interval series on a shared timeline. This tutorial covers a practical workflow for loading, navigating, and interpreting multiple synchronized series.</p>
-</section>
-<section id="prerequisites" class="level2">
-<h2 class="anchored" data-anchor-id="prerequisites">Prerequisites</h2>
-<ul>
-<li>One or more time series loaded in the Data Manager.</li>
-<li>A known master timeline for your session.</li>
-</ul>
-</section>
-<section id="step-1-open-the-data-viewer" class="level2">
-<h2 class="anchored" data-anchor-id="step-1-open-the-data-viewer">Step 1: Open the Data Viewer</h2>
+<p>Neuralyzer organizes loaded and derived data as typed objects in the Data Manager.</p>
+<p>Each feature in the Data Manager has three parts:</p>
 <ol type="1">
-<li>Open the Data Viewer widget from the main interface.</li>
-<li>Add the series you want to inspect from the feature list.</li>
-<li>Confirm each selected key appears as a lane in the viewer.</li>
+<li>A <strong>key</strong> (the feature name you use in widgets and Python).</li>
+<li>A <strong>data type</strong> (the structure of each sample).</li>
+<li>A <strong>TimeFrame</strong> (the temporal coordinate system for indexing samples).</li>
 </ol>
+<p>This is what enables synchronized multi-modal visualization across video, signals, events, intervals, and model outputs.</p>
+<section id="core-data-type-families" class="level2">
+<h2 class="anchored" data-anchor-id="core-data-type-families">Core Data Type Families</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Core types</th>
+<th>What they represent</th>
+<th>Typical workflows</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Media</td>
+<td><code>MediaData</code></td>
+<td>Video or image sequences</td>
+<td>Playback, visual context, overlaying labels</td>
+</tr>
+<tr class="even">
+<td>Spatial annotations</td>
+<td><code>PointData</code>, <code>LineData</code>, <code>MaskData</code></td>
+<td>Positions, ordered contours, segmented regions over time</td>
+<td>Manual labeling, curation, geometry transforms</td>
+</tr>
+<tr class="odd">
+<td>Continuous and sparse time series</td>
+<td><code>AnalogTimeSeries</code>, <code>DigitalEventSeries</code>, <code>DigitalIntervalSeries</code></td>
+<td>Continuous values, point-in-time events, and start/end intervals</td>
+<td>Signal analysis, event alignment, behavioral epoch marking</td>
+</tr>
+<tr class="even">
+<td>Multi-dimensional arrays</td>
+<td><code>TensorData</code></td>
+<td>N-dimensional features and model outputs</td>
+<td>Deep learning features, tensor inspection, ML pipelines</td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="step-2-configure-what-you-see" class="level2">
-<h2 class="anchored" data-anchor-id="step-2-configure-what-you-see">Step 2: Configure What You See</h2>
+<section id="spatial-types-vs-time-series-types" class="level2">
+<h2 class="anchored" data-anchor-id="spatial-types-vs-time-series-types">Spatial Types vs Time-Series Types</h2>
+<p>From the developer-side architecture, point/line/mask objects are ragged in time: multiple entities can exist at the same time index, and entities can be tracked and grouped across time.</p>
+<p>Time-series types are optimized for signal/event semantics:</p>
 <ul>
-<li>Toggle per-series visibility.</li>
-<li>Set colors and opacity for clarity.</li>
-<li>Adjust per-series scaling to make comparisons readable.</li>
+<li><code>AnalogTimeSeries</code>: dense or sparse scalar values over a TimeFrame.</li>
+<li><code>DigitalEventSeries</code>: discrete timestamps.</li>
+<li><code>DigitalIntervalSeries</code>: intervals with start/end boundaries.</li>
 </ul>
 </section>
-<section id="step-3-navigate-time" class="level2">
-<h2 class="anchored" data-anchor-id="step-3-navigate-time">Step 3: Navigate Time</h2>
+<section id="how-to-choose-the-right-type" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-choose-the-right-type">How to Choose the Right Type</h2>
+<p>Use these rules of thumb:</p>
 <ul>
-<li>Use the global time controls to move through the recording.</li>
-<li>Zoom in for event-level precision.</li>
-<li>Zoom out for session-level context.</li>
+<li>Use <code>PointData</code> when each object is a location <code>(x, y)</code>.</li>
+<li>Use <code>LineData</code> when order along the shape matters (curves, traces, contours).</li>
+<li>Use <code>MaskData</code> when full object shape/region is needed.</li>
+<li>Use <code>AnalogTimeSeries</code> for continuous-valued trajectories.</li>
+<li>Use <code>DigitalEventSeries</code> for instantaneous markers (spikes, triggers, contacts).</li>
+<li>Use <code>DigitalIntervalSeries</code> for epochs (trial windows, behavior bouts).</li>
+<li>Use <code>TensorData</code> for model features or any N-D numeric output.</li>
+<li>Use <code>MediaData</code> as the base visual stream that other types align to.</li>
 </ul>
 </section>
-<section id="step-4-compare-across-modalities" class="level2">
-<h2 class="anchored" data-anchor-id="step-4-compare-across-modalities">Step 4: Compare Across Modalities</h2>
-<ul>
-<li>Overlay event and interval labels on analog traces.</li>
-<li>Verify that labels align with expected signal structure.</li>
-<li>Use this pass to identify missing labels or suspicious artifacts.</li>
-</ul>
+<section id="where-you-interact-with-each-type" class="level2">
+<h2 class="anchored" data-anchor-id="where-you-interact-with-each-type">Where You Interact with Each Type</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Tool</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Data Manager</td>
+<td>Creating keys, assigning data type, assigning TimeFrame</td>
+</tr>
+<tr class="even">
+<td>Data Import Widget</td>
+<td>Loading the correct type from file formats</td>
+</tr>
+<tr class="odd">
+<td>Media Viewer</td>
+<td>Spatial editing (points, lines, masks) and visual overlays</td>
+</tr>
+<tr class="even">
+<td>Data Viewer</td>
+<td>Temporal validation of analog/event/interval alignment</td>
+</tr>
+<tr class="odd">
+<td>Data Inspector</td>
+<td>Curation and table-like editing workflows</td>
+</tr>
+<tr class="even">
+<td>Transform Widget</td>
+<td>Type-safe conversion and feature extraction pipelines</td>
+</tr>
+<tr class="odd">
+<td>Python Console</td>
+<td>Programmatic access and custom derived outputs</td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="step-5-export-or-hand-off" class="level2">
-<h2 class="anchored" data-anchor-id="step-5-export-or-hand-off">Step 5: Export or Hand Off</h2>
-<p>After review, pass cleaned data to transforms, machine learning, or CSV/export workflows.</p>
-</section>
-<section id="python-console-handoff" class="level2">
-<h2 class="anchored" data-anchor-id="python-console-handoff">Python Console Handoff</h2>
-<p>When you find candidate features in Data Viewer, you can immediately continue in Python:</p>
+<section id="transforming-between-types" class="level2">
+<h2 class="anchored" data-anchor-id="transforming-between-types">Transforming Between Types</h2>
+<p>Transforms map one type to another while preserving data lineage through new output keys. Examples include:</p>
 <ul>
-<li>Use <code>dm.getData("key")</code> to pull the feature.</li>
-<li>Use <code>dm.getTimeKey("key")</code> to preserve the TimeFrame context.</li>
-<li>Prototype custom analyses and transforms in the Python Console.</li>
+<li><code>MaskData</code> -&gt; <code>AnalogTimeSeries</code> (area)</li>
+<li><code>MaskData</code> -&gt; <code>PointData</code> (centroid)</li>
+<li><code>MaskData</code> -&gt; <code>LineData</code> (mask-to-line conversion)</li>
+<li>Analog thresholding -&gt; digital event/interval outputs</li>
 </ul>
+<p>A practical pattern is to keep source keys immutable and write each transform output to a new key.</p>
 </section>
 <section id="see-also" class="level2">
 <h2 class="anchored" data-anchor-id="see-also">See Also</h2>
 <ul>
-<li><a href="../../user_guide/data_viewer/overview.html">Data Viewer</a></li>
-<li><a href="../../learning-resources/tutorials/event_labeling.html">Tutorial: Event Labeling</a></li>
-<li><a href="../../learning-resources/tutorials/interval_series_labeling.html">Tutorial: Interval Series Labeling</a></li>
-<li><a href="../../user_guide/python_console.html">Python Console</a></li>
+<li><a href="../concepts/timeframe.html">TimeFrame</a></li>
+<li><a href="../concepts/no_write_access.html">Non-Destructive Workflows</a></li>
+<li><a href="../concepts/interface_roles.html">Interacting with Your Data</a></li>
+<li><a href="../user_guide/data_loading/index.html">Data Loading Overview</a></li>
+<li><a href="../developer/DataManager/data_manager.html">Data Manager (Developer)</a></li>
+<li><a href="../developer/DataManager/data_structures.html">Data Structure Performance (Developer)</a></li>
 </ul>
 
 

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>No Write Access and Non-Destructive Workflows – Neuralyzer</title>
+<title>Non-Destructive Workflows – Neuralyzer</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -310,7 +310,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../concepts/timeframe.html">Concepts</a></li><li class="breadcrumb-item"><a href="../concepts/no_write_access.html">No Write Access and Non-Destructive Workflows</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../concepts/timeframe.html">Concepts</a></li><li class="breadcrumb-item"><a href="../concepts/no_write_access.html">Non-Destructive Workflows</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -345,14 +345,20 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../concepts/interface_roles.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Inspector vs Media Viewer vs Data Viewer vs Data Manager</span></a>
+  <a href="../concepts/no_write_access.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Non-Destructive Workflows</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../concepts/no_write_access.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">No Write Access and Non-Destructive Workflows</span></a>
+  <a href="../concepts/data_types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Types</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../concepts/interface_roles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Interacting with Your Data</span></a>
   </div>
 </li>
       </ul>
@@ -366,6 +372,18 @@ ul.task-list li input[type="checkbox"] {
           </a> 
       </div>
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/video_import.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Video Import</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/image_stack_import.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Image Stack Import</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../examples/keypoint_labeling.html" class="sidebar-item-text sidebar-link">
@@ -406,18 +424,6 @@ ul.task-list li input[type="checkbox"] {
   <div class="sidebar-item-container"> 
   <a href="../learning-resources/tutorials/hmm_behavioral_epochs.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">HMM Behavioral Epoch Prediction</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/video_import.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Video Import</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/image_stack_import.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Image Stack Import</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -482,9 +488,9 @@ ul.task-list li input[type="checkbox"] {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../concepts/timeframe.html">Concepts</a></li><li class="breadcrumb-item"><a href="../concepts/no_write_access.html">No Write Access and Non-Destructive Workflows</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../concepts/timeframe.html">Concepts</a></li><li class="breadcrumb-item"><a href="../concepts/no_write_access.html">Non-Destructive Workflows</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">No Write Access and Non-Destructive Workflows</h1>
+<h1 class="title">Non-Destructive Workflows</h1>
 </div>
 
 
@@ -501,7 +507,7 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>In most analysis workflows, you want transforms and derived operations not to overwrite your source labels. This is the practical idea behind “no write access” workflows.</p>
+<p>In most analysis workflows, you want transforms and derived operations not to overwrite your source labels. This is the practical idea behind non-destructive workflows (sometimes called “no write access” workflows).</p>
 <section id="core-principle" class="level2">
 <h2 class="anchored" data-anchor-id="core-principle">Core Principle</h2>
 <p>Treat source data as immutable reference data. New operations should create new output features instead of replacing the original key.</p>
@@ -553,7 +559,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="see-also" class="level2">
 <h2 class="anchored" data-anchor-id="see-also">See Also</h2>
 <ul>
-<li><a href="../concepts/interface_roles.html">Inspector vs Media Viewer vs Data Viewer vs Data Manager</a></li>
+<li><a href="../concepts/interface_roles.html">Interacting with Your Data</a></li>
 <li><a href="../concepts/timeframe.html">TimeFrame</a></li>
 <li><a href="../user_guide/python_console.html">Python Console</a></li>
 <li><a href="../learning-resources/tutorials/performing_data_transforms.html">Tutorial: Performing Data Transforms</a></li>

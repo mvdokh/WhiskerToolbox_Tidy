@@ -1,5 +1,5 @@
 ---
-title: "Inspector vs Media Viewer vs Data Viewer vs Data Manager"
+title: "Interacting with Your Data"
 ---
 
 This concept page gives a practical model of where to create and edit

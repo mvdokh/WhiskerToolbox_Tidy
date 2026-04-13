@@ -1,0 +1,85 @@
+---
+title: "Data Types"
+---
+
+Neuralyzer organizes loaded and derived data as typed objects in the Data
+Manager.
+
+Each feature in the Data Manager has three parts:
+
+1. A **key** (the feature name you use in widgets and Python).
+2. A **data type** (the structure of each sample).
+3. A **TimeFrame** (the temporal coordinate system for indexing samples).
+
+This is what enables synchronized multi-modal visualization across video,
+signals, events, intervals, and model outputs.
+
+## Core Data Type Families
+
+| Family | Core types | What they represent | Typical workflows |
+|---|---|---|---|
+| Media | `MediaData` | Video or image sequences | Playback, visual context, overlaying labels |
+| Spatial annotations | `PointData`, `LineData`, `MaskData` | Positions, ordered contours, segmented regions over time | Manual labeling, curation, geometry transforms |
+| Continuous and sparse time series | `AnalogTimeSeries`, `DigitalEventSeries`, `DigitalIntervalSeries` | Continuous values, point-in-time events, and start/end intervals | Signal analysis, event alignment, behavioral epoch marking |
+| Multi-dimensional arrays | `TensorData` | N-dimensional features and model outputs | Deep learning features, tensor inspection, ML pipelines |
+
+## Spatial Types vs Time-Series Types
+
+From the developer-side architecture, point/line/mask objects are ragged
+in time: multiple entities can exist at the same time index, and entities
+can be tracked and grouped across time.
+
+Time-series types are optimized for signal/event semantics:
+
+- `AnalogTimeSeries`: dense or sparse scalar values over a TimeFrame.
+- `DigitalEventSeries`: discrete timestamps.
+- `DigitalIntervalSeries`: intervals with start/end boundaries.
+
+## How to Choose the Right Type
+
+Use these rules of thumb:
+
+- Use `PointData` when each object is a location `(x, y)`.
+- Use `LineData` when order along the shape matters (curves, traces,
+  contours).
+- Use `MaskData` when full object shape/region is needed.
+- Use `AnalogTimeSeries` for continuous-valued trajectories.
+- Use `DigitalEventSeries` for instantaneous markers (spikes, triggers,
+  contacts).
+- Use `DigitalIntervalSeries` for epochs (trial windows, behavior bouts).
+- Use `TensorData` for model features or any N-D numeric output.
+- Use `MediaData` as the base visual stream that other types align to.
+
+## Where You Interact with Each Type
+
+| Tool | Best for |
+|---|---|
+| Data Manager | Creating keys, assigning data type, assigning TimeFrame |
+| Data Import Widget | Loading the correct type from file formats |
+| Media Viewer | Spatial editing (points, lines, masks) and visual overlays |
+| Data Viewer | Temporal validation of analog/event/interval alignment |
+| Data Inspector | Curation and table-like editing workflows |
+| Transform Widget | Type-safe conversion and feature extraction pipelines |
+| Python Console | Programmatic access and custom derived outputs |
+
+## Transforming Between Types
+
+Transforms map one type to another while preserving data lineage through
+new output keys. Examples include:
+
+- `MaskData` -> `AnalogTimeSeries` (area)
+- `MaskData` -> `PointData` (centroid)
+- `MaskData` -> `LineData` (mask-to-line conversion)
+- Analog thresholding -> digital event/interval outputs
+
+A practical pattern is to keep source keys immutable and write each
+transform output to a new key.
+
+## See Also
+
+- [TimeFrame](timeframe.qmd)
+- [Non-Destructive Workflows](no_write_access.qmd)
+- [Interacting with Your Data](interface_roles.qmd)
+- [Data Loading Overview](../user_guide/data_loading/index.qmd)
+- [Data Manager (Developer)](../developer/DataManager/data_manager.qmd)
+- [Data Structure Performance (Developer)](../developer/DataManager/data_structures.qmd)
