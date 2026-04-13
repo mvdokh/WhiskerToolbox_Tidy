@@ -3,3 +3,94 @@ title: "Data Viewer"
 format: html
 ---
 
+The **Data Viewer** is the central place to inspect **non-video data over time**.
+
+If the Media Viewer answers "what is happening in this frame?", the Data Viewer answers
+"what is happening across this timeline?"
+
+## What the Data Viewer Is For
+
+Use the Data Viewer to:
+
+- inspect continuous signals and sparse labels on one shared timeline,
+- verify timing alignment across data modalities,
+- compare raw and transformed outputs,
+- quality-check labels and model outputs before downstream analysis.
+
+This widget is designed for temporal interpretation, not frame-by-frame spatial annotation.
+
+## Data Types You Can View
+
+The Data Viewer focuses on time-series modalities:
+
+- **Analog Time Series**: continuous-valued signals over time,
+- **Digital Event Series**: instantaneous timestamps,
+- **Digital Interval Series**: start/end temporal windows.
+
+These are shown in stacked lanes on a shared time axis so you can directly compare relationships
+between continuous activity and discrete labels.
+
+For broader type definitions, see [Data Types](../../concepts/data_types.qmd).
+
+## Time Alignment and TimeFrame
+
+All display behavior is grounded in each feature's **TimeFrame**.
+
+- Different modalities may have very different native sampling rates.
+- The Data Viewer displays them on a common temporal view.
+- This makes cross-modal checks possible (for example analog signal dynamics vs event/interval labels).
+
+When something "looks off", verify the assigned TimeFrame first.
+See [TimeFrame](../../concepts/timeframe.qmd).
+
+## How the Display Works
+
+At a practical level:
+
+- You choose series from the feature tree.
+- Each selected series is rendered with its own display settings.
+- The view follows the application's global time position.
+- You zoom time and amplitude to move from session-scale context to event-scale detail.
+
+Typical lane rendering:
+
+- analog as line traces,
+- events as glyph/tick markers,
+- intervals as blocks spanning time windows.
+
+## Common Workflow
+
+1. Add the relevant analog, event, and interval keys.
+2. Set visibility/colors/scaling so overlays are legible.
+3. Navigate time and zoom into important windows.
+4. Check whether event/interval labels match signal structure.
+5. Iterate with Data Inspector or transforms, then re-validate here.
+
+This loop is one of the fastest ways to catch synchronization mistakes and labeling drift.
+
+## Why It Is Central for Non-Video Data
+
+Most downstream analysis depends on temporal consistency:
+
+- thresholded events should coincide with meaningful signal changes,
+- grouped intervals should track expected behavioral epochs,
+- transformed outputs should preserve interpretable timing.
+
+The Data Viewer is where these assumptions are visually validated before export, ML, or scripting.
+
+## Relationship to Other Widgets
+
+- **Data Manager**: create keys, set type, assign TimeFrame.
+- **Data Viewer**: temporal validation and comparison.
+- **Data Inspector**: curation and detailed editing.
+- **Media Viewer**: spatial/frame-based annotation.
+
+See [Interacting with Your Data](../../concepts/interface_roles.qmd) for the full division of roles.
+
+## Practical Tips
+
+- Keep derived outputs as new keys so you can compare source vs result side-by-side.
+- Use consistent naming for related analog/event/interval series.
+- Re-check TimeFrame assignments when combining hardware streams.
+- Validate in Data Viewer before final export or model training.
+

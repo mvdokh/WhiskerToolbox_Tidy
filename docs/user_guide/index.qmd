@@ -72,15 +72,7 @@ subsections.
 
 ## Data Transformations
 
-- [Overview](data_transformations/overview.qmd)
 - [Transform Widget](data_transformations/transforms_v2_widget.qmd)
-
-### Reference Guides
-
-- [Mask Transforms Reference](data_transformations/mask_transforms_reference.qmd)
-- [Media Transforms Reference](data_transformations/media_transforms_reference.qmd)
-- [Point Transforms Reference](data_transformations/point_transforms_reference.qmd)
-- [Interval Transforms Reference](data_transformations/interval_transforms_reference.qmd)
 
 ### Transforms by Input Type
 
@@ -142,11 +134,6 @@ subsections.
 - [DBSCAN](machine_learning/DBSCAN.qmd)
 - [GMM](machine_learning/GMM.qmd)
 
-## Export
-
-- [Video Export](export/video_export.qmd)
-- [CSV Plot Export](export/csv_plot_export.qmd)
-
 ## Behavioral Modules
 
 - [Whisker](behaviors/whisker.qmd)
@@ -159,3 +146,8 @@ subsections.
 ## Python Console
 
 - [Python Console](python_console.qmd)
+
+## Export
+
+- [Video Export](export/video_export.qmd)
+- [CSV Plot Export](export/csv_plot_export.qmd)

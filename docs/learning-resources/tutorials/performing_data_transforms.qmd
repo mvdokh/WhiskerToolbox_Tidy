@@ -65,9 +65,7 @@ Console with DataManager-backed objects:
 ## See Also
 
 - [Transform Widget](../../user_guide/data_transformations/transforms_v2_widget.qmd)
-- [Data Transformations](../../user_guide/data_transformations/overview.qmd)
-- [Mask Transforms Reference](../../user_guide/data_transformations/mask_transforms_reference.qmd)
-- [Media Transforms Reference](../../user_guide/data_transformations/media_transforms_reference.qmd)
-- [Point Transforms Reference](../../user_guide/data_transformations/point_transforms_reference.qmd)
-- [Interval Transforms Reference](../../user_guide/data_transformations/interval_transforms_reference.qmd)
+- [Analog Filter](../../user_guide/data_transformations/analog_filter.qmd)
+- [Digital Interval Group](../../user_guide/data_transformations/digital_interval_group.qmd)
+- [Mask Area](../../user_guide/data_transformations/mask_area.qmd)
 - [Python Console](../../user_guide/python_console.qmd)

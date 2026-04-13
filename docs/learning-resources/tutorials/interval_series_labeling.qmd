@@ -75,5 +75,5 @@ custom scripts, metrics, and transforms.
 
 - [How-To: Label Video Intervals](../how-to/label_video_intervals.qmd)
 - [How-To: Triage Line Data](../how-to/triage_line_data.qmd)
-- [Interval Transforms Reference](../../user_guide/data_transformations/interval_transforms_reference.qmd)
+- [Transform Widget](../../user_guide/data_transformations/transforms_v2_widget.qmd)
 - [Python Console](../../user_guide/python_console.qmd)

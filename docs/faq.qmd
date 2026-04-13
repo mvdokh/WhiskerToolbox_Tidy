@@ -132,7 +132,7 @@ you can convert data types, compute features, and build analysis
 pipelines.
 
 See [Transform Widget](user_guide/data_transformations/transforms_v2_widget.qmd)
-and [Data Transformations](user_guide/data_transformations/overview.qmd).
+for the full transform list and pipeline workflow.
 </details>
 
 <details>

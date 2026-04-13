@@ -37,7 +37,7 @@ See [TimeFrame](../../concepts/timeframe.qmd) for synchronization details.
 ## Common Follow-up Transforms
 
 - [Digital Interval Group](../data_transformations/digital_interval_group.qmd)
-- [Interval Transforms Reference](../data_transformations/interval_transforms_reference.qmd)
+- [Analog Interval Threshold](../data_transformations/analog_interval_threshold.qmd)
 
 ## Practical Tip
 

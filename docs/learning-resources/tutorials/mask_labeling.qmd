@@ -70,6 +70,6 @@ Example flow:
 
 - [Creating Mask Labels](../../labeling/mask.qmd)
 - [Keypoint Video Labeling](../../examples/keypoint_labeling.qmd)
-- [Mask Transforms Reference](../../user_guide/data_transformations/mask_transforms_reference.qmd)
+- [Transform Widget](../../user_guide/data_transformations/transforms_v2_widget.qmd)
 - [Calculate Mask Area](../../user_guide/data_transformations/mask_area.qmd)
 - [Python Console](../../user_guide/python_console.qmd)

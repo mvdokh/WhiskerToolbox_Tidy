@@ -335,15 +335,8 @@ website:
             - user_guide/data_manager/overview.qmd
         - section: "Data Transformations"
           contents:
-            - user_guide/data_transformations/overview.qmd
             - text: "Transform Widget"
               href: user_guide/data_transformations/transforms_v2_widget.qmd
-            - section: "Reference Guides"
-              contents:
-                - user_guide/data_transformations/mask_transforms_reference.qmd
-                - user_guide/data_transformations/media_transforms_reference.qmd
-                - user_guide/data_transformations/point_transforms_reference.qmd
-                - user_guide/data_transformations/interval_transforms_reference.qmd
             - section: "Transforms by Input Type"
               contents:
                 - section: "Analog Input"
@@ -396,10 +389,6 @@ website:
                 - user_guide/machine_learning/KMeans.qmd
                 - user_guide/machine_learning/DBSCAN.qmd
                 - user_guide/machine_learning/GMM.qmd
-        - section: "Export"
-          contents:
-            - user_guide/export/video_export.qmd
-            - user_guide/export/csv_plot_export.qmd
         - section: "Behavioral Modules"
           contents:
             - user_guide/behaviors/whisker.qmd
@@ -410,6 +399,10 @@ website:
         - section: "Python Console"
           contents:
             - user_guide/python_console.qmd
+        - section: "Export"
+          contents:
+            - user_guide/export/video_export.qmd
+            - user_guide/export/csv_plot_export.qmd
 
 
 format:

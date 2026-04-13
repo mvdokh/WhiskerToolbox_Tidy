@@ -39,7 +39,7 @@ Mask data is often transformed into derived features:
 - [Calculate Mask Area](../data_transformations/mask_area.qmd)
 - [Calculate Mask Centroid](../data_transformations/mask_centroid.qmd)
 - [Calculate Mask Principal Axis](../data_transformations/calculate_mask_principal_axis.qmd)
-- [Convert Mask To Line](../data_transformations/mask_transforms_reference.qmd#convert-mask-to-line)
+- [Skeletonize Mask](../data_transformations/skeletonize_mask.qmd)
 
 ## Practical Tip
 
