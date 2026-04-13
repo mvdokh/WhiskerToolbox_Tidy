@@ -11,12 +11,24 @@
 	transform-origin: left center;
 }
 
-/* Apply a subtle shadow to content images and GIFs across docs pages. */
+/* Apply a strong, noticeable shadow to content images and GIFs across docs pages. */
 main img {
-	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+	box-shadow: 0 22px 56px rgba(0, 0, 0, 0.45), 0 8px 18px rgba(0, 0, 0, 0.28);
 }
 
 /* Keep the homepage hero image shadow-free. */
 main img[src*="hero.png"] {
 	box-shadow: none;
+}
+
+/* Keep OS logos on the introduction page shadow-free. */
+main img[src*="Apple_logo_black.svg"],
+main img[src*="Linux_Logo_in_Linux_Libertine_Font.svg"],
+main img[src*="Windows_logo_-_2021.svg"] {
+	box-shadow: none;
+}
+
+/* Render the Windows logo in black and white. */
+main img[src*="Windows_logo_-_2021.svg"] {
+	filter: grayscale(100%) contrast(170%);
 }

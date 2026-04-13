@@ -4,6 +4,10 @@ title: "Getting Started"
 
 Ready to start analyzing? Follow these simple steps to get Neuralyzer running on your system.
 
+::: {.callout-note}
+Need guided walkthroughs? See [Learning Resources](learning-resources/index.qmd). For frequently asked questions, see [F&Q](faq.qmd).
+:::
+
 ## 1. Download
 
 The latest version of Neuralyzer is available on our GitHub Releases page.

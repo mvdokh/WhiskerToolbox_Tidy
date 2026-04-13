@@ -16,6 +16,9 @@ website:
 
       - text: "Getting Started"
         href: getting-started.qmd
+
+      - text: "F&Q"
+        href: faq.qmd
         
       - text: "Learning Resources"
         href: learning-resources/index.qmd
