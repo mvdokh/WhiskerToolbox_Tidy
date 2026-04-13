@@ -3,6 +3,8 @@ title: "How to Import Video"
 format: html
 ---
 
+![](../images/load_video.png){fig-align="center"}
+
 ## Overview
 
 This guide shows you how to import video files into Neuralyzer for visualization and analysis. Videos are used as the primary media backdrop for viewing and annotating behavioral data such as whisker movements, facial expressions, or body tracking.

@@ -21,6 +21,66 @@ features, where to visualize them, and where to curate labels.
 | Data Viewer | Temporal visualization | Compare traces with events and intervals across time |
 | Data Inspector | Data curation and correction | Create/remove/extend/merge intervals, clean event series, inspect table rows |
 
+## Where They Appear in the UI
+
+### Data Manager
+
+![](../images/data_manager_panel.png){fig-align="center"}
+
+In the default startup layout, the Data Manager is docked on the left
+side of the screen. It acts as the main navigation and selection panel:
+
+- The top table lists data keys and data types.
+- Selecting a key loads data-type-specific controls and tables.
+- It is where you create new features and assign TimeFrames.
+- It is also a primary place for save/export workflows.
+
+### Media Viewer
+
+![](../images/media_viewer.png){fig-align="center"}
+
+The Media Viewer controls what you see in the main central media window.
+Its feature table and type-specific controls determine which overlays are
+visible and editable.
+
+When you select different data features, different manipulation options
+appear for that type. For example, selecting a mask feature exposes mask
+editing controls (such as brush-based drawing). See the
+[Tutorial: Mask Labeling](../learning-resources/tutorials/mask_labeling.qmd)
+for a practical walkthrough.
+
+### Opening Data Viewer
+
+![](../images/open_data_viewer.png){fig-align="center"}
+
+### Data Viewer
+
+![](../images/data_viewer_modalities.png){fig-align="center"}
+
+This view is designed for synchronized temporal analysis across
+modalities. A common layout includes analog traces (for example angle),
+events (such as spikes), and intervals on the same timeline.
+
+Manipulation and configuration for this view appear in the right-side
+properties panel.
+
+### Opening Data Inspector
+
+![](../images/open_data_inspector.png){fig-align="center"}
+
+### Data Inspector
+
+![](../images/data_inspector.png){fig-align="center"}
+
+Data Inspector provides table-centric curation tools for many data
+types.
+
+- In table-based inspectors, double-clicking rows/cells can jump the app
+   to the corresponding frame or time index.
+- Many inspector types also include export controls, allowing you to
+   export modalities (for example points, lines, intervals, analog, and
+   tensors) to formats such as CSV.
+
 ## Mental Model for Daily Work
 
 1. Start in **Data Manager** to create the target feature and choose its

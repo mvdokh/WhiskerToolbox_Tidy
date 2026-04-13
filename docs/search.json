@@ -2513,8 +2513,8 @@
     "objectID": "examples/video_import.html#overview",
     "href": "examples/video_import.html#overview",
     "title": "How to Import Video",
-    "section": "",
-    "text": "This guide shows you how to import video files into Neuralyzer for visualization and analysis. Videos are used as the primary media backdrop for viewing and annotating behavioral data such as whisker movements, facial expressions, or body tracking.\n\n\n\n\n\n\nWarningVideo Encoding Requirements\n\n\n\nNeuralyzer does not support videos encoded with B-frames. B-frames (bidirectional frames) use data from both past and future frames for compression, which breaks the simple sequential decoding strategy used for efficient random frame access.\nIf your video has B-frames, you must re-encode it before importing. See Checking for and Removing B-frames below.",
+    "section": "Overview",
+    "text": "Overview\nThis guide shows you how to import video files into Neuralyzer for visualization and analysis. Videos are used as the primary media backdrop for viewing and annotating behavioral data such as whisker movements, facial expressions, or body tracking.\n\n\n\n\n\n\nWarningVideo Encoding Requirements\n\n\n\nNeuralyzer does not support videos encoded with B-frames. B-frames (bidirectional frames) use data from both past and future frames for compression, which breaks the simple sequential decoding strategy used for efficient random frame access.\nIf your video has B-frames, you must re-encode it before importing. See Checking for and Removing B-frames below.",
     "crumbs": [
       "Learning Resources",
       "Tutorials",
@@ -18048,7 +18048,7 @@
     "href": "introduction.html",
     "title": "Introduction",
     "section": "",
-    "text": "&lt;img src=\"images/Apple_logo_black.svg\" alt=\"Apple logo\" width=\"36\"&gt;\n&lt;img src=\"images/Linux_Logo_in_Linux_Libertine_Font.svg\" alt=\"Linux logo\" width=\"36\"&gt;\n&lt;img src=\"images/Windows_logo_-_2021.svg\" alt=\"Windows logo\" width=\"36\"&gt;\nNeuralyzer (WhiskerToolbox) is an open-source desktop platform for neural and behavioral data analysis, developed by neuroscientists who use it every day. Its primary purpose is to act as both a reproducibility machine and a practical toolkit for data exploration.\nIn real experiments, it is hard to align all your data and visualize everything together. Doing this repeatedly across many concurrent data modalities can become complex and tedious. Neuralyzer is built as a workbench for behavioral and neural recordings so those multimodal workflows stay connected, time-aligned, and manageable.\nSuppose you want to load a video of a mouse licking a spout and also load predicted tongue masks so you can track tongue area while optogenetic stimulation is being recorded.\nIn Neuralyzer, you can load all of these modalities, run transforms to compute mask area, derive intervals where licking occurs, and then measure how many licks fall inside each optogenetic stimulus event. Even when TTL events were recorded on a different acquisition path and may live in a different TimeFrame, the platform is designed to make this cross-modal analysis straightforward and easy to perform in one place."
+    "text": "Neuralyzer (WhiskerToolbox) is an open-source desktop platform for neural and behavioral data analysis, developed by neuroscientists who use it every day. Its primary purpose is to act as both a reproducibility machine and a practical toolkit for data exploration.\nIn real experiments, it is hard to align all your data and visualize everything together. Doing this repeatedly across many concurrent data modalities can become complex and tedious. Neuralyzer is built as a workbench for behavioral and neural recordings so those multimodal workflows stay connected, time-aligned, and manageable.\nSuppose you want to load a video of a mouse licking a spout and also load predicted tongue masks so you can track tongue area while optogenetic stimulation is being recorded.\nIn Neuralyzer, you can load all of these modalities, run transforms to compute mask area, derive intervals where licking occurs, and then measure how many licks fall inside each optogenetic stimulus event. Even when TTL events were recorded on a different acquisition path and may live in a different TimeFrame, the platform is designed to make this cross-modal analysis straightforward and easy to perform in one place."
   },
   {
     "objectID": "introduction.html#what-this-program-does",
@@ -20455,6 +20455,18 @@
       "Learning Resources",
       "Concepts",
       "TimeFrame"
+    ]
+  },
+  {
+    "objectID": "concepts/interface_roles.html#where-they-appear-in-the-ui",
+    "href": "concepts/interface_roles.html#where-they-appear-in-the-ui",
+    "title": "Interacting with Your Data",
+    "section": "Where They Appear in the UI",
+    "text": "Where They Appear in the UI\n\nData Manager\n\n\n\n\n\nIn the default startup layout, the Data Manager is docked on the left side of the screen. It acts as the main navigation and selection panel:\n\nThe top table lists data keys and data types.\nSelecting a key loads data-type-specific controls and tables.\nIt is where you create new features and assign TimeFrames.\nIt is also a primary place for save/export workflows.\n\n\n\nMedia Viewer\n\n\n\n\n\nThe Media Viewer controls what you see in the main central media window. Its feature table and type-specific controls determine which overlays are visible and editable.\nWhen you select different data features, different manipulation options appear for that type. For example, selecting a mask feature exposes mask editing controls (such as brush-based drawing). See the Tutorial: Mask Labeling for a practical walkthrough.\n\n\nOpening Data Viewer\n\n\n\n\n\n\n\nData Viewer\n\n\n\n\n\nThis view is designed for synchronized temporal analysis across modalities. A common layout includes analog traces (for example angle), events (such as spikes), and intervals on the same timeline.\nManipulation and configuration for this view appear in the right-side properties panel.\n\n\nOpening Data Inspector\n\n\n\n\n\n\n\nData Inspector\n\n\n\n\n\nData Inspector provides table-centric curation tools for many data types.\n\nIn table-based inspectors, double-clicking rows/cells can jump the app to the corresponding frame or time index.\nMany inspector types also include export controls, allowing you to export modalities (for example points, lines, intervals, analog, and tensors) to formats such as CSV.",
+    "crumbs": [
+      "Learning Resources",
+      "Concepts",
+      "Interacting with Your Data"
     ]
   }
 ]

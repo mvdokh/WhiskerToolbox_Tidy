@@ -476,6 +476,15 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#the-short-version" id="toc-the-short-version" class="nav-link active" data-scroll-target="#the-short-version">The Short Version</a></li>
   <li><a href="#what-each-tool-is-best-for" id="toc-what-each-tool-is-best-for" class="nav-link" data-scroll-target="#what-each-tool-is-best-for">What Each Tool Is Best For</a></li>
+  <li><a href="#where-they-appear-in-the-ui" id="toc-where-they-appear-in-the-ui" class="nav-link" data-scroll-target="#where-they-appear-in-the-ui">Where They Appear in the UI</a>
+  <ul class="collapse">
+  <li><a href="#data-manager" id="toc-data-manager" class="nav-link" data-scroll-target="#data-manager">Data Manager</a></li>
+  <li><a href="#media-viewer" id="toc-media-viewer" class="nav-link" data-scroll-target="#media-viewer">Media Viewer</a></li>
+  <li><a href="#opening-data-viewer" id="toc-opening-data-viewer" class="nav-link" data-scroll-target="#opening-data-viewer">Opening Data Viewer</a></li>
+  <li><a href="#data-viewer" id="toc-data-viewer" class="nav-link" data-scroll-target="#data-viewer">Data Viewer</a></li>
+  <li><a href="#opening-data-inspector" id="toc-opening-data-inspector" class="nav-link" data-scroll-target="#opening-data-inspector">Opening Data Inspector</a></li>
+  <li><a href="#data-inspector" id="toc-data-inspector" class="nav-link" data-scroll-target="#data-inspector">Data Inspector</a></li>
+  </ul></li>
   <li><a href="#mental-model-for-daily-work" id="toc-mental-model-for-daily-work" class="nav-link" data-scroll-target="#mental-model-for-daily-work">Mental Model for Daily Work</a></li>
   <li><a href="#common-patterns" id="toc-common-patterns" class="nav-link" data-scroll-target="#common-patterns">Common Patterns</a>
   <ul class="collapse">
@@ -559,6 +568,73 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 </tbody>
 </table>
+</section>
+<section id="where-they-appear-in-the-ui" class="level2">
+<h2 class="anchored" data-anchor-id="where-they-appear-in-the-ui">Where They Appear in the UI</h2>
+<section id="data-manager" class="level3">
+<h3 class="anchored" data-anchor-id="data-manager">Data Manager</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/data_manager_panel.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<p>In the default startup layout, the Data Manager is docked on the left side of the screen. It acts as the main navigation and selection panel:</p>
+<ul>
+<li>The top table lists data keys and data types.</li>
+<li>Selecting a key loads data-type-specific controls and tables.</li>
+<li>It is where you create new features and assign TimeFrames.</li>
+<li>It is also a primary place for save/export workflows.</li>
+</ul>
+</section>
+<section id="media-viewer" class="level3">
+<h3 class="anchored" data-anchor-id="media-viewer">Media Viewer</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/media_viewer.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<p>The Media Viewer controls what you see in the main central media window. Its feature table and type-specific controls determine which overlays are visible and editable.</p>
+<p>When you select different data features, different manipulation options appear for that type. For example, selecting a mask feature exposes mask editing controls (such as brush-based drawing). See the <a href="../learning-resources/tutorials/mask_labeling.html">Tutorial: Mask Labeling</a> for a practical walkthrough.</p>
+</section>
+<section id="opening-data-viewer" class="level3">
+<h3 class="anchored" data-anchor-id="opening-data-viewer">Opening Data Viewer</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/open_data_viewer.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+</section>
+<section id="data-viewer" class="level3">
+<h3 class="anchored" data-anchor-id="data-viewer">Data Viewer</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/data_viewer_modalities.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<p>This view is designed for synchronized temporal analysis across modalities. A common layout includes analog traces (for example angle), events (such as spikes), and intervals on the same timeline.</p>
+<p>Manipulation and configuration for this view appear in the right-side properties panel.</p>
+</section>
+<section id="opening-data-inspector" class="level3">
+<h3 class="anchored" data-anchor-id="opening-data-inspector">Opening Data Inspector</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/open_data_inspector.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+</section>
+<section id="data-inspector" class="level3">
+<h3 class="anchored" data-anchor-id="data-inspector">Data Inspector</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/data_inspector.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<p>Data Inspector provides table-centric curation tools for many data types.</p>
+<ul>
+<li>In table-based inspectors, double-clicking rows/cells can jump the app to the corresponding frame or time index.</li>
+<li>Many inspector types also include export controls, allowing you to export modalities (for example points, lines, intervals, analog, and tensors) to formats such as CSV.</li>
+</ul>
+</section>
 </section>
 <section id="mental-model-for-daily-work" class="level2">
 <h2 class="anchored" data-anchor-id="mental-model-for-daily-work">Mental Model for Daily Work</h2>
