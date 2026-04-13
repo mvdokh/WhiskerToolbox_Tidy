@@ -319,7 +319,6 @@ ul.task-list li input[type="checkbox"] {
   <ul class="collapse">
   <li><a href="#core-capabilities" id="toc-core-capabilities" class="nav-link" data-scroll-target="#core-capabilities">Core capabilities</a></li>
   <li><a href="#typical-use-cases" id="toc-typical-use-cases" class="nav-link" data-scroll-target="#typical-use-cases">Typical use cases</a></li>
-  <li><a href="#example-workflow-tongue-masks-with-optogenetic-events" id="toc-example-workflow-tongue-masks-with-optogenetic-events" class="nav-link" data-scroll-target="#example-workflow-tongue-masks-with-optogenetic-events">Example workflow: tongue masks with optogenetic events</a></li>
   </ul></li>
   <li><a href="#how-it-is-written" id="toc-how-it-is-written" class="nav-link" data-scroll-target="#how-it-is-written">How It Is Written</a></li>
   <li><a href="#architecture-overview" id="toc-architecture-overview" class="nav-link" data-scroll-target="#architecture-overview">Architecture Overview</a>
@@ -361,8 +360,15 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<div style="display:flex; justify-content:center; align-items:center; gap: 1.5rem; margin: 0.75rem 0 1.25rem;">
+<pre><code>&lt;img src="images/Apple_logo_black.svg" alt="Apple logo" width="36"&gt;
+&lt;img src="images/Linux_Logo_in_Linux_Libertine_Font.svg" alt="Linux logo" width="36"&gt;
+&lt;img src="images/Windows_logo_-_2021.svg" alt="Windows logo" width="36"&gt;</code></pre>
+</div>
 <p>Neuralyzer (WhiskerToolbox) is an open-source desktop platform for neural and behavioral data analysis, developed by neuroscientists who use it every day. Its primary purpose is to act as both a reproducibility machine and a practical toolkit for data exploration.</p>
 <p>In real experiments, it is hard to align all your data and visualize everything together. Doing this repeatedly across many concurrent data modalities can become complex and tedious. Neuralyzer is built as a workbench for behavioral and neural recordings so those multimodal workflows stay connected, time-aligned, and manageable.</p>
+<p>Suppose you want to load a video of a mouse licking a spout and also load predicted tongue masks so you can track tongue area while optogenetic stimulation is being recorded.</p>
+<p>In Neuralyzer, you can load all of these modalities, run transforms to compute mask area, derive intervals where licking occurs, and then measure how many licks fall inside each optogenetic stimulus event. Even when TTL events were recorded on a different acquisition path and may live in a different TimeFrame, the platform is designed to make this cross-modal analysis straightforward and easy to perform in one place.</p>
 <div class="callout callout-style-default callout-note callout-titled" title="At a glance">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -401,11 +407,6 @@ ul.task-list li input[type="checkbox"] {
 <li>Comparing model outputs against raw signals and labels.</li>
 <li>Exporting publication-ready summaries and plot-derived tables.</li>
 </ul>
-</section>
-<section id="example-workflow-tongue-masks-with-optogenetic-events" class="level3">
-<h3 class="anchored" data-anchor-id="example-workflow-tongue-masks-with-optogenetic-events">Example workflow: tongue masks with optogenetic events</h3>
-<p>Suppose you want to load a video of a mouse licking a spout and also load predicted tongue masks so you can track tongue area while optogenetic stimulation is being recorded.</p>
-<p>In Neuralyzer, you can load all of these modalities, run transforms to compute mask area, derive intervals where licking occurs, and then measure how many licks fall inside each optogenetic stimulus event. Even when TTL events were recorded on a different acquisition path and may live in a different TimeFrame, the platform is designed to make this cross-modal analysis straightforward and easy to perform in one place.</p>
 </section>
 </section>
 <section id="how-it-is-written" class="level2">
