@@ -22,7 +22,19 @@ This tutorial will guide you through the process of labeling keypoints on a vide
 
 ------------------------------------------------------------------------
 
-## Step 1: Load Video or Existing Labels
+## Full Video
+
+Watch the complete keypoint labeling workflow from start to finish:
+
+<video controls preload="metadata" width="100%" style="max-width: 960px; display: block; margin: 0 auto;">
+    <source src="../images/keypoint_example.mp4" type="video/mp4">
+    Your browser does not support the video tag. You can download the video here:
+    <a href="../images/keypoint_example.mp4">keypoint_example.mp4</a>.
+</video>
+
+## Step-by-Step
+
+### Step 1: Load Video or Existing Labels
 
 ![](2.png){fig-align="center"}
 
@@ -41,7 +53,7 @@ See: [Setting up a JSON File](#) for more on configuration options.
 
 ------------------------------------------------------------------------
 
-## Step 2: Open the Data Manager
+### Step 2: Open the Data Manager
 
 ![](3.png){fig-align="center"}
 
@@ -51,7 +63,7 @@ To create or manage point data:
 
 ------------------------------------------------------------------------
 
-## Step 3: Create a New Keypoint Feature
+### Step 3: Create a New Keypoint Feature
 
 ![](4.png){fig-align="center"}
 
@@ -68,7 +80,7 @@ Click **Create New Data** to add the new feature.
 
 ------------------------------------------------------------------------
 
-## Step 4: Edit and Add Keypoints in the Media Widget
+### Step 4: Edit and Add Keypoints in the Media Widget
 
 ![](5.png){fig-align="center"}
 
@@ -92,7 +104,7 @@ Note: The keypoint is recorded as a single-pixel coordinate. Visual shape and st
 
 ------------------------------------------------------------------------
 
-## Step 5: Review and Export Your Labels
+### Step 5: Review and Export Your Labels
 
 ![](6.png){fig-align="center"}
 
@@ -112,7 +124,7 @@ After labeling:
 
 ------------------------------------------------------------------------
 
-## Optional: Export Matching Media Frames
+### Optional: Export Matching Media Frames
 
 ![](7.png){fig-align="center"}
 
@@ -132,7 +144,7 @@ Keypoints will **not** be drawn on these frames. Only raw frames are exported.
 
 ------------------------------------------------------------------------
 
-## Step 6: Save to CSV
+### Step 6: Save to CSV
 
 ![](8.png){fig-align="center"}
 
@@ -146,7 +158,7 @@ Your labeled keypoint data is now saved and ready for further analysis.
 
 ------------------------------------------------------------------------
 
-### Summary
+## Summary
 
 This tutorial demonstrated how to:
 
@@ -155,6 +167,6 @@ This tutorial demonstrated how to:
 -   Annotate frames with feature coordinates
 -   Export label data and relevant frames
 
-### See Also
+## See Also
 
 -   [Point Transforms Reference](../user_guide/data_transformations/point_transforms_reference.qmd)
