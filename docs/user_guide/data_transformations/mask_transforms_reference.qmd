@@ -194,9 +194,7 @@ $$
 e_i^2 = (x_i-x(t_i))^2 + (y_i-y(t_i))^2
 $$
 
-Point is removed if
-$e_i^2 > \text{error_threshold}^2$
-(equivalently, $e_i > \text{error_threshold}$).
+Point is removed if $e_i^2 > \text{error_threshold}^2$ (equivalently, $e_i > \text{error_threshold}$).
 
 **Output**: `LineData`.
 

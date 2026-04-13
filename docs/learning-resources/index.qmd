@@ -2,6 +2,14 @@
 title: "Learning Resources"
 ---
 
+## Concepts
+
+Deep dive into the core concepts and theory behind Neuralyzer.
+
+- [TimeFrame](../concepts/timeframe.qmd)
+- [Inspector vs Media Viewer vs Data Viewer vs Data Manager](../concepts/interface_roles.qmd)
+- [No Write Access and Non-Destructive Workflows](../concepts/no_write_access.qmd)
+
 ## Tutorials
 
 Detailed step-by-step guides to help you learn the basics.
@@ -15,61 +23,10 @@ Detailed step-by-step guides to help you learn the basics.
 - [Using a Hidden Markov Model to Predict Behavioral Epochs with Deep Learning Features](tutorials/hmm_behavioral_epochs.qmd)
 - [Is this neuron real? Following a signal between results and raw data](tutorials/is_this_neuron_real_tutorial.qmd)
 - [Identifying Clusters in High Dimensional Data](tutorials/clustering_tutorial.qmd)
-
-## How-to Guides
-
-Practical guides to help you achieve specific tasks.
-
-### Data Import
-
 - [Video Import](../examples/video_import.qmd)
 - [Image Stack Import](../examples/image_stack_import.qmd)
 - [Load Tabular Binary Events](../examples/tabular_binary_events.qmd)
-
-### Data Synthesizer
-
-
-
-### Deep Learning
-
 - [Exporting Pytorch Models for Neuralyzer](how-to/exporting_aoti_encoder.qmd)
 - [Using NeuroSAM for Object Segmentation](how-to/neurosam_howto.qmd)
-
-### Labeling
-
-- [Keypoint Label Creation](../labeling/keypoint.qmd)
-- [Mask Creation](../labeling/mask.qmd)
-
-### Layout
-
-TODO: Create layout and save and load
-
-### Machine Learning
-
-TODO: Random Forest Classification
-TODO: Clustering
-
-### Plotting
-
-TODO: Flagging outliers with scatter plot widget
-TODO: Sorting by internal and external features in raster plot widget
-TODO: Exporting DataViewer to SVG
-
-
-### Python Integration
-
-TODO: Using conda environment for processing
-TODO: 
-
-### Triage & Curation
-
 - [Triage Line Data](how-to/triage_line_data.qmd) — review predictions and move correct lines to ground truth
 - [Label Video Intervals](how-to/label_video_intervals.qmd) — inspect scattered video regions and record what you reviewed
-
-## Concepts
-
-Deep dive into the core concepts and theory behind Neuralyzer.
-
-- [TimeFrame](../concepts/timeframe.qmd)
-- [Inspector vs Media Viewer vs Data Viewer vs Data Manager](../concepts/interface_roles.qmd)
-- [No Write Access and Non-Destructive Workflows](../concepts/no_write_access.qmd)
