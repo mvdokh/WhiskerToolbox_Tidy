@@ -2498,18 +2498,6 @@
     "text": "Community & Support\n\n\nLearning Resources\nMaster Neuralyzer with our comprehensive collection of tutorials and how-to guides. Explore Resources\n\n\nJoin the Discussion\nConnect with other users, ask questions, and share your feedback on GitHub. GitHub Discussions\n\n\nDeveloper Documentation\nInterested in contributing? Dive into our technical guides and API reference. Developer Guide"
   },
   {
-    "objectID": "examples/video_import.html",
-    "href": "examples/video_import.html",
-    "title": "How to Import Video",
-    "section": "",
-    "text": "This guide shows you how to import video files into Neuralyzer for visualization and analysis. Videos are used as the primary media backdrop for viewing and annotating behavioral data such as whisker movements, facial expressions, or body tracking.\n\n\n\n\n\n\nWarningVideo Encoding Requirements\n\n\n\nNeuralyzer does not support videos encoded with B-frames. B-frames (bidirectional frames) use data from both past and future frames for compression, which breaks the simple sequential decoding strategy used for efficient random frame access.\nIf your video has B-frames, you must re-encode it before importing. See Checking for and Removing B-frames below.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Video Import"
-    ]
-  },
-  {
     "objectID": "examples/video_import.html#overview",
     "href": "examples/video_import.html#overview",
     "title": "How to Import Video",
@@ -9347,11 +9335,11 @@
     ]
   },
   {
-    "objectID": "concepts/timeframe.html#creating-your-own-timeframe-in-the-app",
-    "href": "concepts/timeframe.html#creating-your-own-timeframe-in-the-app",
+    "objectID": "concepts/timeframe.html#assigning-a-timeframe-to-a-new-data-feature",
+    "href": "concepts/timeframe.html#assigning-a-timeframe-to-a-new-data-feature",
     "title": "TimeFrame",
-    "section": "Creating Your Own TimeFrame in the App",
-    "text": "Creating Your Own TimeFrame in the App\nYou can create a custom derived TimeFrame directly in the Data Manager:\n\nOpen Modules &gt; Data Manager.\nIn the Create New TimeFrame section, choose Method: Upsample.\nSelect a Source TimeFrame.\nSet the integer Factor.\nChoose a new Name.\nClick Create TimeFrame.\n\n\n\n\nWhere you can create TimeFrames in the Data Manager.\n\n\nThis creates a new upsampled TimeFrame with frame count:\n\\[\nN_{out} = (N_{in} - 1) \\cdot \\text{factor} + 1\n\\]\nAfter creation, the new TimeFrame appears in the TimeFrame table and in the TimeFrame selector when creating new data features.",
+    "section": "Assigning a TimeFrame to a New Data Feature",
+    "text": "Assigning a TimeFrame to a New Data Feature\nWhen you create a new feature in Data Manager, you can assign either a TimeFrame that was loaded from source data or one you created yourself.\n\nOpen Modules &gt; Data Manager.\nIn Create New Data, enter the new feature key and data type.\nIn the TimeFrame dropdown, select the desired TimeFrame.\nClick Create to register the new feature.\n\n\n\n\nAssigning a loaded or newly created TimeFrame to a new data feature in the Data Manager.\n\n\nThis assignment determines how the new feature synchronizes with other modalities in plots, labeling workflows, and transforms.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
@@ -9359,11 +9347,11 @@
     ]
   },
   {
-    "objectID": "concepts/timeframe.html#assigning-timeframes-to-new-features",
-    "href": "concepts/timeframe.html#assigning-timeframes-to-new-features",
+    "objectID": "concepts/timeframe.html#creating-your-own-timeframe-in-the-app",
+    "href": "concepts/timeframe.html#creating-your-own-timeframe-in-the-app",
     "title": "TimeFrame",
-    "section": "Assigning TimeFrames to New Features",
-    "text": "Assigning TimeFrames to New Features\nWhen creating data in Data Manager (Create New Data), choose the feature’s TimeFrame from the dropdown. This keeps labels, transforms, and plots on the intended temporal grid.",
+    "section": "Creating Your Own TimeFrame in the App",
+    "text": "Creating Your Own TimeFrame in the App\nYou can create a custom derived TimeFrame directly in the Data Manager:\n\nOpen Modules &gt; Data Manager.\nIn the Create New TimeFrame section, choose Method: Upsample.\nSelect a Source TimeFrame.\nSet the integer Factor.\nChoose a new Name.\nClick Create TimeFrame.\n\n\n\n\nWhere you can create TimeFrames in the Data Manager.\n\n\nThis creates a new upsampled TimeFrame with frame count:\n\\[\nN_{out} = (N_{in} - 1) \\cdot \\text{factor} + 1\n\\]\nAfter creation, the new TimeFrame appears in the TimeFrame table and in the TimeFrame selector when creating new data features.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
@@ -9424,6 +9412,18 @@
     "title": "Interacting with Your Data",
     "section": "What Each Tool Is Best For",
     "text": "What Each Tool Is Best For\n\n\n\n\n\n\n\n\nTool\nPrimary role\nTypical actions\n\n\n\n\nData Manager\nData orchestration\nCreate keys, choose data type, assign TimeFrame, organize features\n\n\nMedia Viewer\nSpatial labeling\nDraw/edit points, masks, and lines on frames\n\n\nData Viewer\nTemporal visualization\nCompare traces with events and intervals across time\n\n\nData Inspector\nData curation and correction\nCreate/remove/extend/merge intervals, clean event series, inspect table rows",
+    "crumbs": [
+      "Learning Resources",
+      "Concepts",
+      "Interacting with Your Data"
+    ]
+  },
+  {
+    "objectID": "concepts/interface_roles.html#where-they-appear-in-the-ui",
+    "href": "concepts/interface_roles.html#where-they-appear-in-the-ui",
+    "title": "Interacting with Your Data",
+    "section": "Where They Appear in the UI",
+    "text": "Where They Appear in the UI\n\nData Manager\n\n\n\n\n\nIn the default startup layout, the Data Manager is docked on the left side of the screen. It acts as the main navigation and selection panel:\n\nThe top table lists data keys and data types.\nSelecting a key loads data-type-specific controls and tables.\nIt is where you create new features and assign TimeFrames.\nIt is also a primary place for save/export workflows.\n\n\n\nMedia Viewer\n\n\n\n\n\nThe Media Viewer controls what you see in the main central media window. Its feature table and type-specific controls determine which overlays are visible and editable.\nWhen you select different data features, different manipulation options appear for that type. For example, selecting a mask feature exposes mask editing controls (such as brush-based drawing). See the Tutorial: Mask Labeling for a practical walkthrough.\n\n\nOpening Data Viewer\n\n\n\n\n\n\n\nData Viewer\n\n\n\n\n\nThis view is designed for synchronized temporal analysis across modalities. A common layout includes analog traces (for example angle), events (such as spikes), and intervals on the same timeline.\nManipulation and configuration for this view appear in the right-side properties panel.\n\n\nOpening Data Inspector\n\n\n\n\n\n\n\nData Inspector\n\n\n\n\n\nData Inspector provides table-centric curation tools for many data types.\n\nIn table-based inspectors, double-clicking rows/cells can jump the app to the corresponding frame or time index.\nMany inspector types also include export controls, allowing you to export modalities (for example points, lines, intervals, analog, and tensors) to formats such as CSV.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
@@ -20443,30 +20443,6 @@
     "crumbs": [
       "Python Console",
       "Python Console"
-    ]
-  },
-  {
-    "objectID": "concepts/timeframe.html#assigning-a-timeframe-to-a-new-data-feature",
-    "href": "concepts/timeframe.html#assigning-a-timeframe-to-a-new-data-feature",
-    "title": "TimeFrame",
-    "section": "Assigning a TimeFrame to a New Data Feature",
-    "text": "Assigning a TimeFrame to a New Data Feature\nWhen you create a new feature in Data Manager, you can assign either a TimeFrame that was loaded from source data or one you created yourself.\n\nOpen Modules &gt; Data Manager.\nIn Create New Data, enter the new feature key and data type.\nIn the TimeFrame dropdown, select the desired TimeFrame.\nClick Create to register the new feature.\n\n\n\n\nAssigning a loaded or newly created TimeFrame to a new data feature in the Data Manager.\n\n\nThis assignment determines how the new feature synchronizes with other modalities in plots, labeling workflows, and transforms.",
-    "crumbs": [
-      "Learning Resources",
-      "Concepts",
-      "TimeFrame"
-    ]
-  },
-  {
-    "objectID": "concepts/interface_roles.html#where-they-appear-in-the-ui",
-    "href": "concepts/interface_roles.html#where-they-appear-in-the-ui",
-    "title": "Interacting with Your Data",
-    "section": "Where They Appear in the UI",
-    "text": "Where They Appear in the UI\n\nData Manager\n\n\n\n\n\nIn the default startup layout, the Data Manager is docked on the left side of the screen. It acts as the main navigation and selection panel:\n\nThe top table lists data keys and data types.\nSelecting a key loads data-type-specific controls and tables.\nIt is where you create new features and assign TimeFrames.\nIt is also a primary place for save/export workflows.\n\n\n\nMedia Viewer\n\n\n\n\n\nThe Media Viewer controls what you see in the main central media window. Its feature table and type-specific controls determine which overlays are visible and editable.\nWhen you select different data features, different manipulation options appear for that type. For example, selecting a mask feature exposes mask editing controls (such as brush-based drawing). See the Tutorial: Mask Labeling for a practical walkthrough.\n\n\nOpening Data Viewer\n\n\n\n\n\n\n\nData Viewer\n\n\n\n\n\nThis view is designed for synchronized temporal analysis across modalities. A common layout includes analog traces (for example angle), events (such as spikes), and intervals on the same timeline.\nManipulation and configuration for this view appear in the right-side properties panel.\n\n\nOpening Data Inspector\n\n\n\n\n\n\n\nData Inspector\n\n\n\n\n\nData Inspector provides table-centric curation tools for many data types.\n\nIn table-based inspectors, double-clicking rows/cells can jump the app to the corresponding frame or time index.\nMany inspector types also include export controls, allowing you to export modalities (for example points, lines, intervals, analog, and tensors) to formats such as CSV.",
-    "crumbs": [
-      "Learning Resources",
-      "Concepts",
-      "Interacting with Your Data"
     ]
   }
 ]
