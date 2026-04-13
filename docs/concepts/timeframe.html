@@ -536,6 +536,12 @@ window.Quarto = {
 </header>
 
 
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/two_timeframes.png" class="img-fluid figure-img"></p>
+<figcaption>Example of multiple data features in the Data Manager and the number of samples per TimeFrame.</figcaption>
+</figure>
+</div>
 <p>A <strong>TimeFrame</strong> defines the temporal coordinate system for a data feature.</p>
 <p>Each data object stores integer positions (<code>TimeFrameIndex</code> values), and its associated TimeFrame defines what those indices mean in time.</p>
 <section id="why-timeframes-matter" class="level2">
@@ -589,6 +595,12 @@ t = \frac{i}{f_s}
 <li>Choose a new <strong>Name</strong>.</li>
 <li>Click <strong>Create TimeFrame</strong>.</li>
 </ol>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/create_timeframe.png" class="img-fluid figure-img"></p>
+<figcaption>Where you can create TimeFrames in the Data Manager.</figcaption>
+</figure>
+</div>
 <p>This creates a new upsampled TimeFrame with frame count:</p>
 <p><span class="math display">\[
 N_{out} = (N_{in} - 1) \cdot \text{factor} + 1

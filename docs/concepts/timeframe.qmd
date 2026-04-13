@@ -2,6 +2,8 @@
 title: "TimeFrame"
 ---
 
+![Example of multiple data features in the Data Manager and the number of samples per TimeFrame.](../images/two_timeframes.png){fig-align="center"}
+
 A **TimeFrame** defines the temporal coordinate system for a data
 feature.
 
@@ -72,6 +74,8 @@ You can create a custom derived TimeFrame directly in the Data Manager:
 4. Set the integer **Factor**.
 5. Choose a new **Name**.
 6. Click **Create TimeFrame**.
+
+![Where you can create TimeFrames in the Data Manager.](../images/create_timeframe.png){fig-align="center"}
 
 This creates a new upsampled TimeFrame with frame count:
 

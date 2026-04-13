@@ -9303,7 +9303,7 @@
     "href": "concepts/timeframe.html",
     "title": "TimeFrame",
     "section": "",
-    "text": "A TimeFrame defines the temporal coordinate system for a data feature.\nEach data object stores integer positions (TimeFrameIndex values), and its associated TimeFrame defines what those indices mean in time.",
+    "text": "Example of multiple data features in the Data Manager and the number of samples per TimeFrame.\nA TimeFrame defines the temporal coordinate system for a data feature.\nEach data object stores integer positions (TimeFrameIndex values), and its associated TimeFrame defines what those indices mean in time.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
@@ -9351,7 +9351,7 @@
     "href": "concepts/timeframe.html#creating-your-own-timeframe-in-the-app",
     "title": "TimeFrame",
     "section": "Creating Your Own TimeFrame in the App",
-    "text": "Creating Your Own TimeFrame in the App\nYou can create a custom derived TimeFrame directly in the Data Manager:\n\nOpen Modules &gt; Data Manager.\nIn the Create New TimeFrame section, choose Method: Upsample.\nSelect a Source TimeFrame.\nSet the integer Factor.\nChoose a new Name.\nClick Create TimeFrame.\n\nThis creates a new upsampled TimeFrame with frame count:\n\\[\nN_{out} = (N_{in} - 1) \\cdot \\text{factor} + 1\n\\]\nAfter creation, the new TimeFrame appears in the TimeFrame table and in the TimeFrame selector when creating new data features.",
+    "text": "Creating Your Own TimeFrame in the App\nYou can create a custom derived TimeFrame directly in the Data Manager:\n\nOpen Modules &gt; Data Manager.\nIn the Create New TimeFrame section, choose Method: Upsample.\nSelect a Source TimeFrame.\nSet the integer Factor.\nChoose a new Name.\nClick Create TimeFrame.\n\n\n\n\nWhere you can create TimeFrames in the Data Manager.\n\n\nThis creates a new upsampled TimeFrame with frame count:\n\\[\nN_{out} = (N_{in} - 1) \\cdot \\text{factor} + 1\n\\]\nAfter creation, the new TimeFrame appears in the TimeFrame table and in the TimeFrame selector when creating new data features.",
     "crumbs": [
       "Learning Resources",
       "Concepts",
