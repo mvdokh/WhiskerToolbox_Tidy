@@ -6,57 +6,141 @@ This page collects common setup and workflow questions.
 
 ## Installation and Startup
 
-::: {.callout-note collapse="true"}
-## Where do I download Neuralyzer?
+<details>
+<summary><strong>I have downloaded the app, but it won't open.</strong></summary>
 
-Use the latest release from GitHub:
-[Download Latest Release](https://github.com/paulmthompson/WhiskerToolbox/releases/latest)
+On macOS, this can happen because of security restrictions for apps
+downloaded from the internet.
 
-For platform-specific steps, see [Getting Started](getting-started.qmd).
-:::
+1. Open **System Settings**.
+2. Go to **Privacy & Security**.
+3. Find the blocked Neuralyzer app notice and click **Open Anyway**.
+4. Launch Neuralyzer again.
 
-::: {.callout-note collapse="true"}
-## The app opens, but I am not sure what to do first. What should I load?
-
-A practical first workflow is:
-
-1. Load media (video or image stack).
-2. Load one or more features (points, masks, lines, events, or intervals).
-3. Confirm TimeFrame alignment in Data Viewer.
-4. Use transforms to derive analysis-ready features.
-
-For tutorials, see [Learning Resources](learning-resources/index.qmd).
-:::
+For platform-specific installation steps, see
+[Getting Started](getting-started.qmd).
+</details>
 
 ## Data and Workflows
 
-::: {.callout-note collapse="true"}
-## What if my modalities use different sampling rates or clocks?
+<details>
+<summary><strong>Loading data</strong></summary>
+
+Start with the [Data Loading Overview](user_guide/data_loading/index.qmd).
+
+For video specifically, see [How to Import Video](examples/video_import.qmd).
+Important warning: videos with B-frames are not supported for correct
+frame-accurate behavior. See
+[Checking for and Removing B-frames](examples/video_import.qmd#checking-for-and-removing-b-frames).
+</details>
+
+<details>
+<summary><strong>What are modules?</strong></summary>
+
+Modules are major tools in Neuralyzer (for example Data Manager, Media
+Viewer, Data Viewer, and Data Inspector). You can open them from the
+main menus and use them together in one synchronized workspace.
+
+See [Interacting with Your Data](concepts/interface_roles.qmd).
+</details>
+
+<details>
+<summary><strong>What are widgets?</strong></summary>
+
+Widgets are dockable UI panels that make up the application. Each widget
+focuses on a task (viewing media, editing labels, inspecting tables,
+running transforms, etc.).
+
+See [Interacting with Your Data](concepts/interface_roles.qmd).
+</details>
+
+<details>
+<summary><strong>How do I play the video?</strong></summary>
+
+Use the play button in the Media Viewer controls, or press the
+spacebar to play/pause. If the shortcut does not trigger, click in the
+media panel first to give it keyboard focus.
+
+See [Media Viewer Overview](user_guide/media_viewer/overview.qmd).
+</details>
+
+<details>
+<summary><strong>What is a JSON file, and how do I write it?</strong></summary>
+
+A JSON file is a structured text configuration that lets you define
+repeatable loading workflows (media + features + clocks) so you can load
+the same experiment setup quickly.
+
+See [JSON Loading](user_guide/data_loading/JSON_loading.qmd) and
+[Import via JSON Configuration](examples/video_import.qmd#json-import).
+</details>
+
+<details>
+<summary><strong>Will my data get deleted if I modify it in the program?</strong></summary>
+
+Neuralyzer supports non-destructive workflows. Best practice is to keep
+source keys separate from edited/derived keys and write transform output
+to new keys.
+
+See [Non-Destructive Workflows](concepts/no_write_access.qmd).
+</details>
+
+<details>
+<summary><strong>What is a mask?</strong></summary>
+
+A mask is a binary region (a segmented shape) on an image/video frame.
+Masks are used when full object shape matters, not just a single point.
+
+See [Mask Loader](user_guide/data_loading/Mask_Loading.qmd) and
+[Tutorial: Mask Labeling](learning-resources/tutorials/mask_labeling.qmd).
+</details>
+
+<details>
+<summary><strong>What is a line?</strong></summary>
+
+A line is an ordered set of connected points with a base/reference end,
+useful for structures like whiskers, contours, or centerlines.
+
+See [Line Loader](user_guide/data_loading/Line_Loading.qmd).
+</details>
+
+<details>
+<summary><strong>What is RLE format?</strong></summary>
+
+RLE means Run-Length Encoding: a compact way to store binary masks by
+recording pixel runs instead of every pixel individually.
+
+See [Mask CSV RLE (Developer Reference)](developer/DataManager/IO/mask_csv_rle.qmd).
+</details>
+
+<details>
+<summary><strong>How can I save my data?</strong></summary>
+
+Use Data Inspector export controls for the selected modality (for
+example points, lines, intervals, analog, and tensors), typically to
+CSV.
+
+See [Interacting with Your Data](concepts/interface_roles.qmd) and
+[CSV Plot Export](user_guide/export/csv_plot_export.qmd).
+</details>
+
+<details>
+<summary><strong>What can I do with my data?</strong></summary>
+
+Explore and derive new features with the Data Transform widget, where
+you can convert data types, compute features, and build analysis
+pipelines.
+
+See [Transform Widget](user_guide/data_transformations/transforms_v2_widget.qmd)
+and [Data Transformations](user_guide/data_transformations/overview.qmd).
+</details>
+
+<details>
+<summary><strong>What if my modalities use different sampling rates or clocks?</strong></summary>
 
 Use explicit TimeFrames and assign each feature to the correct time base.
 Neuralyzer is designed to handle cross-modal synchronization across
 TimeFrames.
 
 See [TimeFrame](concepts/timeframe.qmd).
-:::
-
-::: {.callout-note collapse="true"}
-## Where should I edit labels versus inspect traces?
-
-Use this rule of thumb:
-
-- Media Viewer for spatial edits (points, lines, masks).
-- Data Viewer for timeline interpretation across signals/events/intervals.
-- Data Inspector for table-centric curation and export workflows.
-
-See [Interacting with Your Data](concepts/interface_roles.qmd).
-:::
-
-::: {.callout-note collapse="true"}
-## How do I keep my workflow reproducible?
-
-Keep source and derived outputs in separate keys, and write transform
-results to new keys.
-
-See [Non-Destructive Workflows](concepts/no_write_access.qmd).
-:::
+</details>

@@ -350,105 +350,106 @@ ul.task-list li input[type="checkbox"] {
 <p>This page collects common setup and workflow questions.</p>
 <section id="installation-and-startup" class="level2">
 <h2 class="anchored" data-anchor-id="installation-and-startup">Installation and Startup</h2>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Where do I download Neuralyzer?
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>Use the latest release from GitHub: <a href="https://github.com/paulmthompson/WhiskerToolbox/releases/latest">Download Latest Release</a></p>
-<p>For platform-specific steps, see <a href="./getting-started.html">Getting Started</a>.</p>
-</div>
-</div>
-</div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>The app opens, but I am not sure what to do first. What should I load?
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>A practical first workflow is:</p>
+<details>
+<summary>
+<strong>I have downloaded the app, but it won’t open.</strong>
+</summary>
+<p>On macOS, this can happen because of security restrictions for apps downloaded from the internet.</p>
 <ol type="1">
-<li>Load media (video or image stack).</li>
-<li>Load one or more features (points, masks, lines, events, or intervals).</li>
-<li>Confirm TimeFrame alignment in Data Viewer.</li>
-<li>Use transforms to derive analysis-ready features.</li>
+<li>Open <strong>System Settings</strong>.</li>
+<li>Go to <strong>Privacy &amp; Security</strong>.</li>
+<li>Find the blocked Neuralyzer app notice and click <strong>Open Anyway</strong>.</li>
+<li>Launch Neuralyzer again.</li>
 </ol>
-<p>For tutorials, see <a href="./learning-resources/index.html">Learning Resources</a>.</p>
-</div>
-</div>
-</div>
+For platform-specific installation steps, see <a href="./getting-started.html">Getting Started</a>.
+</details>
 </section>
 <section id="data-and-workflows" class="level2">
 <h2 class="anchored" data-anchor-id="data-and-workflows">Data and Workflows</h2>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>What if my modalities use different sampling rates or clocks?
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-3" class="callout-3-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
+<details>
+<summary>
+<strong>Loading data</strong>
+</summary>
+<p>Start with the <a href="./user_guide/data_loading/index.html">Data Loading Overview</a>.</p>
+For video specifically, see <a href="./examples/video_import.html">How to Import Video</a>. Important warning: videos with B-frames are not supported for correct frame-accurate behavior. See <a href="./examples/video_import.html#checking-for-and-removing-b-frames">Checking for and Removing B-frames</a>.
+</details>
+<details>
+<summary>
+<strong>What are modules?</strong>
+</summary>
+<p>Modules are major tools in Neuralyzer (for example Data Manager, Media Viewer, Data Viewer, and Data Inspector). You can open them from the main menus and use them together in one synchronized workspace.</p>
+See <a href="./concepts/interface_roles.html">Interacting with Your Data</a>.
+</details>
+<details>
+<summary>
+<strong>What are widgets?</strong>
+</summary>
+<p>Widgets are dockable UI panels that make up the application. Each widget focuses on a task (viewing media, editing labels, inspecting tables, running transforms, etc.).</p>
+See <a href="./concepts/interface_roles.html">Interacting with Your Data</a>.
+</details>
+<details>
+<summary>
+<strong>How do I play the video?</strong>
+</summary>
+<p>Use the play button in the Media Viewer controls, or press the spacebar to play/pause. If the shortcut does not trigger, click in the media panel first to give it keyboard focus.</p>
+See <a href="./user_guide/media_viewer/overview.html">Media Viewer Overview</a>.
+</details>
+<details>
+<summary>
+<strong>What is a JSON file, and how do I write it?</strong>
+</summary>
+<p>A JSON file is a structured text configuration that lets you define repeatable loading workflows (media + features + clocks) so you can load the same experiment setup quickly.</p>
+See <a href="./user_guide/data_loading/JSON_loading.html">JSON Loading</a> and <a href="./examples/video_import.html#json-import">Import via JSON Configuration</a>.
+</details>
+<details>
+<summary>
+<strong>Will my data get deleted if I modify it in the program?</strong>
+</summary>
+<p>Neuralyzer supports non-destructive workflows. Best practice is to keep source keys separate from edited/derived keys and write transform output to new keys.</p>
+See <a href="./concepts/no_write_access.html">Non-Destructive Workflows</a>.
+</details>
+<details>
+<summary>
+<strong>What is a mask?</strong>
+</summary>
+<p>A mask is a binary region (a segmented shape) on an image/video frame. Masks are used when full object shape matters, not just a single point.</p>
+See <a href="./user_guide/data_loading/Mask_Loading.html">Mask Loader</a> and <a href="./learning-resources/tutorials/mask_labeling.html">Tutorial: Mask Labeling</a>.
+</details>
+<details>
+<summary>
+<strong>What is a line?</strong>
+</summary>
+<p>A line is an ordered set of connected points with a base/reference end, useful for structures like whiskers, contours, or centerlines.</p>
+See <a href="./user_guide/data_loading/Line_Loading.html">Line Loader</a>.
+</details>
+<details>
+<summary>
+<strong>What is RLE format?</strong>
+</summary>
+<p>RLE means Run-Length Encoding: a compact way to store binary masks by recording pixel runs instead of every pixel individually.</p>
+See <a href="./developer/DataManager/IO/mask_csv_rle.html">Mask CSV RLE (Developer Reference)</a>.
+</details>
+<details>
+<summary>
+<strong>How can I save my data?</strong>
+</summary>
+<p>Use Data Inspector export controls for the selected modality (for example points, lines, intervals, analog, and tensors), typically to CSV.</p>
+See <a href="./concepts/interface_roles.html">Interacting with Your Data</a> and <a href="./user_guide/export/csv_plot_export.html">CSV Plot Export</a>.
+</details>
+<details>
+<summary>
+<strong>What can I do with my data?</strong>
+</summary>
+<p>Explore and derive new features with the Data Transform widget, where you can convert data types, compute features, and build analysis pipelines.</p>
+See <a href="./user_guide/data_transformations/transforms_v2_widget.html">Transform Widget</a> and <a href="./user_guide/data_transformations/overview.html">Data Transformations</a>.
+</details>
+<details>
+<summary>
+<strong>What if my modalities use different sampling rates or clocks?</strong>
+</summary>
 <p>Use explicit TimeFrames and assign each feature to the correct time base. Neuralyzer is designed to handle cross-modal synchronization across TimeFrames.</p>
-<p>See <a href="./concepts/timeframe.html">TimeFrame</a>.</p>
-</div>
-</div>
-</div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Where should I edit labels versus inspect traces?
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-4" class="callout-4-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>Use this rule of thumb:</p>
-<ul>
-<li>Media Viewer for spatial edits (points, lines, masks).</li>
-<li>Data Viewer for timeline interpretation across signals/events/intervals.</li>
-<li>Data Inspector for table-centric curation and export workflows.</li>
-</ul>
-<p>See <a href="./concepts/interface_roles.html">Interacting with Your Data</a>.</p>
-</div>
-</div>
-</div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>How do I keep my workflow reproducible?
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-5" class="callout-5-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>Keep source and derived outputs in separate keys, and write transform results to new keys.</p>
-<p>See <a href="./concepts/no_write_access.html">Non-Destructive Workflows</a>.</p>
-</div>
-</div>
-</div>
+See <a href="./concepts/timeframe.html">TimeFrame</a>.
+</details>
 
 
 </section>
