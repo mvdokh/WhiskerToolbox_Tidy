@@ -1029,7 +1029,7 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#how-interval-data-is-represented" id="toc-how-interval-data-is-represented" class="nav-link active" data-scroll-target="#how-interval-data-is-represented">How Interval Data Is Represented</a></li>
+  <li><a href="#how-interval-data-is-represented-in-the-media-viewer" id="toc-how-interval-data-is-represented-in-the-media-viewer" class="nav-link active" data-scroll-target="#how-interval-data-is-represented-in-the-media-viewer">How Interval Data Is Represented in the Media Viewer</a></li>
   <li><a href="#how-intervals-appear-in-the-media-viewer" id="toc-how-intervals-appear-in-the-media-viewer" class="nav-link" data-scroll-target="#how-intervals-appear-in-the-media-viewer">How Intervals Appear in the Media Viewer</a></li>
   <li><a href="#temporal-behavior-and-timeframe" id="toc-temporal-behavior-and-timeframe" class="nav-link" data-scroll-target="#temporal-behavior-and-timeframe">Temporal Behavior and TimeFrame</a></li>
   <li><a href="#common-follow-up-transforms" id="toc-common-follow-up-transforms" class="nav-link" data-scroll-target="#common-follow-up-transforms">Common Follow-up Transforms</a></li>
@@ -1061,24 +1061,25 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>Interval data represent <strong>time spans</strong> where something is active.</p>
-<section id="how-interval-data-is-represented" class="level2">
-<h2 class="anchored" data-anchor-id="how-interval-data-is-represented">How Interval Data Is Represented</h2>
-<p>In Neuralyzer, intervals are represented as <strong>temporal boxes</strong>:</p>
+<section id="how-interval-data-is-represented-in-the-media-viewer" class="level2">
+<h2 class="anchored" data-anchor-id="how-interval-data-is-represented-in-the-media-viewer">How Interval Data Is Represented in the Media Viewer</h2>
+<p>By default, interval data is shown as a <strong>row of small boxes</strong> in a corner of the media view.</p>
 <ul>
-<li>Each interval has a <strong>start</strong> and <strong>end</strong> in a TimeFrame.</li>
-<li>Intervals may also carry an identifier/group label depending on workflow.</li>
-<li>The representation is temporal first (ranges over time), not spatial geometry.</li>
+<li>The row is centered on the current frame and spans a configurable window of frames before and after it.</li>
+<li>Boxes are filled with the interval color when that frame is inside an interval.</li>
+<li>Boxes are minimally filled when that frame is outside an interval, so you can still see temporal context.</li>
+<li>You can choose the corner location (<strong>Top Left</strong>, <strong>Top Right</strong>, <strong>Bottom Left</strong>, <strong>Bottom Right</strong>).</li>
+<li>You can adjust both <strong>box size</strong> and <strong>frame range</strong> (how many frames ahead/behind are shown).</li>
 </ul>
-<p>This is ideal for events with duration, such as contact epochs, licking bouts, stimulation windows, or behavioral states.</p>
 </section>
 <section id="how-intervals-appear-in-the-media-viewer" class="level2">
 <h2 class="anchored" data-anchor-id="how-intervals-appear-in-the-media-viewer">How Intervals Appear in the Media Viewer</h2>
-<p>When interval data are enabled, the viewer treats the current frame as either:</p>
+<p>When interval data are enabled, the viewer treats each frame in the interval window as either:</p>
 <ul>
 <li><strong>inside</strong> an interval (active), or</li>
 <li><strong>outside</strong> an interval (inactive).</li>
 </ul>
-<p>In practical workflows, intervals are commonly reviewed together with media, points, masks, and lines to verify timing against visible behavior.</p>
+<p>You can also switch to <strong>Border</strong> plotting style, which draws a colored border around the full image whenever the current frame is inside an interval. Border thickness is configurable.</p>
 </section>
 <section id="temporal-behavior-and-timeframe" class="level2">
 <h2 class="anchored" data-anchor-id="temporal-behavior-and-timeframe">Temporal Behavior and TimeFrame</h2>

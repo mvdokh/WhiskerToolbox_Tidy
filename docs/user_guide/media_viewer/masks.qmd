@@ -18,19 +18,21 @@ This makes masks suitable when full object shape matters (for example tongue/bod
 
 ## How Masks Appear in the Media Viewer
 
-When a mask feature is enabled, the Media Viewer draws it as a semi-transparent overlay on top of the media.
+When a mask feature is enabled, the Media Viewer draws it as an overlay on top of the media.
 
-- **Color and alpha** control visibility and contrast against the image/video.
+- By default, mask **alpha is 1.0** (fully opaque).
+- **Color and alpha** can be adjusted in the Mask widget for visibility and contrast.
 - Multiple mask features can be viewed together for comparison.
 - The rendered overlay is display-focused; exported data keeps the mask geometry representation.
 
-## Temporal Behavior
+## Editing Masks in the Media Viewer
 
-Masks are frame-aware and TimeFrame-aware:
+In **Mouse Mode = Brush**, you can directly edit masks in the media window:
 
-- At each current frame, the viewer displays the corresponding mask sample.
-- If no mask exists at a frame, nothing is drawn for that feature at that time.
-- TimeFrame assignment controls synchronization with other modalities.
+- **Left click / drag** adds pixels to the mask.
+- **Right click / drag** erases pixels from the mask.
+- **Brush Size** controls edit radius, and you can optionally show the brush circle while hovering.
+- You can change mask **color**, **alpha**, and additional display modes such as **Show bounding box**, **Show outline**, and **Use as transparency layer**.
 
 ## Common Follow-up Transforms
 

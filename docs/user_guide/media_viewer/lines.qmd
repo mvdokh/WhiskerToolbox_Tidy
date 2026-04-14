@@ -24,12 +24,16 @@ When enabled, lines are drawn as overlays on the media:
 - Multiple line features can be shown at once.
 - Styling (color/opacity/width) affects display only, not geometric measurements.
 
-## Temporal Behavior
+## Viewing and Editing Lines
 
-Like other tracked features, line geometry can vary by frame:
+The line widget includes direct controls for inspection and editing:
 
-- At each frame, the viewer displays the line sample for that timestamp.
-- Missing frames can be filled or regularized with transforms when appropriate.
+- **Show points as circles** displays the sampled points along each line.
+- **Show line segment** lets you view only a selected percentage range of the line using **Start (%)** and **End (%)**.
+- In **Mouse Mode = Select Line**, click near a line to select it, then:
+- **`Ctrl+click`** to add points and extend the selected line.
+- **`Alt+click`** to erase points from the selected line.
+- In **Mouse Mode = Draw Across All Frames**, you can draw a line once and apply it to every frame.
 
 ## Common Follow-up Transforms
 

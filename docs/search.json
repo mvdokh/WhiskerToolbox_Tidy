@@ -135,7 +135,7 @@
     "href": "user_guide/media_viewer/points.html",
     "title": "Point Data",
     "section": "",
-    "text": "The Points widget appears when Points are enabled in the Feature Tree. It’s designed for viewing, styling, adding, and editing keypoints visible in the Media Viewer.\nIf you haven’t loaded a keypoint dataset, you can still add keypoints; these changes will be tracked in the Data Manager (see Data Manager → points [link user-ref here]).\n\n\n\n\n\n\nNote\n\n\n\nSaving and Export: Any additions or edits to keypoints are recorded by the Data Manager and can be exported later as part of your dataset.\n\n\n\n\n\n\n\nRGB (0–255): Enter the Red, Green, and Blue channels to set the keypoint color.\n\nHex Color: Optionally specify a color using a hex code (e.g., #FF6600).\n\nColor Preview: Shows the current color selection.\n\nAlpha: Controls opacity/transparency of the keypoint in the Media Viewer (higher = more opaque).\n\n\n\n\n\nPoint Size: Sets how large the keypoint appears in the Media Viewer.\n\n\n\n\n\n\nNote\n\n\n\nData size vs. display size: The stored keypoint in the Data Manager is always one pixel (a single coordinate). Point Size/Shape only affects on-screen display, not the underlying saved data.\n\n\nMarker Shape: Choose how the keypoint is drawn in the display:\n\ncircle, square, triangle, cross, x, diamond\n\n\n\n\n\n\n\nIn the Points widget, find Mouse Mode (dropdown).\nSelect Select Point.\nClick anywhere in the Media Viewer to add a keypoint at that location.\nTo modify a keypoint, use the same mode to select it and then adjust its location in the media window.\n\n\n\n\n\n\nNote\n\n\n\nDeleting Keypoints: To delete accidentally added or misplaced keypoints, open the data manager and find the frame that contains the keypoint and delete it (see Data Manager → points [link user-ref here]).\n\n\n\n\n\n\n\nKeep Alpha low to ensure that imagery remains visible under points.\n\nWhen working with multiple keypoints, use distinct shapes or colors to differentiate labels, annotators, or classes.",
+    "text": "The Points widget appears when Points are enabled in the Feature Tree. It’s designed for viewing, styling, adding, and editing keypoints visible in the Media Viewer.\nIf you haven’t loaded a keypoint dataset, you can still add keypoints; these changes will be tracked in the Data Manager (see Data Manager → points [link user-ref here]).\n\n\n\n\n\n\nNote\n\n\n\nSaving and Export: Any additions or edits to keypoints are recorded by the Data Manager and can be exported later as part of your dataset.\n\n\n\n\n\n\n\nRGB (0–255): Enter the Red, Green, and Blue channels to set the keypoint color.\n\nHex Color: Optionally specify a color using a hex code (e.g., #FF6600).\n\nColor Preview: Shows the current color selection.\n\nAlpha: Controls opacity/transparency of the keypoint in the Media Viewer (higher = more opaque).\n\n\n\n\n\nPoint Size: Sets how large the keypoint appears in the Media Viewer.\n\n\n\n\n\n\nNote\n\n\n\nData size vs. display size: The stored keypoint in the Data Manager is always one pixel (a single coordinate). Point Size/Shape only affects on-screen display, not the underlying saved data.\n\n\nMarker Shape: Choose how the keypoint is drawn in the display:\n\ncircle, square, triangle, cross, x, diamond\n\n\n\n\n\n\n\nIn the Points widget, find Mouse Mode (dropdown).\nSelect Select Point.\nTo add a keypoint at the current frame, hold Alt and click in the Media Viewer.\nTo select a keypoint, click near an existing point.\nTo move the selected keypoint, hold Ctrl and click the new location in the Media Viewer.\n\n\n\n\n\n\nNote\n\n\n\nDeleting Keypoints: To delete accidentally added or misplaced keypoints, open the data manager and find the frame that contains the keypoint and delete it (see Data Manager → points [link user-ref here]).\n\n\n\n\n\n\n\nKeep Alpha low to ensure that imagery remains visible under points.\n\nIf multiple point features are enabled at the same time, each one is auto-assigned a separate default color for easier visual separation.\n\nWhen working with multiple keypoints, use distinct shapes or colors to differentiate labels, annotators, or classes.",
     "crumbs": [
       "Media Viewer",
       "Point Data"
@@ -157,7 +157,7 @@
     "href": "user_guide/media_viewer/points.html#adding-editing-keypoints",
     "title": "Point Data",
     "section": "",
-    "text": "In the Points widget, find Mouse Mode (dropdown).\nSelect Select Point.\nClick anywhere in the Media Viewer to add a keypoint at that location.\nTo modify a keypoint, use the same mode to select it and then adjust its location in the media window.\n\n\n\n\n\n\nNote\n\n\n\nDeleting Keypoints: To delete accidentally added or misplaced keypoints, open the data manager and find the frame that contains the keypoint and delete it (see Data Manager → points [link user-ref here]).",
+    "text": "In the Points widget, find Mouse Mode (dropdown).\nSelect Select Point.\nTo add a keypoint at the current frame, hold Alt and click in the Media Viewer.\nTo select a keypoint, click near an existing point.\nTo move the selected keypoint, hold Ctrl and click the new location in the Media Viewer.\n\n\n\n\n\n\nNote\n\n\n\nDeleting Keypoints: To delete accidentally added or misplaced keypoints, open the data manager and find the frame that contains the keypoint and delete it (see Data Manager → points [link user-ref here]).",
     "crumbs": [
       "Media Viewer",
       "Point Data"
@@ -168,7 +168,7 @@
     "href": "user_guide/media_viewer/points.html#tips",
     "title": "Point Data",
     "section": "",
-    "text": "Keep Alpha low to ensure that imagery remains visible under points.\n\nWhen working with multiple keypoints, use distinct shapes or colors to differentiate labels, annotators, or classes.",
+    "text": "Keep Alpha low to ensure that imagery remains visible under points.\n\nIf multiple point features are enabled at the same time, each one is auto-assigned a separate default color for easier visual separation.\n\nWhen working with multiple keypoints, use distinct shapes or colors to differentiate labels, annotators, or classes.",
     "crumbs": [
       "Media Viewer",
       "Point Data"
@@ -201,7 +201,7 @@
     "href": "user_guide/media_viewer/masks.html#how-masks-appear-in-the-media-viewer",
     "title": "Mask Data",
     "section": "How Masks Appear in the Media Viewer",
-    "text": "How Masks Appear in the Media Viewer\nWhen a mask feature is enabled, the Media Viewer draws it as a semi-transparent overlay on top of the media.\n\nColor and alpha control visibility and contrast against the image/video.\nMultiple mask features can be viewed together for comparison.\nThe rendered overlay is display-focused; exported data keeps the mask geometry representation.",
+    "text": "How Masks Appear in the Media Viewer\nWhen a mask feature is enabled, the Media Viewer draws it as an overlay on top of the media.\n\nBy default, mask alpha is 1.0 (fully opaque).\nColor and alpha can be adjusted in the Mask widget for visibility and contrast.\nMultiple mask features can be viewed together for comparison.\nThe rendered overlay is display-focused; exported data keeps the mask geometry representation.",
     "crumbs": [
       "Media Viewer",
       "Mask Data"
@@ -267,7 +267,7 @@
     "href": "user_guide/media_viewer/intervals.html#how-intervals-appear-in-the-media-viewer",
     "title": "Interval Data",
     "section": "How Intervals Appear in the Media Viewer",
-    "text": "How Intervals Appear in the Media Viewer\nWhen interval data are enabled, the viewer treats the current frame as either:\n\ninside an interval (active), or\noutside an interval (inactive).\n\nIn practical workflows, intervals are commonly reviewed together with media, points, masks, and lines to verify timing against visible behavior.",
+    "text": "How Intervals Appear in the Media Viewer\nWhen interval data are enabled, the viewer treats each frame in the interval window as either:\n\ninside an interval (active), or\noutside an interval (inactive).\n\nYou can also switch to Border plotting style, which draws a colored border around the full image whenever the current frame is inside an interval. Border thickness is configurable.",
     "crumbs": [
       "Media Viewer",
       "Interval Data"
@@ -21220,6 +21220,39 @@
     "crumbs": [
       "Python Console",
       "Python Console"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/masks.html#editing-masks-in-the-media-viewer",
+    "href": "user_guide/media_viewer/masks.html#editing-masks-in-the-media-viewer",
+    "title": "Mask Data",
+    "section": "Editing Masks in the Media Viewer",
+    "text": "Editing Masks in the Media Viewer\nIn Mouse Mode = Brush, you can directly edit masks in the media window:\n\nLeft click / drag adds pixels to the mask.\nRight click / drag erases pixels from the mask.\nBrush Size controls edit radius, and you can optionally show the brush circle while hovering.\nYou can change mask color, alpha, and additional display modes such as Show bounding box, Show outline, and Use as transparency layer.",
+    "crumbs": [
+      "Media Viewer",
+      "Mask Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/intervals.html#how-interval-data-is-represented-in-the-media-viewer",
+    "href": "user_guide/media_viewer/intervals.html#how-interval-data-is-represented-in-the-media-viewer",
+    "title": "Interval Data",
+    "section": "How Interval Data Is Represented in the Media Viewer",
+    "text": "How Interval Data Is Represented in the Media Viewer\nBy default, interval data is shown as a row of small boxes in a corner of the media view.\n\nThe row is centered on the current frame and spans a configurable window of frames before and after it.\nBoxes are filled with the interval color when that frame is inside an interval.\nBoxes are minimally filled when that frame is outside an interval, so you can still see temporal context.\nYou can choose the corner location (Top Left, Top Right, Bottom Left, Bottom Right).\nYou can adjust both box size and frame range (how many frames ahead/behind are shown).",
+    "crumbs": [
+      "Media Viewer",
+      "Interval Data"
+    ]
+  },
+  {
+    "objectID": "user_guide/media_viewer/lines.html#viewing-and-editing-lines",
+    "href": "user_guide/media_viewer/lines.html#viewing-and-editing-lines",
+    "title": "Line Data",
+    "section": "Viewing and Editing Lines",
+    "text": "Viewing and Editing Lines\nThe line widget includes direct controls for inspection and editing:\n\nShow points as circles displays the sampled points along each line.\nShow line segment lets you view only a selected percentage range of the line using Start (%) and End (%).\nIn Mouse Mode = Select Line, click near a line to select it, then:\nCtrl+click to add points and extend the selected line.\nAlt+click to erase points from the selected line.\nIn Mouse Mode = Draw Across All Frames, you can draw a line once and apply it to every frame.",
+    "crumbs": [
+      "Media Viewer",
+      "Line Data"
     ]
   }
 ]

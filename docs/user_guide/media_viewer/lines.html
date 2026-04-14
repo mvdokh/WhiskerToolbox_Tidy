@@ -1031,7 +1031,7 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#how-line-data-is-represented" id="toc-how-line-data-is-represented" class="nav-link active" data-scroll-target="#how-line-data-is-represented">How Line Data Is Represented</a></li>
   <li><a href="#how-lines-appear-in-the-media-viewer" id="toc-how-lines-appear-in-the-media-viewer" class="nav-link" data-scroll-target="#how-lines-appear-in-the-media-viewer">How Lines Appear in the Media Viewer</a></li>
-  <li><a href="#temporal-behavior" id="toc-temporal-behavior" class="nav-link" data-scroll-target="#temporal-behavior">Temporal Behavior</a></li>
+  <li><a href="#viewing-and-editing-lines" id="toc-viewing-and-editing-lines" class="nav-link" data-scroll-target="#viewing-and-editing-lines">Viewing and Editing Lines</a></li>
   <li><a href="#common-follow-up-transforms" id="toc-common-follow-up-transforms" class="nav-link" data-scroll-target="#common-follow-up-transforms">Common Follow-up Transforms</a></li>
   <li><a href="#practical-tip" id="toc-practical-tip" class="nav-link" data-scroll-target="#practical-tip">Practical Tip</a></li>
   </ul>
@@ -1080,12 +1080,16 @@ ul.task-list li input[type="checkbox"] {
 <li>Styling (color/opacity/width) affects display only, not geometric measurements.</li>
 </ul>
 </section>
-<section id="temporal-behavior" class="level2">
-<h2 class="anchored" data-anchor-id="temporal-behavior">Temporal Behavior</h2>
-<p>Like other tracked features, line geometry can vary by frame:</p>
+<section id="viewing-and-editing-lines" class="level2">
+<h2 class="anchored" data-anchor-id="viewing-and-editing-lines">Viewing and Editing Lines</h2>
+<p>The line widget includes direct controls for inspection and editing:</p>
 <ul>
-<li>At each frame, the viewer displays the line sample for that timestamp.</li>
-<li>Missing frames can be filled or regularized with transforms when appropriate.</li>
+<li><strong>Show points as circles</strong> displays the sampled points along each line.</li>
+<li><strong>Show line segment</strong> lets you view only a selected percentage range of the line using <strong>Start (%)</strong> and <strong>End (%)</strong>.</li>
+<li>In <strong>Mouse Mode = Select Line</strong>, click near a line to select it, then:</li>
+<li><strong><code>Ctrl+click</code></strong> to add points and extend the selected line.</li>
+<li><strong><code>Alt+click</code></strong> to erase points from the selected line.</li>
+<li>In <strong>Mouse Mode = Draw Across All Frames</strong>, you can draw a line once and apply it to every frame.</li>
 </ul>
 </section>
 <section id="common-follow-up-transforms" class="level2">

@@ -40,9 +40,11 @@ If you haven’t loaded a keypoint dataset, you can still add keypoints; these c
 
 2.  Select **`Select Point`**.
 
-3.  Click **anywhere in the Media Viewer** to **add** a keypoint at that location.
+3.  To **add** a keypoint at the current frame, hold **`Alt`** and click in the Media Viewer.
 
-4.  To **modify** a keypoint, use the same mode to select it and then adjust its location in the media window.
+4.  To **select** a keypoint, click near an existing point.
+
+5.  To **move** the selected keypoint, hold **`Ctrl`** and click the new location in the Media Viewer.
 
     ::: callout-note
     **Deleting Keypoints:** To delete accidentally added or misplaced keypoints, open the data manager and find the frame that contains the keypoint and delete it (see *Data Manager → points \[link user-ref here\]*).
@@ -51,4 +53,5 @@ If you haven’t loaded a keypoint dataset, you can still add keypoints; these c
 ## Tips
 
 -   Keep **Alpha** low to ensure that imagery remains visible under points.\
+-   If multiple point features are enabled at the same time, each one is auto-assigned a separate default color for easier visual separation.\
 -   When working with multiple keypoints, use distinct **shapes** or **colors** to differentiate labels, annotators, or classes.

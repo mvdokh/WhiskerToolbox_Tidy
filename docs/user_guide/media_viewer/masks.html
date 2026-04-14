@@ -1031,7 +1031,7 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#how-mask-data-is-represented" id="toc-how-mask-data-is-represented" class="nav-link active" data-scroll-target="#how-mask-data-is-represented">How Mask Data Is Represented</a></li>
   <li><a href="#how-masks-appear-in-the-media-viewer" id="toc-how-masks-appear-in-the-media-viewer" class="nav-link" data-scroll-target="#how-masks-appear-in-the-media-viewer">How Masks Appear in the Media Viewer</a></li>
-  <li><a href="#temporal-behavior" id="toc-temporal-behavior" class="nav-link" data-scroll-target="#temporal-behavior">Temporal Behavior</a></li>
+  <li><a href="#editing-masks-in-the-media-viewer" id="toc-editing-masks-in-the-media-viewer" class="nav-link" data-scroll-target="#editing-masks-in-the-media-viewer">Editing Masks in the Media Viewer</a></li>
   <li><a href="#common-follow-up-transforms" id="toc-common-follow-up-transforms" class="nav-link" data-scroll-target="#common-follow-up-transforms">Common Follow-up Transforms</a></li>
   <li><a href="#practical-tip" id="toc-practical-tip" class="nav-link" data-scroll-target="#practical-tip">Practical Tip</a></li>
   </ul>
@@ -1073,20 +1073,22 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="how-masks-appear-in-the-media-viewer" class="level2">
 <h2 class="anchored" data-anchor-id="how-masks-appear-in-the-media-viewer">How Masks Appear in the Media Viewer</h2>
-<p>When a mask feature is enabled, the Media Viewer draws it as a semi-transparent overlay on top of the media.</p>
+<p>When a mask feature is enabled, the Media Viewer draws it as an overlay on top of the media.</p>
 <ul>
-<li><strong>Color and alpha</strong> control visibility and contrast against the image/video.</li>
+<li>By default, mask <strong>alpha is 1.0</strong> (fully opaque).</li>
+<li><strong>Color and alpha</strong> can be adjusted in the Mask widget for visibility and contrast.</li>
 <li>Multiple mask features can be viewed together for comparison.</li>
 <li>The rendered overlay is display-focused; exported data keeps the mask geometry representation.</li>
 </ul>
 </section>
-<section id="temporal-behavior" class="level2">
-<h2 class="anchored" data-anchor-id="temporal-behavior">Temporal Behavior</h2>
-<p>Masks are frame-aware and TimeFrame-aware:</p>
+<section id="editing-masks-in-the-media-viewer" class="level2">
+<h2 class="anchored" data-anchor-id="editing-masks-in-the-media-viewer">Editing Masks in the Media Viewer</h2>
+<p>In <strong>Mouse Mode = Brush</strong>, you can directly edit masks in the media window:</p>
 <ul>
-<li>At each current frame, the viewer displays the corresponding mask sample.</li>
-<li>If no mask exists at a frame, nothing is drawn for that feature at that time.</li>
-<li>TimeFrame assignment controls synchronization with other modalities.</li>
+<li><strong>Left click / drag</strong> adds pixels to the mask.</li>
+<li><strong>Right click / drag</strong> erases pixels from the mask.</li>
+<li><strong>Brush Size</strong> controls edit radius, and you can optionally show the brush circle while hovering.</li>
+<li>You can change mask <strong>color</strong>, <strong>alpha</strong>, and additional display modes such as <strong>Show bounding box</strong>, <strong>Show outline</strong>, and <strong>Use as transparency layer</strong>.</li>
 </ul>
 </section>
 <section id="common-follow-up-transforms" class="level2">

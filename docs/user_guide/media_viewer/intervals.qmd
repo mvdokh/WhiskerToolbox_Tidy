@@ -6,24 +6,24 @@ toc: true
 
 Interval data represent **time spans** where something is active.
 
-## How Interval Data Is Represented
+## How Interval Data Is Represented in the Media Viewer
 
-In Neuralyzer, intervals are represented as **temporal boxes**:
+By default, interval data is shown as a **row of small boxes** in a corner of the media view.
 
-- Each interval has a **start** and **end** in a TimeFrame.
-- Intervals may also carry an identifier/group label depending on workflow.
-- The representation is temporal first (ranges over time), not spatial geometry.
-
-This is ideal for events with duration, such as contact epochs, licking bouts, stimulation windows, or behavioral states.
+- The row is centered on the current frame and spans a configurable window of frames before and after it.
+- Boxes are filled with the interval color when that frame is inside an interval.
+- Boxes are minimally filled when that frame is outside an interval, so you can still see temporal context.
+- You can choose the corner location (**Top Left**, **Top Right**, **Bottom Left**, **Bottom Right**).
+- You can adjust both **box size** and **frame range** (how many frames ahead/behind are shown).
 
 ## How Intervals Appear in the Media Viewer
 
-When interval data are enabled, the viewer treats the current frame as either:
+When interval data are enabled, the viewer treats each frame in the interval window as either:
 
 - **inside** an interval (active), or
 - **outside** an interval (inactive).
 
-In practical workflows, intervals are commonly reviewed together with media, points, masks, and lines to verify timing against visible behavior.
+You can also switch to **Border** plotting style, which draws a colored border around the full image whenever the current frame is inside an interval. Border thickness is configurable.
 
 ## Temporal Behavior and TimeFrame
 
