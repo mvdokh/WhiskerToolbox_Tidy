@@ -18556,7 +18556,7 @@
     "href": "learning-resources/tutorials/event_labeling.html",
     "title": "Tutorial: Event Labeling",
     "section": "",
-    "text": "Event labeling is for discrete time points (single-frame or near-instant occurrences), such as cue onsets, licks, or threshold crossings. The output is a DigitalEventSeries with one timestamp per labeled event.",
+    "text": "Event labeling is for discrete time points (single-frame or near-instant occurrences), such as cue onsets, licks, or threshold crossings. The output is a DigitalEventSeries with one timestamp per labeled event.\n\n\nYour browser does not support the video tag. You can download the video events.mp4.",
     "crumbs": [
       "Learning Resources",
       "Tutorials",
@@ -18568,7 +18568,7 @@
     "href": "learning-resources/tutorials/event_labeling.html#overview",
     "title": "Tutorial: Event Labeling",
     "section": "",
-    "text": "Event labeling is for discrete time points (single-frame or near-instant occurrences), such as cue onsets, licks, or threshold crossings. The output is a DigitalEventSeries with one timestamp per labeled event.",
+    "text": "Event labeling is for discrete time points (single-frame or near-instant occurrences), such as cue onsets, licks, or threshold crossings. The output is a DigitalEventSeries with one timestamp per labeled event.\n\n\nYour browser does not support the video tag. You can download the video events.mp4.",
     "crumbs": [
       "Learning Resources",
       "Tutorials",
@@ -21253,6 +21253,54 @@
     "crumbs": [
       "Media Viewer",
       "Line Data"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/event_labeling.html#step-2-open-the-event-data-inspector",
+    "href": "learning-resources/tutorials/event_labeling.html#step-2-open-the-event-data-inspector",
+    "title": "Tutorial: Event Labeling",
+    "section": "Step 2: Open the Event Data Inspector",
+    "text": "Step 2: Open the Event Data Inspector\n\nOpen the Data Inspector for your new event feature.\nUse this inspector for event curation controls.\nAdd or remove events from the Data Inspector as you review frames.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Event Labeling"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/event_labeling.html#step-3-align-your-views",
+    "href": "learning-resources/tutorials/event_labeling.html#step-3-align-your-views",
+    "title": "Tutorial: Event Labeling",
+    "section": "Step 3: Align Your Views",
+    "text": "Step 3: Align Your Views\n\nOpen the Media Viewer and Data Viewer side-by-side.\nLoad the relevant analog/event/interval context series.\nVerify time synchronization before labeling.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Event Labeling"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/event_labeling.html#step-4-add-event-labels",
+    "href": "learning-resources/tutorials/event_labeling.html#step-4-add-event-labels",
+    "title": "Tutorial: Event Labeling",
+    "section": "Step 4: Add Event Labels",
+    "text": "Step 4: Add Event Labels\n\nScrub frame-by-frame through candidate regions.\nAdd an event marker at each onset time using Data Inspector controls.\nUse one onset convention consistently across the full session.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Event Labeling"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/event_labeling.html#step-5-clean-up-and-validate",
+    "href": "learning-resources/tutorials/event_labeling.html#step-5-clean-up-and-validate",
+    "title": "Tutorial: Event Labeling",
+    "section": "Step 5: Clean Up and Validate",
+    "text": "Step 5: Clean Up and Validate\n\nRemove false positives in the Data Inspector.\nAdd missed events.\nSpot-check dense regions where near-duplicate events are common.\n\n\n\n\n\n\n\nNoteOptional Bootstrap: Event Threshold Transform\n\n\n\nFor high-volume datasets, you can generate a first-pass event series using Analog Event Threshold, then manually curate the result in the inspector.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Event Labeling"
     ]
   }
 ]

@@ -487,9 +487,10 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
   <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link" data-scroll-target="#prerequisites">Prerequisites</a></li>
   <li><a href="#step-1-create-the-event-series" id="toc-step-1-create-the-event-series" class="nav-link" data-scroll-target="#step-1-create-the-event-series">Step 1: Create the Event Series</a></li>
-  <li><a href="#step-2-align-your-views" id="toc-step-2-align-your-views" class="nav-link" data-scroll-target="#step-2-align-your-views">Step 2: Align Your Views</a></li>
-  <li><a href="#step-3-add-event-labels" id="toc-step-3-add-event-labels" class="nav-link" data-scroll-target="#step-3-add-event-labels">Step 3: Add Event Labels</a></li>
-  <li><a href="#step-4-clean-up-and-validate" id="toc-step-4-clean-up-and-validate" class="nav-link" data-scroll-target="#step-4-clean-up-and-validate">Step 4: Clean Up and Validate</a></li>
+  <li><a href="#step-2-open-the-event-data-inspector" id="toc-step-2-open-the-event-data-inspector" class="nav-link" data-scroll-target="#step-2-open-the-event-data-inspector">Step 2: Open the Event Data Inspector</a></li>
+  <li><a href="#step-3-align-your-views" id="toc-step-3-align-your-views" class="nav-link" data-scroll-target="#step-3-align-your-views">Step 3: Align Your Views</a></li>
+  <li><a href="#step-4-add-event-labels" id="toc-step-4-add-event-labels" class="nav-link" data-scroll-target="#step-4-add-event-labels">Step 4: Add Event Labels</a></li>
+  <li><a href="#step-5-clean-up-and-validate" id="toc-step-5-clean-up-and-validate" class="nav-link" data-scroll-target="#step-5-clean-up-and-validate">Step 5: Clean Up and Validate</a></li>
   <li><a href="#python-console-for-custom-workflows" id="toc-python-console-for-custom-workflows" class="nav-link" data-scroll-target="#python-console-for-custom-workflows">Python Console for Custom Workflows</a></li>
   <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
   </ul>
@@ -521,7 +522,10 @@ ul.task-list li input[type="checkbox"] {
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
 <p>Event labeling is for discrete time points (single-frame or near-instant occurrences), such as cue onsets, licks, or threshold crossings. The output is a <code>DigitalEventSeries</code> with one timestamp per labeled event.</p>
-</section>
+<video controls="" preload="metadata" width="100%" style="max-width: 960px; display: block; margin: 0 auto;">
+<source src="../../images/events.mp4" type="video/mp4">
+<p>Your browser does not support the video tag. You can download the video <a href="../../images/events.mp4">events.mp4</a>. </p>
+</video></section>
 <section id="prerequisites" class="level2">
 <h2 class="anchored" data-anchor-id="prerequisites">Prerequisites</h2>
 <ul>
@@ -538,26 +542,34 @@ ul.task-list li input[type="checkbox"] {
 <li>Name it clearly (for example: <code>lick_events</code>).</li>
 </ol>
 </section>
-<section id="step-2-align-your-views" class="level2">
-<h2 class="anchored" data-anchor-id="step-2-align-your-views">Step 2: Align Your Views</h2>
+<section id="step-2-open-the-event-data-inspector" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-open-the-event-data-inspector">Step 2: Open the Event Data Inspector</h2>
+<ol type="1">
+<li>Open the Data Inspector for your new event feature.</li>
+<li>Use this inspector for event curation controls.</li>
+<li>Add or remove events from the Data Inspector as you review frames.</li>
+</ol>
+</section>
+<section id="step-3-align-your-views" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-align-your-views">Step 3: Align Your Views</h2>
 <ol type="1">
 <li>Open the Media Viewer and Data Viewer side-by-side.</li>
 <li>Load the relevant analog/event/interval context series.</li>
 <li>Verify time synchronization before labeling.</li>
 </ol>
 </section>
-<section id="step-3-add-event-labels" class="level2">
-<h2 class="anchored" data-anchor-id="step-3-add-event-labels">Step 3: Add Event Labels</h2>
+<section id="step-4-add-event-labels" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-add-event-labels">Step 4: Add Event Labels</h2>
 <ol type="1">
 <li>Scrub frame-by-frame through candidate regions.</li>
-<li>Add an event marker at each onset time.</li>
+<li>Add an event marker at each onset time using Data Inspector controls.</li>
 <li>Use one onset convention consistently across the full session.</li>
 </ol>
 </section>
-<section id="step-4-clean-up-and-validate" class="level2">
-<h2 class="anchored" data-anchor-id="step-4-clean-up-and-validate">Step 4: Clean Up and Validate</h2>
+<section id="step-5-clean-up-and-validate" class="level2">
+<h2 class="anchored" data-anchor-id="step-5-clean-up-and-validate">Step 5: Clean Up and Validate</h2>
 <ul>
-<li>Remove false positives.</li>
+<li>Remove false positives in the Data Inspector.</li>
 <li>Add missed events.</li>
 <li>Spot-check dense regions where near-duplicate events are common.</li>
 </ul>
