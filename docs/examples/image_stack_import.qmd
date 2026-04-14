@@ -249,6 +249,143 @@ experiment/
 
 ---
 
+## Align Image Filenames with Keypoints (time + master TimeFrames)
+
+If your image filenames encode frame identity (for example `frame_10452.tif`) and your
+keypoint table uses the same frame identity, do not rely on row order alone.
+
+Use explicit TimeFrames so keypoints map to the filename-derived frame IDs.
+
+### Step 1: Create `time` and `master` from image filenames
+
+Create a sparse `time` TimeFrame using only values found in filenames, plus a dense
+`master` TimeFrame covering the full range.
+
+```json
+[
+  {
+    "data_type": "time",
+    "name": "time",
+    "filepath": "imaging",
+    "format": "filename",
+    "file_extension": ".tif",
+    "regex_pattern": "frame_(\\d+)\\.tif$",
+    "mode": "found_values",
+    "sort_ascending": true
+  },
+  {
+    "data_type": "time",
+    "name": "master",
+    "filepath": "imaging",
+    "format": "filename",
+    "file_extension": ".tif",
+    "regex_pattern": "frame_(\\d+)\\.tif$",
+    "mode": "min_to_max",
+    "sort_ascending": true
+  }
+]
+```
+
+### Step 2: Load images and keypoints onto the same clock
+
+Assign both the image stack and point data to `time` so keypoint frame IDs align to
+filename-extracted IDs (not just row position).
+
+```json
+[
+  {
+    "data_type": "images",
+    "name": "media",
+    "filepath": "imaging",
+    "file_extensions": [".tif"],
+    "sort_by_name": true,
+    "display_format": "Gray",
+    "clock": "time"
+  },
+  {
+    "data_type": "point",
+    "name": "jaw_keypoint",
+    "filepath": "keypoints.csv",
+    "format": "csv",
+    "frame_column": 0,
+    "x_column": 1,
+    "y_column": 2,
+    "column_delim": ",",
+    "clock": "time"
+  }
+]
+```
+
+Expected keypoint CSV format:
+
+```text
+frame_id,x,y
+10452,312.4,188.0
+10453,313.1,187.6
+```
+
+::: {.callout-important}
+## Frame Column Requirement
+Point CSV loading expects an integer frame column. If your keypoint rows contain full
+filenames (for example `frame_10452.tif`), extract the numeric ID first using the same
+regex logic you used for the TimeFrame (`frame_(\d+)\.tif$`).
+:::
+
+::: {.callout-note}
+## When to Use `master`
+Use `time` for exact filename-ID mapping. Use `master` when you also need a dense,
+continuous timeline (for example when combining imaging with other streams).
+:::
+
+### Complete Example: Image Stack + Keypoints with Filename IDs
+
+```json
+[
+  {
+    "data_type": "time",
+    "name": "time",
+    "filepath": "imaging",
+    "format": "filename",
+    "file_extension": ".tif",
+    "regex_pattern": "frame_(\\d+)\\.tif$",
+    "mode": "found_values",
+    "sort_ascending": true
+  },
+  {
+    "data_type": "time",
+    "name": "master",
+    "filepath": "imaging",
+    "format": "filename",
+    "file_extension": ".tif",
+    "regex_pattern": "frame_(\\d+)\\.tif$",
+    "mode": "min_to_max",
+    "sort_ascending": true
+  },
+  {
+    "data_type": "images",
+    "name": "media",
+    "filepath": "imaging",
+    "file_extensions": [".tif"],
+    "sort_by_name": true,
+    "display_format": "Gray",
+    "clock": "time"
+  },
+  {
+    "data_type": "point",
+    "name": "nose_tip",
+    "filepath": "tracking_keypoints.csv",
+    "format": "csv",
+    "frame_column": 0,
+    "x_column": 1,
+    "y_column": 2,
+    "column_delim": ",",
+    "clock": "time"
+  }
+]
+```
+
+---
+
 ## Troubleshooting
 
 ### No images loaded
@@ -330,3 +467,5 @@ A full configuration loading imaging data with behavioral video and events:
 - [JSON Configuration Reference](../user_guide/data_loading/JSON_loading.qmd) - All JSON loading options
 - [Media Viewer Overview](../user_guide/media_viewer/overview.qmd) - Working with loaded images
 - [How to Import Video](video_import.qmd) - Video file import
+- [Keypoint Video Labeling](keypoint_labeling.qmd) - Creating and exporting point tracks
+- [TimeFrame](../concepts/timeframe.qmd) - Temporal coordinate systems and clock mapping

@@ -17688,7 +17688,7 @@
     "href": "examples/image_stack_import.html#see-also",
     "title": "How to Import Image Stacks",
     "section": "See Also",
-    "text": "See Also\n\nImage Loading Reference - Complete reference documentation\nJSON Configuration Reference - All JSON loading options\nMedia Viewer Overview - Working with loaded images\nHow to Import Video - Video file import",
+    "text": "See Also\n\nImage Loading Reference - Complete reference documentation\nJSON Configuration Reference - All JSON loading options\nMedia Viewer Overview - Working with loaded images\nHow to Import Video - Video file import\nKeypoint Video Labeling - Creating and exporting point tracks\nTimeFrame - Temporal coordinate systems and clock mapping",
     "crumbs": [
       "Learning Resources",
       "Tutorials",
@@ -20566,6 +20566,18 @@
     "crumbs": [
       "Python Console",
       "Python Console"
+    ]
+  },
+  {
+    "objectID": "examples/image_stack_import.html#align-image-filenames-with-keypoints-time-master-timeframes",
+    "href": "examples/image_stack_import.html#align-image-filenames-with-keypoints-time-master-timeframes",
+    "title": "How to Import Image Stacks",
+    "section": "Align Image Filenames with Keypoints (time + master TimeFrames)",
+    "text": "Align Image Filenames with Keypoints (time + master TimeFrames)\nIf your image filenames encode frame identity (for example frame_10452.tif) and your keypoint table uses the same frame identity, do not rely on row order alone.\nUse explicit TimeFrames so keypoints map to the filename-derived frame IDs.\n\nStep 1: Create time and master from image filenames\nCreate a sparse time TimeFrame using only values found in filenames, plus a dense master TimeFrame covering the full range.\n[\n  {\n    \"data_type\": \"time\",\n    \"name\": \"time\",\n    \"filepath\": \"imaging\",\n    \"format\": \"filename\",\n    \"file_extension\": \".tif\",\n    \"regex_pattern\": \"frame_(\\\\d+)\\\\.tif$\",\n    \"mode\": \"found_values\",\n    \"sort_ascending\": true\n  },\n  {\n    \"data_type\": \"time\",\n    \"name\": \"master\",\n    \"filepath\": \"imaging\",\n    \"format\": \"filename\",\n    \"file_extension\": \".tif\",\n    \"regex_pattern\": \"frame_(\\\\d+)\\\\.tif$\",\n    \"mode\": \"min_to_max\",\n    \"sort_ascending\": true\n  }\n]\n\n\nStep 2: Load images and keypoints onto the same clock\nAssign both the image stack and point data to time so keypoint frame IDs align to filename-extracted IDs (not just row position).\n[\n  {\n    \"data_type\": \"images\",\n    \"name\": \"media\",\n    \"filepath\": \"imaging\",\n    \"file_extensions\": [\".tif\"],\n    \"sort_by_name\": true,\n    \"display_format\": \"Gray\",\n    \"clock\": \"time\"\n  },\n  {\n    \"data_type\": \"point\",\n    \"name\": \"jaw_keypoint\",\n    \"filepath\": \"keypoints.csv\",\n    \"format\": \"csv\",\n    \"frame_column\": 0,\n    \"x_column\": 1,\n    \"y_column\": 2,\n    \"column_delim\": \",\",\n    \"clock\": \"time\"\n  }\n]\nExpected keypoint CSV format:\nframe_id,x,y\n10452,312.4,188.0\n10453,313.1,187.6\n\n\n\n\n\n\nImportantFrame Column Requirement\n\n\n\nPoint CSV loading expects an integer frame column. If your keypoint rows contain full filenames (for example frame_10452.tif), extract the numeric ID first using the same regex logic you used for the TimeFrame (frame_(\\d+)\\.tif$).\n\n\n\n\n\n\n\n\nNoteWhen to Use master\n\n\n\nUse time for exact filename-ID mapping. Use master when you also need a dense, continuous timeline (for example when combining imaging with other streams).\n\n\n\n\nComplete Example: Image Stack + Keypoints with Filename IDs\n[\n  {\n    \"data_type\": \"time\",\n    \"name\": \"time\",\n    \"filepath\": \"imaging\",\n    \"format\": \"filename\",\n    \"file_extension\": \".tif\",\n    \"regex_pattern\": \"frame_(\\\\d+)\\\\.tif$\",\n    \"mode\": \"found_values\",\n    \"sort_ascending\": true\n  },\n  {\n    \"data_type\": \"time\",\n    \"name\": \"master\",\n    \"filepath\": \"imaging\",\n    \"format\": \"filename\",\n    \"file_extension\": \".tif\",\n    \"regex_pattern\": \"frame_(\\\\d+)\\\\.tif$\",\n    \"mode\": \"min_to_max\",\n    \"sort_ascending\": true\n  },\n  {\n    \"data_type\": \"images\",\n    \"name\": \"media\",\n    \"filepath\": \"imaging\",\n    \"file_extensions\": [\".tif\"],\n    \"sort_by_name\": true,\n    \"display_format\": \"Gray\",\n    \"clock\": \"time\"\n  },\n  {\n    \"data_type\": \"point\",\n    \"name\": \"nose_tip\",\n    \"filepath\": \"tracking_keypoints.csv\",\n    \"format\": \"csv\",\n    \"frame_column\": 0,\n    \"x_column\": 1,\n    \"y_column\": 2,\n    \"column_delim\": \",\",\n    \"clock\": \"time\"\n  }\n]",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Image Stack Import"
     ]
   }
 ]
