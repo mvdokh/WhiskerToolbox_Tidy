@@ -1,0 +1,142 @@
+---
+title: "Analog Loading"
+format: html
+---
+
+## Overview
+
+Analog time series stores continuous-valued samples over time (for example LFP, photometry, force sensors, motion energy).
+
+Supported analog formats:
+
+| Format | Typical Source | Available In |
+|---|---|---|
+| `csv` | Single-column or time/value table | Data Import Widget and JSON |
+| `binary` | Raw interleaved channels | Data Import Widget (build-dependent) and JSON |
+| `hdf5` | Time/value datasets in HDF5 | JSON workflows |
+
+::: {.callout-note}
+## JSON Data Type Name
+Use `"data_type": "analog"` in JSON.
+:::
+
+## Data Import Widget
+
+Open **Modules -> Data Import**, choose **Analog Time Series**.
+
+### CSV mode
+
+- Select file
+- Choose delimiter
+- Choose one-column or two-column layout
+- If two-column, set time and data column indices
+
+### Binary mode
+
+- Select file
+- Set `header_size`, `num_channels`, sample type, and scaling options
+- Optional memory-mapped mode for large files
+
+## JSON: CSV Analog (`format: "csv"`)
+
+### Single-column CSV
+
+```json
+{
+  "filepath": "ephys/lfp.csv",
+  "data_type": "analog",
+  "name": "lfp",
+  "format": "csv",
+  "single_column_format": true,
+  "delimiter": ",",
+  "has_header": false
+}
+```
+
+### Two-column CSV (time + value)
+
+```json
+{
+  "filepath": "ephys/lfp_time_value.csv",
+  "data_type": "analog",
+  "name": "lfp",
+  "format": "csv",
+  "single_column_format": false,
+  "time_column": 0,
+  "data_column": 1,
+  "delimiter": ",",
+  "has_header": true
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `single_column_format` | No | boolean | `true` | `true`: first column is value and row index is time |
+| `delimiter` | No | string | `","` | Column delimiter |
+| `has_header` | No | boolean | `false` | Skip first row when true |
+| `time_column` | No | integer | `0` | Time column when `single_column_format` is `false` |
+| `data_column` | No | integer | `1` | Value column when `single_column_format` is `false` |
+| `clock` | No | string | `"time"` | Assigns this data to an existing TimeFrame |
+
+## JSON: Binary Analog (`format: "binary"`)
+
+```json
+{
+  "filepath": "ephys/amplifier.dat",
+  "data_type": "analog",
+  "name": "amplifier",
+  "format": "binary",
+  "header_size": 0,
+  "num_channels": 32,
+  "binary_data_type": "int16",
+  "use_memory_mapped": true,
+  "offset": 0,
+  "stride": 1,
+  "scale_factor": 1.0,
+  "offset_value": 0.0,
+  "num_samples": 0
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `header_size` | No | integer | `0` | Bytes to skip at file start |
+| `num_channels` | No | integer | `1` | Interleaved channel count |
+| `binary_data_type` | No | string | `"int16"` | One of: `int8`, `int16`, `uint16`, `float32`, `float64` |
+| `use_memory_mapped` | No | boolean | `false` | Enables memory-mapped loading path |
+| `offset` | No | integer | `0` | Starting element offset (memory-mapped path) |
+| `stride` | No | integer | `1` | Sample stride (memory-mapped path) |
+| `scale_factor` | No | number | `1.0` | Multiplicative sample scaling (memory-mapped path) |
+| `offset_value` | No | number | `0.0` | Additive sample offset (memory-mapped path) |
+| `num_samples` | No | integer | `0` | Max samples per channel (`0` means all) |
+
+::: {.callout-tip}
+When `num_channels > 1`, JSON batch loading creates one series per channel with names like `name_0`, `name_1`, and so on.
+:::
+
+## JSON: HDF5 Analog (`format: "hdf5"`)
+
+```json
+{
+  "filepath": "ephys/signals.h5",
+  "data_type": "analog",
+  "name": "lfp",
+  "format": "hdf5",
+  "time_key": "time_s",
+  "value_key": "lfp",
+  "scale": 30000.0,
+  "scale_divide": false
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `time_key` | Yes | string | - | Dataset path containing time values |
+| `value_key` | Yes | string | - | Dataset path containing analog values |
+| `scale` | No | number | `1.0` | Multiply (or divide) times before integer conversion |
+| `scale_divide` | No | boolean | `false` | If true, divide by `scale` instead of multiply |
+
+## Related
+
+- [Data Viewer Overview](../data_viewer/overview.qmd)
+- [Data Loading Overview](index.qmd)

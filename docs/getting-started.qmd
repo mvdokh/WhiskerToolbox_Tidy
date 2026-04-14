@@ -16,6 +16,8 @@ Select the appropriate file for your operating system:
 -   **macOS**: `Neuralyzer-macOS.dmg`
 -   **Linux**: `Neuralyzer-Linux.tar.gz`
 
+GPU builds are provided as separate release files and use the suffix `_gpu`.
+
 ## 2. Install & Run
 
 ::: panel-tabset

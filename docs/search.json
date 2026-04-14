@@ -1358,6 +1358,83 @@
     ]
   },
   {
+    "objectID": "user_guide/data_loading/Mask_Loading.html",
+    "href": "user_guide/data_loading/Mask_Loading.html",
+    "title": "Mask Loading",
+    "section": "",
+    "text": "Mask data represents foreground regions over time (for example: tongue segmentation, whisker pad ROIs, or behavior-state masks).\nSupported mask formats:\n\n\n\n\n\n\n\n\nFormat\nTypical Source\nAvailable In\n\n\n\n\nimage\nOne binary image per frame (.png, .jpg, .bmp, .tiff)\nData Import Widget and JSON\n\n\nhdf5\nFrame array + ragged coordinate arrays\nData Import Widget and JSON\n\n\ncsv (RLE)\nFrame + run-length encoded mask rows\nJSON workflows\n\n\n\n\n\n\n\n\n\nNoteJSON Data Type Name\n\n\n\nUse \"data_type\": \"mask\" in JSON.",
+    "crumbs": [
+      "Data Loading",
+      "Mask Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Mask_Loading.html#overview",
+    "href": "user_guide/data_loading/Mask_Loading.html#overview",
+    "title": "Mask Loading",
+    "section": "",
+    "text": "Mask data represents foreground regions over time (for example: tongue segmentation, whisker pad ROIs, or behavior-state masks).\nSupported mask formats:\n\n\n\n\n\n\n\n\nFormat\nTypical Source\nAvailable In\n\n\n\n\nimage\nOne binary image per frame (.png, .jpg, .bmp, .tiff)\nData Import Widget and JSON\n\n\nhdf5\nFrame array + ragged coordinate arrays\nData Import Widget and JSON\n\n\ncsv (RLE)\nFrame + run-length encoded mask rows\nJSON workflows\n\n\n\n\n\n\n\n\n\nNoteJSON Data Type Name\n\n\n\nUse \"data_type\": \"mask\" in JSON.",
+    "crumbs": [
+      "Data Loading",
+      "Mask Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Mask_Loading.html#data-import-widget",
+    "href": "user_guide/data_loading/Mask_Loading.html#data-import-widget",
+    "title": "Mask Loading",
+    "section": "Data Import Widget",
+    "text": "Data Import Widget\nOpen Modules -&gt; Data Import, choose Mask Data, then choose the loader type:\n\nImage: load a directory of mask images.\nHDF5: load one or multiple HDF5 mask files.\n\nThe widget also lets you apply spatial scaling after load.",
+    "crumbs": [
+      "Data Loading",
+      "Mask Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Mask_Loading.html#json-image-sequence-masks-format-image",
+    "href": "user_guide/data_loading/Mask_Loading.html#json-image-sequence-masks-format-image",
+    "title": "Mask Loading",
+    "section": "JSON: Image Sequence Masks (format: \"image\")",
+    "text": "JSON: Image Sequence Masks (format: \"image\")\nEach file in a directory is treated as one frame. Frame number is parsed from the filename stem.\n{\n    \"filepath\": \"segmentation/masks\",\n    \"data_type\": \"mask\",\n    \"name\": \"tongue_mask\",\n    \"format\": \"image\",\n    \"file_pattern\": \"*.png\",\n    \"filename_prefix\": \"mask_\",\n    \"frame_number_padding\": 4,\n    \"threshold_value\": 128,\n    \"invert_mask\": false,\n    \"clock\": \"time\"\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\nfilepath\nYes\nstring\n-\nDirectory containing mask images\n\n\ndata_type\nYes\nstring\n-\nMust be \"mask\"\n\n\nname\nYes\nstring\n-\nOutput object name\n\n\nformat\nYes\nstring\n-\n\"image\"\n\n\nfile_pattern\nNo\nstring\n\"*.png\"\nGlob-like filter for filenames\n\n\nfilename_prefix\nNo\nstring\n\"\"\nPrefix before numeric frame ID\n\n\nframe_number_padding\nNo\ninteger\n0\nExpected zero-padding in frame number (0 allows unpadded)\n\n\nthreshold_value\nNo\ninteger\n128\nPixels at or above threshold are mask (unless inverted)\n\n\ninvert_mask\nNo\nboolean\nfalse\nIf true, invert foreground/background logic\n\n\nimage_width\nNo\ninteger\ninferred\nOptional output width override\n\n\nimage_height\nNo\ninteger\ninferred\nOptional output height override\n\n\nclock\nNo\nstring\n\"time\"\nAssigns this data to an existing TimeFrame",
+    "crumbs": [
+      "Data Loading",
+      "Mask Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Mask_Loading.html#json-hdf5-masks-format-hdf5",
+    "href": "user_guide/data_loading/Mask_Loading.html#json-hdf5-masks-format-hdf5",
+    "title": "Mask Loading",
+    "section": "JSON: HDF5 Masks (format: \"hdf5\")",
+    "text": "JSON: HDF5 Masks (format: \"hdf5\")\nHDF5 masks are loaded from one frame dataset and two ragged coordinate datasets.\n{\n    \"filepath\": \"session/masks.h5\",\n    \"data_type\": \"mask\",\n    \"name\": \"tongue_mask\",\n    \"format\": \"hdf5\",\n    \"frame_key\": \"frames\",\n    \"x_key\": \"widths\",\n    \"y_key\": \"heights\",\n    \"width\": 640,\n    \"height\": 480\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\nframe_key\nNo\nstring\n\"frames\"\nDataset path for frame indices\n\n\nx_key\nNo\nstring\n\"widths\"\nRagged dataset path for x coordinates\n\n\ny_key\nNo\nstring\n\"heights\"\nRagged dataset path for y coordinates\n\n\nwidth\nNo\ninteger\nnone\nOptional image width to store in MaskData\n\n\nheight\nNo\ninteger\nnone\nOptional image height to store in MaskData",
+    "crumbs": [
+      "Data Loading",
+      "Mask Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Mask_Loading.html#json-csv-rle-masks-format-csv",
+    "href": "user_guide/data_loading/Mask_Loading.html#json-csv-rle-masks-format-csv",
+    "title": "Mask Loading",
+    "section": "JSON: CSV RLE Masks (format: \"csv\")",
+    "text": "JSON: CSV RLE Masks (format: \"csv\")\nCSV RLE uses one row per mask with a frame column and a quoted RLE payload.\nFrame,\"y,x_start,length,y,x_start,length,...\"\n0,\"12,31,5,13,30,7\"\n{\n    \"filepath\": \"segmentation/masks_rle.csv\",\n    \"data_type\": \"mask\",\n    \"name\": \"tongue_mask\",\n    \"format\": \"csv\",\n    \"delimiter\": \",\",\n    \"rle_delimiter\": \",\",\n    \"has_header\": true,\n    \"header_identifier\": \"Frame\",\n    \"image_width\": 640,\n    \"image_height\": 480\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\ndelimiter\nNo\nstring\n\",\"\nDelimiter between CSV columns\n\n\nrle_delimiter\nNo\nstring\n\",\"\nDelimiter within RLE triplets\n\n\nhas_header\nNo\nboolean\ntrue\nSkip first row when true\n\n\nheader_identifier\nNo\nstring\n\"Frame\"\nExpected header label for frame column\n\n\nimage_width\nNo\ninteger\nnone\nOptional image width metadata\n\n\nimage_height\nNo\ninteger\nnone\nOptional image height metadata",
+    "crumbs": [
+      "Data Loading",
+      "Mask Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Mask_Loading.html#related",
+    "href": "user_guide/data_loading/Mask_Loading.html#related",
+    "title": "Mask Loading",
+    "section": "Related",
+    "text": "Related\n\nMask Labeling Tutorial\nData Loading Overview",
+    "crumbs": [
+      "Data Loading",
+      "Mask Loading"
+    ]
+  },
+  {
     "objectID": "user_guide/data_loading/JSON_loading.html",
     "href": "user_guide/data_loading/JSON_loading.html",
     "title": "JSON_loading",
@@ -1369,200 +1446,480 @@
     ]
   },
   {
-    "objectID": "user_guide/data_loading/Image_Loading.html",
-    "href": "user_guide/data_loading/Image_Loading.html",
-    "title": "Image Stack Loading",
+    "objectID": "user_guide/data_loading/index.html",
+    "href": "user_guide/data_loading/index.html",
+    "title": "Data Loading",
     "section": "",
-    "text": "Image stacks are sequences of image files that Neuralyzer treats as frame-by-frame media, similar to video. This is the standard data format for two-photon microscopy, widefield calcium imaging, and other scientific imaging modalities.\n\n\n\n\n\n\nTipHow-To Guide\n\n\n\nFor step-by-step instructions including multi-channel loading and filename patterns, see How to Import Image Stacks.",
+    "text": "Neuralyzer supports loading diverse data types commonly used in systems neuroscience experiments. This section covers all data import methods and formats.\nData can be loaded through:\n\nData Import Widget - Unified interface for importing all data types via Modules → Data Import\nJSON configuration files - Reproducible, scriptable data loading for batch workflows",
     "crumbs": [
-      "Data Loading",
-      "Image Stack Loading"
+      "Data Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/Image_Loading.html#overview",
-    "href": "user_guide/data_loading/Image_Loading.html#overview",
-    "title": "Image Stack Loading",
+    "objectID": "user_guide/data_loading/index.html#overview",
+    "href": "user_guide/data_loading/index.html#overview",
+    "title": "Data Loading",
     "section": "",
-    "text": "Image stacks are sequences of image files that Neuralyzer treats as frame-by-frame media, similar to video. This is the standard data format for two-photon microscopy, widefield calcium imaging, and other scientific imaging modalities.\n\n\n\n\n\n\nTipHow-To Guide\n\n\n\nFor step-by-step instructions including multi-channel loading and filename patterns, see How to Import Image Stacks.",
+    "text": "Neuralyzer supports loading diverse data types commonly used in systems neuroscience experiments. This section covers all data import methods and formats.\nData can be loaded through:\n\nData Import Widget - Unified interface for importing all data types via Modules → Data Import\nJSON configuration files - Reproducible, scriptable data loading for batch workflows",
     "crumbs": [
-      "Data Loading",
-      "Image Stack Loading"
+      "Data Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/Image_Loading.html#supported-formats",
-    "href": "user_guide/data_loading/Image_Loading.html#supported-formats",
-    "title": "Image Stack Loading",
-    "section": "Supported Formats",
-    "text": "Supported Formats\nNeuralyzer uses OpenCV for image loading:\n\n\n\nFormat\nExtensions\nBit Depth\n\n\n\n\nTIFF\n.tif, .tiff, .ome.tif\n8-bit, 16-bit\n\n\nPNG\n.png\n8-bit, 16-bit\n\n\nJPEG\n.jpg, .jpeg\n8-bit\n\n\nBMP\n.bmp\n8-bit\n\n\n\n\n\n\n\n\n\nNote16-bit Support\n\n\n\nTIFF and PNG formats support 16-bit images common in scientific imaging. Neuralyzer automatically detects bit depth and normalizes display accordingly.",
+    "objectID": "user_guide/data_loading/index.html#using-the-data-import-widget",
+    "href": "user_guide/data_loading/index.html#using-the-data-import-widget",
+    "title": "Data Loading",
+    "section": "Using the Data Import Widget",
+    "text": "Using the Data Import Widget\nThe Data Import Widget provides a unified interface for loading all supported data types. Access it via Modules → Data Import from the main menu.\n\nFeatures\n\nType Selection: Choose the data type you want to import (Lines, Masks, Points, Analog, Events, Intervals, Tensors)\nFormat Selection: Each data type supports multiple file formats (CSV, HDF5, Binary, LMDB, etc.)\nPreview: Many loaders show a preview of the data before importing\nScaling Options: Apply coordinate scaling for spatial data types\nState Persistence: The widget remembers your last used directory and format preferences\n\n\n\nWorkflow\n\nOpen the widget via Modules → Data Import\nSelect your data type from the dropdown\nChoose the appropriate file format\nConfigure format-specific options (columns, datasets, scaling)\nClick “Import” to load the data into the DataManager\n\n\n\n\n\n\n\nTipPassive Type Awareness\n\n\n\nWhen you select a data object in the DataManager, the Data Import Widget automatically switches to show the appropriate import options for that data type.",
     "crumbs": [
-      "Data Loading",
-      "Image Stack Loading"
+      "Data Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/Image_Loading.html#loading-methods",
-    "href": "user_guide/data_loading/Image_Loading.html#loading-methods",
-    "title": "Image Stack Loading",
-    "section": "Loading Methods",
-    "text": "Loading Methods\n\nGUI: File Menu\nLoad images through the application menu:\nFile → Load Data → Select any image file → Open\nNeuralyzer loads all images with matching extensions in the same directory.\n\n\nJSON Configuration\nFor reproducible workflows with filtering and multi-channel support:\n{\n  \"data_type\": \"images\",\n  \"name\": \"media\",\n  \"filepath\": \"imaging_data\",\n  \"file_extensions\": [\".tif\", \".tiff\"],\n  \"filename_pattern\": \"_Ch2_\",\n  \"sort_by_name\": true,\n  \"display_format\": \"Gray\",\n  \"recursive_search\": false\n}\nLoad via File → Load JSON Configuration.",
+    "objectID": "user_guide/data_loading/index.html#media-data",
+    "href": "user_guide/data_loading/index.html#media-data",
+    "title": "Data Loading",
+    "section": "Media Data",
+    "text": "Media Data\nMedia provides the visual backdrop for data visualization and annotation.\n\n\n\nType\nDescription\nFormats\nReference\n\n\n\n\nVideo\nFrame-by-frame video files\n.mp4, .avi, .mov\nVideo Loading\n\n\nImage Stacks\nSequence of image files\n.tif, .png, .jpg\nImage Loading\n\n\nHDF5\nHierarchical data with image arrays\n.h5, .hdf5, .mat\n—\n\n\n\n\n\n\n\n\n\nTipMedia Import How-To Guides\n\n\n\n\nVideo: See How to Import Video for a complete walkthrough including troubleshooting B-frame issues.\nImage Stacks: See How to Import Image Stacks for loading 2P imaging data and multi-channel stacks.",
     "crumbs": [
-      "Data Loading",
-      "Image Stack Loading"
+      "Data Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/Image_Loading.html#json-configuration-reference",
-    "href": "user_guide/data_loading/Image_Loading.html#json-configuration-reference",
-    "title": "Image Stack Loading",
-    "section": "JSON Configuration Reference",
-    "text": "JSON Configuration Reference\n\nImage Data Type\n\n\n\n\n\n\n\n\n\n\nElement\nDescription\nRequired?\nType\nDefault\n\n\n\n\ndata_type\nMust be \"images\"\nYes\nstring\n—\n\n\nname\nIdentifier for this data in Neuralyzer\nYes\nstring\n—\n\n\nfilepath\nDirectory containing images, relative to JSON\nYes\nstring\n—\n\n\nfile_extensions\nArray of extensions to include\nNo\narray\n[\".png\", \".jpg\", \".jpeg\"]\n\n\nfilename_pattern\nRegex pattern to filter filenames\nNo\nstring\n\"\" (all files)\n\n\nsort_by_name\nSort files alphabetically by name\nNo\nboolean\ntrue\n\n\ndisplay_format\n\"Gray\" or \"Color\"\nNo\nstring\n\"Color\"\n\n\nrecursive_search\nInclude subdirectories in search\nNo\nboolean\nfalse\n\n\n\n\n\nMulti-Channel Example\nLoad two-photon imaging data with separate channels:\n[\n  {\n    \"data_type\": \"images\",\n    \"name\": \"media\",\n    \"filepath\": \".\",\n    \"file_extensions\": [\".ome.tif\", \".tif\", \".tiff\"],\n    \"filename_pattern\": \"_Ch2_\",\n    \"sort_by_name\": true,\n    \"display_format\": \"Gray\",\n    \"recursive_search\": false\n  },\n  {\n    \"data_type\": \"images\",\n    \"name\": \"media_2\",\n    \"filepath\": \".\",\n    \"file_extensions\": [\".ome.tif\", \".tif\", \".tiff\"],\n    \"filename_pattern\": \"_Ch1_\",\n    \"sort_by_name\": true,\n    \"display_format\": \"Gray\",\n    \"recursive_search\": false\n  }\n]",
+    "objectID": "user_guide/data_loading/index.html#spatial-data",
+    "href": "user_guide/data_loading/index.html#spatial-data",
+    "title": "Data Loading",
+    "section": "Spatial Data",
+    "text": "Spatial Data\nSpatial data represents locations and shapes over time, typically overlaid on video.\n\n\n\nType\nDescription\nCommon Sources\nReference\n\n\n\n\nPoints\n(x, y) coordinates per frame\nDeepLabCut, SLEAP, manual annotation\nPoint Loading\n\n\nLines\nOrdered sequences of points\nWhisker trackers, contour detection\nLine Loading\n\n\nMasks\nBinary regions per frame\nSegmentation models, ROI tools\nMask Loading",
     "crumbs": [
-      "Data Loading",
-      "Image Stack Loading"
+      "Data Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/Image_Loading.html#filename-pattern-matching",
-    "href": "user_guide/data_loading/Image_Loading.html#filename-pattern-matching",
-    "title": "Image Stack Loading",
-    "section": "Filename Pattern Matching",
-    "text": "Filename Pattern Matching\nThe filename_pattern field accepts regex patterns that are searched within each filename:\n\n\n\n\n\n\n\n\nPattern\nDescription\nExample Match\n\n\n\n\n_Ch1_\nContains “Ch1”\nexp_Ch1_001.tif\n\n\ngreen\nContains “green”\nmouse_green_0001.tif\n\n\ntrial[0-9]+\nContains “trial” followed by digits\nexp_trial42.tif\n\n\n^frame_\nStarts with “frame_”\nframe_0001.tif\n\n\n\n\n\n\n\n\n\nWarningCase Sensitivity\n\n\n\nRegex patterns are case-sensitive. _Ch1_ will not match _ch1_.",
+    "objectID": "user_guide/data_loading/index.html#time-series-data",
+    "href": "user_guide/data_loading/index.html#time-series-data",
+    "title": "Data Loading",
+    "section": "Time Series Data",
+    "text": "Time Series Data\nContinuous and discrete signals recorded alongside behavior.\n\n\n\nType\nDescription\nCommon Sources\nReference\n\n\n\n\nAnalog Time Series\nContinuous signals\nElectrophysiology, sensor data\nAnalog Loading\n\n\nDigital Events\nPoint events in time\nSpike times, behavioral markers\nEvent Loading\n\n\nDigital Intervals\nTime periods (start/end)\nTrial epochs, stimulus periods\nInterval Loading",
     "crumbs": [
-      "Data Loading",
-      "Image Stack Loading"
+      "Data Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/Image_Loading.html#display-formats",
-    "href": "user_guide/data_loading/Image_Loading.html#display-formats",
-    "title": "Image Stack Loading",
-    "section": "Display Formats",
-    "text": "Display Formats\n\n\n\nFormat\nDescription\nUse Case\n\n\n\n\n\"Gray\"\nSingle-channel grayscale\nFluorescence imaging\n\n\n\"Color\"\nRGBA color\nBrightfield, histology",
+    "objectID": "user_guide/data_loading/index.html#multi-dimensional-data",
+    "href": "user_guide/data_loading/index.html#multi-dimensional-data",
+    "title": "Data Loading",
+    "section": "Multi-dimensional Data",
+    "text": "Multi-dimensional Data\n\n\n\nType\nDescription\nCommon Sources\nReference\n\n\n\n\nTensors\nN-dimensional arrays\nNeural network outputs, multi-channel data\nTensor Loading",
     "crumbs": [
-      "Data Loading",
-      "Image Stack Loading"
+      "Data Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/Image_Loading.html#technical-details",
-    "href": "user_guide/data_loading/Image_Loading.html#technical-details",
-    "title": "Image Stack Loading",
-    "section": "Technical Details",
-    "text": "Technical Details\n\nFile Discovery\nWhen loading images:\n\nDirectory is scanned for files matching specified extensions\nIf filename_pattern is provided, files are filtered by regex match\nIf sort_by_name is true, files are sorted alphabetically\nSorted file list determines frame order\n\n\n\nMemory Management\nOnly the current frame is loaded into memory. Large datasets with thousands of frames are handled efficiently.\n\n\nBit Depth Handling\n\n8-bit images: Displayed directly (0-255 range)\n16-bit images: Normalized to display range while preserving underlying data",
+    "objectID": "user_guide/data_loading/index.html#json-configuration-loading",
+    "href": "user_guide/data_loading/index.html#json-configuration-loading",
+    "title": "Data Loading",
+    "section": "JSON Configuration Loading",
+    "text": "JSON Configuration Loading\nFor reproducible analysis workflows, define all data loading in a JSON file:\n[\n  {\n    \"filepath\": \"experiment.mp4\",\n    \"data_type\": \"video\",\n    \"name\": \"media\"\n  },\n  {\n    \"filepath\": \"tracking.csv\",\n    \"data_type\": \"point\",\n    \"name\": \"nose\"\n  },\n  {\n    \"filepath\": \"trials.csv\",\n    \"data_type\": \"digital_interval\",\n    \"name\": \"stimulus_on\"\n  }\n]\nSee JSON Loading Reference for complete documentation on all supported formats and options.",
     "crumbs": [
-      "Data Loading",
-      "Image Stack Loading"
+      "Data Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/Image_Loading.html#programmatic-access",
-    "href": "user_guide/data_loading/Image_Loading.html#programmatic-access",
-    "title": "Image Stack Loading",
-    "section": "Programmatic Access",
-    "text": "Programmatic Access\nFor developers:\n#include \"Media/IO/Image_Data_Loader.hpp\"\n\nImageLoaderOptions opts;\nopts.directory_path = \"path/to/images\";\nopts.file_extensions = {\".tif\", \".tiff\"};\nopts.filename_pattern = \"_Ch2_\";\nopts.sort_by_name = true;\nopts.display_format = MediaData::DisplayFormat::Gray;\n\nauto image_data = load(opts);\n\n// Access frame count\nint total_frames = image_data-&gt;getTotalFrameCount();",
+    "objectID": "user_guide/data_loading/index.html#how-to-guides",
+    "href": "user_guide/data_loading/index.html#how-to-guides",
+    "title": "Data Loading",
+    "section": "How-To Guides",
+    "text": "How-To Guides\nStep-by-step guides for common data import tasks:\n\nHow to Import Video - Video loading with B-frame handling\nHow to Import Image Stacks - 2P imaging and multi-channel image sequences\nHow to Load Tabular Binary Events - Import digital intervals from DAQ data",
     "crumbs": [
-      "Data Loading",
-      "Image Stack Loading"
+      "Data Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/Image_Loading.html#related-topics",
-    "href": "user_guide/data_loading/Image_Loading.html#related-topics",
-    "title": "Image Stack Loading",
-    "section": "Related Topics",
-    "text": "Related Topics\n\nHow to Import Image Stacks - Step-by-step guide with examples\nJSON Loading Reference - Complete JSON configuration options\nVideo Loading - Loading video files\nMedia Viewer Overview - Working with loaded media",
+    "objectID": "user_guide/data_loading/index.html#getting-started",
+    "href": "user_guide/data_loading/index.html#getting-started",
+    "title": "Data Loading",
+    "section": "Getting Started",
+    "text": "Getting Started\n\nSingle video analysis: Use File → Load Data to select your video\nMulti-modal experiments: Create a JSON configuration file referencing all your data files\nReproducible workflows: Save your JSON configuration alongside your data for easy re-loading",
     "crumbs": [
-      "Data Loading",
-      "Image Stack Loading"
+      "Data Loading"
     ]
   },
   {
-    "objectID": "user_guide/behaviors/whisker.html",
-    "href": "user_guide/behaviors/whisker.html",
-    "title": "Whisker Tracking",
+    "objectID": "user_guide/data_loading/Event_Loading.html",
+    "href": "user_guide/data_loading/Event_Loading.html",
+    "title": "Event Loading",
     "section": "",
-    "text": "Load Whiskers\n\nSupported Whisker File Formats\n\n\n\n\n\n\nFile Format\nDescription\n\n\n\n\nJanelia\nBinary format output by janelia whisker tracker\n\n\nCSV\nEach row represents a 2d point (x,y) along the whisker. The points should be arranged from follicle to tip\n\n\nHDF5\n\n\n\n\n\n\nLoad Keypoints\n\n\nTrace Button\n\n\nLength Threshold\nWhisker segments below the length threshold will be discarded. Length threshold is in units of pixels\n\n\nWhisker Pad Selection\nThe whisker pad location in pixel coordinates. Candidate whiskers are ordered so that the base of the whisker is nearest the whisker pad. Whiskers with bases beyond some distance from the whisker pad can also be discarded.\n\n\nHead Orientation\nThe head orientation is the direction that the animal’s nose is pointing in the image. The head orientation is used to determine the identity of the whiskers in the frame (most posterior whisker is 0, next most posterior is 1, etc).\n\n\nNumber of Whiskers Selection\n\n\nExport Image and CSV Button\n\n\nFace Mask\nThe face mask corresponds to the part of the image belonging to the face. This can be used in several ways\n\nWhisker bases can be extended to always connect to the face mask. This eliminates jitter that can occur because of fur\nWhisker bases can be clipped to ensure that the whisker does not enter the face mask.\n\n\n\nJanelia Settings\n\n\nContact Detection",
+    "text": "Digital event series stores timestamped events (for example spike times, lick onsets, cue onsets).\nSupported event formats:\n\n\n\n\n\n\n\n\nFormat\nTypical Source\nAvailable In\n\n\n\n\ncsv\nEvent timestamp tables\nData Import Widget and JSON\n\n\nbinary / uint16\nTTL bit extraction from packed words\nJSON workflows\n\n\nhdf5\nTime array + event indicator array\nJSON workflows\n\n\n\n\n\n\n\n\n\nNoteJSON Data Type Name\n\n\n\nUse \"data_type\": \"digital_event\" in JSON.",
+    "crumbs": [
+      "Data Loading",
+      "Event Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Event_Loading.html#overview",
+    "href": "user_guide/data_loading/Event_Loading.html#overview",
+    "title": "Event Loading",
+    "section": "",
+    "text": "Digital event series stores timestamped events (for example spike times, lick onsets, cue onsets).\nSupported event formats:\n\n\n\n\n\n\n\n\nFormat\nTypical Source\nAvailable In\n\n\n\n\ncsv\nEvent timestamp tables\nData Import Widget and JSON\n\n\nbinary / uint16\nTTL bit extraction from packed words\nJSON workflows\n\n\nhdf5\nTime array + event indicator array\nJSON workflows\n\n\n\n\n\n\n\n\n\nNoteJSON Data Type Name\n\n\n\nUse \"data_type\": \"digital_event\" in JSON.",
+    "crumbs": [
+      "Data Loading",
+      "Event Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Event_Loading.html#data-import-widget",
+    "href": "user_guide/data_loading/Event_Loading.html#data-import-widget",
+    "title": "Event Loading",
+    "section": "Data Import Widget",
+    "text": "Data Import Widget\nOpen Modules -&gt; Data Import, choose Digital Event Series.\nCurrent widget mode focuses on CSV:\n\nfile path\ndelimiter\nheader toggle\nevent column\noptional identifier column (to split into multiple series)",
+    "crumbs": [
+      "Data Loading",
+      "Event Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Event_Loading.html#json-csv-events-format-csv",
+    "href": "user_guide/data_loading/Event_Loading.html#json-csv-events-format-csv",
+    "title": "Event Loading",
+    "section": "JSON: CSV Events (format: \"csv\")",
+    "text": "JSON: CSV Events (format: \"csv\")\n\nSingle-series CSV\n{\n  \"filepath\": \"events/reward_times.csv\",\n  \"data_type\": \"digital_event\",\n  \"name\": \"reward\",\n  \"format\": \"csv\",\n  \"event_column\": 0,\n  \"has_header\": true,\n  \"delimiter\": \",\"\n}\n\n\nMulti-series CSV using identifiers\n{\n  \"filepath\": \"events/behavior_events.csv\",\n  \"data_type\": \"digital_event\",\n  \"name\": \"behavior\",\n  \"format\": \"csv\",\n  \"event_column\": 1,\n  \"identifier_column\": 0,\n  \"base_name\": \"behavior\",\n  \"has_header\": true,\n  \"delimiter\": \",\"\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\nevent_column\nNo\ninteger\n0\n0-based event timestamp column\n\n\nidentifier_column\nNo\ninteger\n-1\n0-based grouping column (-1 disables grouping)\n\n\nlabel_column\nNo\ninteger\n-\nAlias for identifier_column\n\n\nbase_name\nNo\nstring\n\"events\"\nPrefix used for generated series names\n\n\ndelimiter\nNo\nstring\n\",\"\nColumn delimiter\n\n\nhas_header\nNo\nboolean\nfalse\nSkip first row when true\n\n\nscale\nNo\nnumber\n1.0\nMultiply timestamps before integer conversion\n\n\nscale_divide\nNo\nboolean\nfalse\nIf true, divide timestamps by scale\n\n\nclock\nNo\nstring\n\"time\"\nAssigns this data to an existing TimeFrame\n\n\n\n\n\n\n\n\n\nTip\n\n\n\nWith identifier_column &gt;= 0, batch loading creates one DigitalEventSeries per unique identifier.",
+    "crumbs": [
+      "Data Loading",
+      "Event Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Event_Loading.html#json-binary-ttl-events-format-binary-or-uint16",
+    "href": "user_guide/data_loading/Event_Loading.html#json-binary-ttl-events-format-binary-or-uint16",
+    "title": "Event Loading",
+    "section": "JSON: Binary TTL Events (format: \"binary\" or \"uint16\")",
+    "text": "JSON: Binary TTL Events (format: \"binary\" or \"uint16\")\n{\n  \"filepath\": \"daq/ttl.bin\",\n  \"data_type\": \"digital_event\",\n  \"name\": \"laser_onsets\",\n  \"format\": \"binary\",\n  \"channel\": 2,\n  \"transition\": \"rising\",\n  \"header_size\": 0,\n  \"channel_count\": 1\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\nchannel\nYes\ninteger\n-\nBit index to extract\n\n\ntransition\nYes\nstring\n-\n\"rising\" or \"falling\" edge events\n\n\nheader_size\nNo\ninteger\n0\nBytes to skip at file start\n\n\nchannel_count\nNo\ninteger\n1\nInterleaved channel count in binary file",
+    "crumbs": [
+      "Data Loading",
+      "Event Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Event_Loading.html#json-hdf5-events-format-hdf5",
+    "href": "user_guide/data_loading/Event_Loading.html#json-hdf5-events-format-hdf5",
+    "title": "Event Loading",
+    "section": "JSON: HDF5 Events (format: \"hdf5\")",
+    "text": "JSON: HDF5 Events (format: \"hdf5\")\n{\n  \"filepath\": \"daq/events.h5\",\n  \"data_type\": \"digital_event\",\n  \"name\": \"reward\",\n  \"format\": \"hdf5\",\n  \"time_key\": \"time_s\",\n  \"event_key\": \"reward_binary\",\n  \"scale\": 30000.0,\n  \"scale_divide\": false\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\ntime_key\nYes\nstring\n-\nDataset path for event time values\n\n\nevent_key\nYes\nstring\n-\nDataset path for 0/1 event indicator values\n\n\nscale\nNo\nnumber\n1.0\nMultiply (or divide) times before integer conversion\n\n\nscale_divide\nNo\nboolean\nfalse\nIf true, divide by scale instead of multiply",
+    "crumbs": [
+      "Data Loading",
+      "Event Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Event_Loading.html#related",
+    "href": "user_guide/data_loading/Event_Loading.html#related",
+    "title": "Event Loading",
+    "section": "Related",
+    "text": "Related\n\nEvent Plot Widget\nData Loading Overview",
+    "crumbs": [
+      "Data Loading",
+      "Event Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_inspectors/tensor_inspector.html",
+    "href": "user_guide/data_inspectors/tensor_inspector.html",
+    "title": "Tensor Inspector",
+    "section": "",
+    "text": "The Tensor Inspector allows you to view and manipulate multi-dimensional array data (Tensors).",
+    "crumbs": [
+      "Data Inspectors",
+      "Tensor Inspector"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_inspectors/tensor_inspector.html#overview",
+    "href": "user_guide/data_inspectors/tensor_inspector.html#overview",
+    "title": "Tensor Inspector",
+    "section": "Overview",
+    "text": "Overview\nTensors in this toolbox are flexible containers that can hold various types of data in a tabular or multi-dimensional format. The Tensor Inspector provides tools to:\n\nView tensor contents.\nDesign new tensor columns using the Tensor Designer.",
+    "crumbs": [
+      "Data Inspectors",
+      "Tensor Inspector"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_inspectors/tensor_inspector.html#integration-with-transform-widget",
+    "href": "user_guide/data_inspectors/tensor_inspector.html#integration-with-transform-widget",
+    "title": "Tensor Inspector",
+    "section": "Integration with Transform Widget",
+    "text": "Integration with Transform Widget\nThe Tensor Inspector works closely with the Transform Widget. You can define a transformation pipeline to generate data for a specific column in a tensor.\n\nColumn Population: Use a transformation pipeline to calculate values for a column based on other data.\nLazy Evaluation: Some tensor columns can be calculated on-the-fly using these pipelines.",
+    "crumbs": [
+      "Data Inspectors",
+      "Tensor Inspector"
+    ]
+  },
+  {
+    "objectID": "user_guide/behaviors/tongue.html",
+    "href": "user_guide/behaviors/tongue.html",
+    "title": "Tongue Tracking",
+    "section": "",
+    "text": "The Tongue Tracking widget deals with operations related to the tongue.",
     "crumbs": [
       "Behavioral Modules",
-      "Whisker Tracking"
+      "Tongue Tracking"
     ]
   },
   {
-    "objectID": "user_guide/acquisition_systems/spikesorter.html",
-    "href": "user_guide/acquisition_systems/spikesorter.html",
-    "title": "SpikeSorter",
+    "objectID": "user_guide/behaviors/tongue.html#loading",
+    "href": "user_guide/behaviors/tongue.html#loading",
+    "title": "Tongue Tracking",
+    "section": "Loading",
+    "text": "Loading\nTongue masks can be loaded through the sparse HDF5 format or binary images (where white is part of the mask, black is not).\nJaw keypoint tracking can also be loaded through CSV format. The first column should indicate frame number, the next indicating \\(x\\) position and the next \\(y\\) position.",
+    "crumbs": [
+      "Behavioral Modules",
+      "Tongue Tracking"
+    ]
+  },
+  {
+    "objectID": "user_guide/behaviors/tongue.html#grabcut-tool",
+    "href": "user_guide/behaviors/tongue.html#grabcut-tool",
+    "title": "Tongue Tracking",
+    "section": "GrabCut Tool",
+    "text": "GrabCut Tool\nDocumentation on the GrabCut tool can be found here.",
+    "crumbs": [
+      "Behavioral Modules",
+      "Tongue Tracking"
+    ]
+  },
+  {
+    "objectID": "user_guide/acquisition_systems/openephys.html",
+    "href": "user_guide/acquisition_systems/openephys.html",
+    "title": "OpenEphys",
     "section": "",
-    "text": "SpikeSorter is a software used for spike sorting. It outputs spike timestamps in a CSV file format.",
+    "text": "Instructions for loading data from OpenEphys acquisition systems.",
     "crumbs": [
       "Acquisition Systems",
-      "SpikeSorter"
+      "OpenEphys"
     ]
   },
   {
-    "objectID": "user_guide/acquisition_systems/spikesorter.html#file-format",
-    "href": "user_guide/acquisition_systems/spikesorter.html#file-format",
-    "title": "SpikeSorter",
-    "section": "File Format",
-    "text": "File Format\nThe output file is a CSV with the following columns: 1. Time: The time of the event in seconds. 2. Spike ID: The identifier for the spike. 3. Channel: The channel with the highest amplitude during this event.",
+    "objectID": "user_guide/acquisition_systems/intan.html",
+    "href": "user_guide/acquisition_systems/intan.html",
+    "title": "Intan",
+    "section": "",
+    "text": "Intan Technologies acquisition systems are commonly used for electrophysiology. The system saves data in several files, with amplifier.dat and digitalin.dat being the primary files for analog and digital data, respectively.",
     "crumbs": [
       "Acquisition Systems",
-      "SpikeSorter"
+      "Intan"
     ]
   },
   {
-    "objectID": "user_guide/acquisition_systems/spikesorter.html#loading-data",
-    "href": "user_guide/acquisition_systems/spikesorter.html#loading-data",
-    "title": "SpikeSorter",
+    "objectID": "user_guide/acquisition_systems/intan.html#file-formats",
+    "href": "user_guide/acquisition_systems/intan.html#file-formats",
+    "title": "Intan",
+    "section": "File Formats",
+    "text": "File Formats\n\namplifier.dat\nThe amplifier.dat file contains the analog data from the amplifier channels. - Format: 2D array of int16 values. - Organization: Time-major (all channels at t=0, then all channels at t=1, etc.). - Conversion: The values be converted to microvolts using a bit resolution of 0.196 µV/bit. - Sampling Rate: Typically 30 kHz.\n\n\ndigitalin.dat\nThe digitalin.dat file contains digital input data. - Format: Binary file with one uint16 value per sampling tick. - Content: Each bit of the uint16 value represents a high (1) or low (0) state for a specific digital input channel.",
+    "crumbs": [
+      "Acquisition Systems",
+      "Intan"
+    ]
+  },
+  {
+    "objectID": "user_guide/acquisition_systems/intan.html#loading-data",
+    "href": "user_guide/acquisition_systems/intan.html#loading-data",
+    "title": "Intan",
     "section": "Loading Data",
-    "text": "Loading Data\nTo load the spike data as a digital_event series:\n{\n    \"filepath\": \"spikes.csv\",\n    \"data_type\": \"digital_event\",\n    \"name\": \"spikes\",\n    \"format\": \"csv\",\n    \"scale\": 30000,\n    \"identifier_column\": 1,\n    \"clock\": \"master\"\n}",
+    "text": "Loading Data\nData can be loaded using JSON configuration objects. Below are examples for common loading scenarios.\n\nLoading Analog Time Series\nTo load amplifier.dat as an analog time series:\n{\n    \"filepath\": \"amplifier.dat\",\n    \"data_type\": \"analog\",\n    \"name\": \"voltage\",\n    \"format\": \"int16\",\n    \"header_size\": 0,\n    \"channel_count\": 32,\n    \"clock\": \"master\",\n    \"use_memory_mapped\": true\n}\n\n\nLoading Digital Interval Series\nTo load a specific digital input (e.g., channel 0) as a series of intervals:\n{\n    \"filepath\": \"digitalin.dat\",\n    \"data_type\": \"digital_interval\",\n    \"name\": \"pico\",\n    \"format\": \"uint16\",\n    \"channel\": 0,\n    \"transition\": \"rising\",\n    \"clock\": \"master\",\n    \"header_size\": 0\n}\n\n\nCreating a TimeFrame from Digital Input\nIf a digital input represents a time reference (e.g., channel 1):\n{\n    \"filepath\": \"digitalin.dat\",\n    \"data_type\": \"time\",\n    \"name\": \"time\",\n    \"format\": \"uint16\",\n    \"channel\": 1,\n    \"transition\": \"rising\"\n}\n\n\nCreating a TimeFrame from Total Samples\nTo create a TimeFrame based on the total number of samples in the file:\n{\n    \"filepath\": \"digitalin.dat\",\n    \"data_type\": \"time\",\n    \"name\": \"master\",\n    \"format\": \"uint16_length\"\n}",
     "crumbs": [
       "Acquisition Systems",
-      "SpikeSorter"
+      "Intan"
     ]
   },
   {
-    "objectID": "user_guide/acquisition_systems/labjack.html",
-    "href": "user_guide/acquisition_systems/labjack.html",
-    "title": "LabJack",
+    "objectID": "user_guide/acquisition_systems/image_stacks.html",
+    "href": "user_guide/acquisition_systems/image_stacks.html",
+    "title": "Image Stacks",
     "section": "",
-    "text": "Instructions for loading data from LabJack acquisition systems.",
+    "text": "Instructions for loading image stacks.",
     "crumbs": [
       "Acquisition Systems",
-      "LabJack"
+      "Image Stacks"
     ]
   },
   {
-    "objectID": "user_guide/acquisition_systems/index.html",
-    "href": "user_guide/acquisition_systems/index.html",
-    "title": "Acquisition Systems",
+    "objectID": "user_guide/acquisition_systems/generic_binary.html",
+    "href": "user_guide/acquisition_systems/generic_binary.html",
+    "title": "Generic Binary",
     "section": "",
-    "text": "This section provides guides for loading data from specific acquisition systems and generic data formats.",
+    "text": "Instructions for loading generic binary data.",
     "crumbs": [
-      "Acquisition Systems"
+      "Acquisition Systems",
+      "Generic Binary"
     ]
   },
   {
-    "objectID": "user_guide/acquisition_systems/generic_hdf5.html",
-    "href": "user_guide/acquisition_systems/generic_hdf5.html",
-    "title": "Generic HDF5",
+    "objectID": "learning-resources/tutorials/using_deep_learning.html",
+    "href": "learning-resources/tutorials/using_deep_learning.html",
+    "title": "Using Deep Learning",
     "section": "",
-    "text": "Instructions for loading generic HDF5 data.",
+    "text": "This tutorial walks through a practical NeuroSAM workflow in the Deep Learning widget.\nGoal: use the memory attention pathway so your model sees:\n\ndynamic input from current media frames,\nstatic memory inputs from one labeled reference frame (memory image + memory mask),\noutputs written to a mask feature in real time.",
     "crumbs": [
-      "Acquisition Systems",
-      "Generic HDF5"
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
     ]
   },
   {
-    "objectID": "user_guide/acquisition_systems/doric.html",
-    "href": "user_guide/acquisition_systems/doric.html",
-    "title": "Doric",
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#overview",
+    "href": "learning-resources/tutorials/using_deep_learning.html#overview",
+    "title": "Using Deep Learning",
     "section": "",
-    "text": "Instructions for loading data from Doric acquisition systems.",
+    "text": "This tutorial walks through a practical NeuroSAM workflow in the Deep Learning widget.\nGoal: use the memory attention pathway so your model sees:\n\ndynamic input from current media frames,\nstatic memory inputs from one labeled reference frame (memory image + memory mask),\noutputs written to a mask feature in real time.",
     "crumbs": [
-      "Acquisition Systems",
-      "Doric"
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#prerequisites",
+    "href": "learning-resources/tutorials/using_deep_learning.html#prerequisites",
+    "title": "Using Deep Learning",
+    "section": "Prerequisites",
+    "text": "Prerequisites\n\nA media source is loaded (video or image stack) and visible in Media Viewer.\nYou can open View -&gt; Analysis -&gt; Deep Learning.\nYou have a NeuroSAM-compatible weights file.\nYou have (or can create) a mask feature for output.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-1-create-and-label-the-memory-mask",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-1-create-and-label-the-memory-mask",
+    "title": "Using Deep Learning",
+    "section": "Step 1: Create and Label the Memory Mask",
+    "text": "Step 1: Create and Label the Memory Mask\n\nOpen Modules -&gt; Data Manager.\nCreate a Mask feature (or reuse an existing one).\nGo to the frame you want to use as your memory frame.\nDraw your reference mask on that frame.\n\nThis labeled frame is your memory-mask anchor for the memory attention module.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-2-open-deep-learning-and-select-device-model",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-2-open-deep-learning-and-select-device-model",
+    "title": "Using Deep Learning",
+    "section": "Step 2: Open Deep Learning and Select Device + Model",
+    "text": "Step 2: Open Deep Learning and Select Device + Model\n\nOpen View -&gt; Analysis -&gt; Deep Learning.\nIn Device, choose:\n\nGPU (CUDA) for speed, or\nCPU if needed.\n\nIn Model, select NeuroSAM.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-3-load-and-validate-weights",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-3-load-and-validate-weights",
+    "title": "Using Deep Learning",
+    "section": "Step 3: Load and Validate Weights",
+    "text": "Step 3: Load and Validate Weights\n\nIn Weights, click Browse… and select your weights file.\nConfirm the status becomes Loaded & validated.\n\nIf status is not validated, do not run inference yet.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-4-configure-dynamic-input-media",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-4-configure-dynamic-input-media",
+    "title": "Using Deep Learning",
+    "section": "Step 4: Configure Dynamic Input (Media)",
+    "text": "Step 4: Configure Dynamic Input (Media)\nFor dynamic image input (usually encoder_image):\n\nset Source to your media key (typically media).\n\nDynamic inputs should come from media so each inference uses the current frame.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-5-configure-memory_images-static-input",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-5-configure-memory_images-static-input",
+    "title": "Using Deep Learning",
+    "section": "Step 5: Configure memory_images Static Input",
+    "text": "Step 5: Configure memory_images Static Input\nFor memory_images:\n\nSet Source to the same media key (usually media).\nSet Capture Mode to Absolute.\nNavigate to your memory frame.\nClick Capture Current Frame.\n\n\n\n\n\n\n\nWarningKnown Capture Bug Workaround\n\n\n\nSometimes Absolute capture records frame 0 even when you are on a different frame.\nIf that happens:\n\nMove forward one frame.\nMove back to your memory frame.\nCapture again.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-6-configure-memory_masks-static-input",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-6-configure-memory_masks-static-input",
+    "title": "Using Deep Learning",
+    "section": "Step 6: Configure memory_masks Static Input",
+    "text": "Step 6: Configure memory_masks Static Input\nFor memory_masks:\n\nSet Source to the mask feature containing your memory label.\nSet Capture Mode to Absolute.\nNavigate to the same memory frame you used for memory_images.\nClick Capture Current Frame.\n\nImportant: memory_images and memory_masks should be captured at the same frame.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-7-configure-output-target-and-batch-size",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-7-configure-output-target-and-batch-size",
+    "title": "Using Deep Learning",
+    "section": "Step 7: Configure Output Target and Batch Size",
+    "text": "Step 7: Configure Output Target and Batch Size\nUnder output settings:\n\nSet Target to either:\n\na new mask object, or\nthe same mask object that already contains your memory frame.\n\nSet Batch Size if your model supports it.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-8-run-inference",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-8-run-inference",
+    "title": "Using Deep Learning",
+    "section": "Step 8: Run Inference",
+    "text": "Step 8: Run Inference\n\nSingle specific frame\n\nEnter a frame number in the Frame box.\nClick Run Frame.\n\n\n\nCurrent frame in timeline\n\nClick Current to run on the frame you are currently viewing.\n\n\n\nFrame ranges\n\nClick Run Batch.\nChoose either:\n\nManual range, then set start/end frames, or\nFrom interval series, then choose which interval source defines your ranges.\n\n\nYou can use interval data to drive batch inference only over selected epochs.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#what-happens-after-you-click-run",
+    "href": "learning-resources/tutorials/using_deep_learning.html#what-happens-after-you-click-run",
+    "title": "Using Deep Learning",
+    "section": "What Happens After You Click Run",
+    "text": "What Happens After You Click Run\nInference executes on a background thread. As frames complete, predictions are written to your output mask key, and you can watch results appear in real time.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#troubleshooting",
+    "href": "learning-resources/tutorials/using_deep_learning.html#troubleshooting",
+    "title": "Using Deep Learning",
+    "section": "Troubleshooting",
+    "text": "Troubleshooting\n\nShape mismatch error\nIf you get a shape mismatch error, the model was likely not exported as a compatible AOTI package for your environment.\nUse the AOTI export workflow first, then retry inference:\n\nHow-To: Exporting an AOTI Encoder Model\n\n\n\nStatic memory capture issues\n\nEnsure memory_images and memory_masks both use Absolute mode.\nEnsure both were captured at the same memory frame.\nIf capture keeps showing frame 0, use the forward/back recapture workaround above.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#see-also",
+    "href": "learning-resources/tutorials/using_deep_learning.html#see-also",
+    "title": "Using Deep Learning",
+    "section": "See Also",
+    "text": "See Also\n\nDeep Learning Widget\nMask Labeling\nKeypoint Video Labeling\nTimeFrame",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
     ]
   },
   {
@@ -2293,7 +2650,7 @@
     "href": "getting-started.html#download",
     "title": "Getting Started",
     "section": "1. Download",
-    "text": "1. Download\nThe latest version of Neuralyzer is available on our GitHub Releases page.\nDownload Latest Release\nSelect the appropriate file for your operating system:\n\nWindows: Neuralyzer-Windows-x64.zip\nmacOS: Neuralyzer-macOS.dmg\nLinux: Neuralyzer-Linux.tar.gz"
+    "text": "1. Download\nThe latest version of Neuralyzer is available on our GitHub Releases page.\nDownload Latest Release\nSelect the appropriate file for your operating system:\n\nWindows: Neuralyzer-Windows-x64.zip\nmacOS: Neuralyzer-macOS.dmg\nLinux: Neuralyzer-Linux.tar.gz\n\nGPU builds are provided as separate release files and use the suffix _gpu."
   },
   {
     "objectID": "getting-started.html#install-run",
@@ -17660,6 +18017,18 @@
     ]
   },
   {
+    "objectID": "examples/image_stack_import.html#align-image-filenames-with-keypoints-time-master-timeframes",
+    "href": "examples/image_stack_import.html#align-image-filenames-with-keypoints-time-master-timeframes",
+    "title": "How to Import Image Stacks",
+    "section": "Align Image Filenames with Keypoints (time + master TimeFrames)",
+    "text": "Align Image Filenames with Keypoints (time + master TimeFrames)\nIf your image filenames encode frame identity (for example frame_10452.tif) and your keypoint table uses the same frame identity, do not rely on row order alone.\nUse explicit TimeFrames so keypoints map to the filename-derived frame IDs.\n\nStep 1: Create time and master from image filenames\nCreate a sparse time TimeFrame using only values found in filenames, plus a dense master TimeFrame covering the full range.\n[\n  {\n    \"data_type\": \"time\",\n    \"name\": \"time\",\n    \"filepath\": \"imaging\",\n    \"format\": \"filename\",\n    \"file_extension\": \".tif\",\n    \"regex_pattern\": \"frame_(\\\\d+)\\\\.tif$\",\n    \"mode\": \"found_values\",\n    \"sort_ascending\": true\n  },\n  {\n    \"data_type\": \"time\",\n    \"name\": \"master\",\n    \"filepath\": \"imaging\",\n    \"format\": \"filename\",\n    \"file_extension\": \".tif\",\n    \"regex_pattern\": \"frame_(\\\\d+)\\\\.tif$\",\n    \"mode\": \"min_to_max\",\n    \"sort_ascending\": true\n  }\n]\n\n\nStep 2: Load images and keypoints onto the same clock\nAssign both the image stack and point data to time so keypoint frame IDs align to filename-extracted IDs (not just row position).\n[\n  {\n    \"data_type\": \"images\",\n    \"name\": \"media\",\n    \"filepath\": \"imaging\",\n    \"file_extensions\": [\".tif\"],\n    \"sort_by_name\": true,\n    \"display_format\": \"Gray\",\n    \"clock\": \"time\"\n  },\n  {\n    \"data_type\": \"point\",\n    \"name\": \"jaw_keypoint\",\n    \"filepath\": \"keypoints.csv\",\n    \"format\": \"csv\",\n    \"frame_column\": 0,\n    \"x_column\": 1,\n    \"y_column\": 2,\n    \"column_delim\": \",\",\n    \"clock\": \"time\"\n  }\n]\nExpected keypoint CSV format:\nframe_id,x,y\n10452,312.4,188.0\n10453,313.1,187.6\n\n\n\n\n\n\nImportantFrame Column Requirement\n\n\n\nPoint CSV loading expects an integer frame column. If your keypoint rows contain full filenames (for example frame_10452.tif), extract the numeric ID first using the same regex logic you used for the TimeFrame (frame_(\\d+)\\.tif$).\n\n\n\n\n\n\n\n\nNoteWhen to Use master\n\n\n\nUse time for exact filename-ID mapping. Use master when you also need a dense, continuous timeline (for example when combining imaging with other streams).\n\n\n\n\nComplete Example: Image Stack + Keypoints with Filename IDs\n[\n  {\n    \"data_type\": \"time\",\n    \"name\": \"time\",\n    \"filepath\": \"imaging\",\n    \"format\": \"filename\",\n    \"file_extension\": \".tif\",\n    \"regex_pattern\": \"frame_(\\\\d+)\\\\.tif$\",\n    \"mode\": \"found_values\",\n    \"sort_ascending\": true\n  },\n  {\n    \"data_type\": \"time\",\n    \"name\": \"master\",\n    \"filepath\": \"imaging\",\n    \"format\": \"filename\",\n    \"file_extension\": \".tif\",\n    \"regex_pattern\": \"frame_(\\\\d+)\\\\.tif$\",\n    \"mode\": \"min_to_max\",\n    \"sort_ascending\": true\n  },\n  {\n    \"data_type\": \"images\",\n    \"name\": \"media\",\n    \"filepath\": \"imaging\",\n    \"file_extensions\": [\".tif\"],\n    \"sort_by_name\": true,\n    \"display_format\": \"Gray\",\n    \"clock\": \"time\"\n  },\n  {\n    \"data_type\": \"point\",\n    \"name\": \"nose_tip\",\n    \"filepath\": \"tracking_keypoints.csv\",\n    \"format\": \"csv\",\n    \"frame_column\": 0,\n    \"x_column\": 1,\n    \"y_column\": 2,\n    \"column_delim\": \",\",\n    \"clock\": \"time\"\n  }\n]",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Image Stack Import"
+    ]
+  },
+  {
     "objectID": "examples/image_stack_import.html#troubleshooting",
     "href": "examples/image_stack_import.html#troubleshooting",
     "title": "How to Import Image Stacks",
@@ -18423,6 +18792,18 @@
     ]
   },
   {
+    "objectID": "learning-resources/tutorials/mask_labeling.html#full-video",
+    "href": "learning-resources/tutorials/mask_labeling.html#full-video",
+    "title": "Tutorial: Mask Labeling",
+    "section": "Full Video",
+    "text": "Full Video\nWatch the complete mask labeling workflow:\n\n\nYour browser does not support the video tag. You can download the video here: tongue_mask.mp4.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Mask Labeling"
+    ]
+  },
+  {
     "objectID": "learning-resources/tutorials/mask_labeling.html#prerequisites",
     "href": "learning-resources/tutorials/mask_labeling.html#prerequisites",
     "title": "Tutorial: Mask Labeling",
@@ -18639,235 +19020,508 @@
     ]
   },
   {
-    "objectID": "user_guide/acquisition_systems/generic_binary.html",
-    "href": "user_guide/acquisition_systems/generic_binary.html",
-    "title": "Generic Binary",
+    "objectID": "user_guide/acquisition_systems/doric.html",
+    "href": "user_guide/acquisition_systems/doric.html",
+    "title": "Doric",
     "section": "",
-    "text": "Instructions for loading generic binary data.",
+    "text": "Instructions for loading data from Doric acquisition systems.",
     "crumbs": [
       "Acquisition Systems",
-      "Generic Binary"
+      "Doric"
     ]
   },
   {
-    "objectID": "user_guide/acquisition_systems/image_stacks.html",
-    "href": "user_guide/acquisition_systems/image_stacks.html",
-    "title": "Image Stacks",
+    "objectID": "user_guide/acquisition_systems/generic_hdf5.html",
+    "href": "user_guide/acquisition_systems/generic_hdf5.html",
+    "title": "Generic HDF5",
     "section": "",
-    "text": "Instructions for loading image stacks.",
+    "text": "Instructions for loading generic HDF5 data.",
     "crumbs": [
       "Acquisition Systems",
-      "Image Stacks"
+      "Generic HDF5"
     ]
   },
   {
-    "objectID": "user_guide/acquisition_systems/intan.html",
-    "href": "user_guide/acquisition_systems/intan.html",
-    "title": "Intan",
+    "objectID": "user_guide/acquisition_systems/index.html",
+    "href": "user_guide/acquisition_systems/index.html",
+    "title": "Acquisition Systems",
     "section": "",
-    "text": "Intan Technologies acquisition systems are commonly used for electrophysiology. The system saves data in several files, with amplifier.dat and digitalin.dat being the primary files for analog and digital data, respectively.",
+    "text": "This section provides guides for loading data from specific acquisition systems and generic data formats.",
     "crumbs": [
-      "Acquisition Systems",
-      "Intan"
+      "Acquisition Systems"
     ]
   },
   {
-    "objectID": "user_guide/acquisition_systems/intan.html#file-formats",
-    "href": "user_guide/acquisition_systems/intan.html#file-formats",
-    "title": "Intan",
-    "section": "File Formats",
-    "text": "File Formats\n\namplifier.dat\nThe amplifier.dat file contains the analog data from the amplifier channels. - Format: 2D array of int16 values. - Organization: Time-major (all channels at t=0, then all channels at t=1, etc.). - Conversion: The values be converted to microvolts using a bit resolution of 0.196 µV/bit. - Sampling Rate: Typically 30 kHz.\n\n\ndigitalin.dat\nThe digitalin.dat file contains digital input data. - Format: Binary file with one uint16 value per sampling tick. - Content: Each bit of the uint16 value represents a high (1) or low (0) state for a specific digital input channel.",
+    "objectID": "user_guide/acquisition_systems/labjack.html",
+    "href": "user_guide/acquisition_systems/labjack.html",
+    "title": "LabJack",
+    "section": "",
+    "text": "Instructions for loading data from LabJack acquisition systems.",
     "crumbs": [
       "Acquisition Systems",
-      "Intan"
+      "LabJack"
     ]
   },
   {
-    "objectID": "user_guide/acquisition_systems/intan.html#loading-data",
-    "href": "user_guide/acquisition_systems/intan.html#loading-data",
-    "title": "Intan",
+    "objectID": "user_guide/acquisition_systems/spikesorter.html",
+    "href": "user_guide/acquisition_systems/spikesorter.html",
+    "title": "SpikeSorter",
+    "section": "",
+    "text": "SpikeSorter is a software used for spike sorting. It outputs spike timestamps in a CSV file format.",
+    "crumbs": [
+      "Acquisition Systems",
+      "SpikeSorter"
+    ]
+  },
+  {
+    "objectID": "user_guide/acquisition_systems/spikesorter.html#file-format",
+    "href": "user_guide/acquisition_systems/spikesorter.html#file-format",
+    "title": "SpikeSorter",
+    "section": "File Format",
+    "text": "File Format\nThe output file is a CSV with the following columns: 1. Time: The time of the event in seconds. 2. Spike ID: The identifier for the spike. 3. Channel: The channel with the highest amplitude during this event.",
+    "crumbs": [
+      "Acquisition Systems",
+      "SpikeSorter"
+    ]
+  },
+  {
+    "objectID": "user_guide/acquisition_systems/spikesorter.html#loading-data",
+    "href": "user_guide/acquisition_systems/spikesorter.html#loading-data",
+    "title": "SpikeSorter",
     "section": "Loading Data",
-    "text": "Loading Data\nData can be loaded using JSON configuration objects. Below are examples for common loading scenarios.\n\nLoading Analog Time Series\nTo load amplifier.dat as an analog time series:\n{\n    \"filepath\": \"amplifier.dat\",\n    \"data_type\": \"analog\",\n    \"name\": \"voltage\",\n    \"format\": \"int16\",\n    \"header_size\": 0,\n    \"channel_count\": 32,\n    \"clock\": \"master\",\n    \"use_memory_mapped\": true\n}\n\n\nLoading Digital Interval Series\nTo load a specific digital input (e.g., channel 0) as a series of intervals:\n{\n    \"filepath\": \"digitalin.dat\",\n    \"data_type\": \"digital_interval\",\n    \"name\": \"pico\",\n    \"format\": \"uint16\",\n    \"channel\": 0,\n    \"transition\": \"rising\",\n    \"clock\": \"master\",\n    \"header_size\": 0\n}\n\n\nCreating a TimeFrame from Digital Input\nIf a digital input represents a time reference (e.g., channel 1):\n{\n    \"filepath\": \"digitalin.dat\",\n    \"data_type\": \"time\",\n    \"name\": \"time\",\n    \"format\": \"uint16\",\n    \"channel\": 1,\n    \"transition\": \"rising\"\n}\n\n\nCreating a TimeFrame from Total Samples\nTo create a TimeFrame based on the total number of samples in the file:\n{\n    \"filepath\": \"digitalin.dat\",\n    \"data_type\": \"time\",\n    \"name\": \"master\",\n    \"format\": \"uint16_length\"\n}",
+    "text": "Loading Data\nTo load the spike data as a digital_event series:\n{\n    \"filepath\": \"spikes.csv\",\n    \"data_type\": \"digital_event\",\n    \"name\": \"spikes\",\n    \"format\": \"csv\",\n    \"scale\": 30000,\n    \"identifier_column\": 1,\n    \"clock\": \"master\"\n}",
     "crumbs": [
       "Acquisition Systems",
-      "Intan"
+      "SpikeSorter"
     ]
   },
   {
-    "objectID": "user_guide/acquisition_systems/openephys.html",
-    "href": "user_guide/acquisition_systems/openephys.html",
-    "title": "OpenEphys",
+    "objectID": "user_guide/behaviors/whisker.html",
+    "href": "user_guide/behaviors/whisker.html",
+    "title": "Whisker Tracking",
     "section": "",
-    "text": "Instructions for loading data from OpenEphys acquisition systems.",
-    "crumbs": [
-      "Acquisition Systems",
-      "OpenEphys"
-    ]
-  },
-  {
-    "objectID": "user_guide/behaviors/tongue.html",
-    "href": "user_guide/behaviors/tongue.html",
-    "title": "Tongue Tracking",
-    "section": "",
-    "text": "The Tongue Tracking widget deals with operations related to the tongue.",
+    "text": "Load Whiskers\n\nSupported Whisker File Formats\n\n\n\n\n\n\nFile Format\nDescription\n\n\n\n\nJanelia\nBinary format output by janelia whisker tracker\n\n\nCSV\nEach row represents a 2d point (x,y) along the whisker. The points should be arranged from follicle to tip\n\n\nHDF5\n\n\n\n\n\n\nLoad Keypoints\n\n\nTrace Button\n\n\nLength Threshold\nWhisker segments below the length threshold will be discarded. Length threshold is in units of pixels\n\n\nWhisker Pad Selection\nThe whisker pad location in pixel coordinates. Candidate whiskers are ordered so that the base of the whisker is nearest the whisker pad. Whiskers with bases beyond some distance from the whisker pad can also be discarded.\n\n\nHead Orientation\nThe head orientation is the direction that the animal’s nose is pointing in the image. The head orientation is used to determine the identity of the whiskers in the frame (most posterior whisker is 0, next most posterior is 1, etc).\n\n\nNumber of Whiskers Selection\n\n\nExport Image and CSV Button\n\n\nFace Mask\nThe face mask corresponds to the part of the image belonging to the face. This can be used in several ways\n\nWhisker bases can be extended to always connect to the face mask. This eliminates jitter that can occur because of fur\nWhisker bases can be clipped to ensure that the whisker does not enter the face mask.\n\n\n\nJanelia Settings\n\n\nContact Detection",
     "crumbs": [
       "Behavioral Modules",
-      "Tongue Tracking"
+      "Whisker Tracking"
     ]
   },
   {
-    "objectID": "user_guide/behaviors/tongue.html#loading",
-    "href": "user_guide/behaviors/tongue.html#loading",
-    "title": "Tongue Tracking",
-    "section": "Loading",
-    "text": "Loading\nTongue masks can be loaded through the sparse HDF5 format or binary images (where white is part of the mask, black is not).\nJaw keypoint tracking can also be loaded through CSV format. The first column should indicate frame number, the next indicating \\(x\\) position and the next \\(y\\) position.",
-    "crumbs": [
-      "Behavioral Modules",
-      "Tongue Tracking"
-    ]
-  },
-  {
-    "objectID": "user_guide/behaviors/tongue.html#grabcut-tool",
-    "href": "user_guide/behaviors/tongue.html#grabcut-tool",
-    "title": "Tongue Tracking",
-    "section": "GrabCut Tool",
-    "text": "GrabCut Tool\nDocumentation on the GrabCut tool can be found here.",
-    "crumbs": [
-      "Behavioral Modules",
-      "Tongue Tracking"
-    ]
-  },
-  {
-    "objectID": "user_guide/data_inspectors/tensor_inspector.html",
-    "href": "user_guide/data_inspectors/tensor_inspector.html",
-    "title": "Tensor Inspector",
+    "objectID": "user_guide/data_loading/Analog_Loading.html",
+    "href": "user_guide/data_loading/Analog_Loading.html",
+    "title": "Analog Loading",
     "section": "",
-    "text": "The Tensor Inspector allows you to view and manipulate multi-dimensional array data (Tensors).",
+    "text": "Analog time series stores continuous-valued samples over time (for example LFP, photometry, force sensors, motion energy).\nSupported analog formats:\n\n\n\n\n\n\n\n\nFormat\nTypical Source\nAvailable In\n\n\n\n\ncsv\nSingle-column or time/value table\nData Import Widget and JSON\n\n\nbinary\nRaw interleaved channels\nData Import Widget (build-dependent) and JSON\n\n\nhdf5\nTime/value datasets in HDF5\nJSON workflows\n\n\n\n\n\n\n\n\n\nNoteJSON Data Type Name\n\n\n\nUse \"data_type\": \"analog\" in JSON.",
     "crumbs": [
-      "Data Inspectors",
-      "Tensor Inspector"
+      "Data Loading",
+      "Analog Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_inspectors/tensor_inspector.html#overview",
-    "href": "user_guide/data_inspectors/tensor_inspector.html#overview",
-    "title": "Tensor Inspector",
-    "section": "Overview",
-    "text": "Overview\nTensors in this toolbox are flexible containers that can hold various types of data in a tabular or multi-dimensional format. The Tensor Inspector provides tools to:\n\nView tensor contents.\nDesign new tensor columns using the Tensor Designer.",
-    "crumbs": [
-      "Data Inspectors",
-      "Tensor Inspector"
-    ]
-  },
-  {
-    "objectID": "user_guide/data_inspectors/tensor_inspector.html#integration-with-transform-widget",
-    "href": "user_guide/data_inspectors/tensor_inspector.html#integration-with-transform-widget",
-    "title": "Tensor Inspector",
-    "section": "Integration with Transform Widget",
-    "text": "Integration with Transform Widget\nThe Tensor Inspector works closely with the Transform Widget. You can define a transformation pipeline to generate data for a specific column in a tensor.\n\nColumn Population: Use a transformation pipeline to calculate values for a column based on other data.\nLazy Evaluation: Some tensor columns can be calculated on-the-fly using these pipelines.",
-    "crumbs": [
-      "Data Inspectors",
-      "Tensor Inspector"
-    ]
-  },
-  {
-    "objectID": "user_guide/data_loading/index.html",
-    "href": "user_guide/data_loading/index.html",
-    "title": "Data Loading",
+    "objectID": "user_guide/data_loading/Analog_Loading.html#overview",
+    "href": "user_guide/data_loading/Analog_Loading.html#overview",
+    "title": "Analog Loading",
     "section": "",
-    "text": "Neuralyzer supports loading diverse data types commonly used in systems neuroscience experiments. This section covers all data import methods and formats.\nData can be loaded through:\n\nData Import Widget - Unified interface for importing all data types via Modules → Data Import\nJSON configuration files - Reproducible, scriptable data loading for batch workflows",
+    "text": "Analog time series stores continuous-valued samples over time (for example LFP, photometry, force sensors, motion energy).\nSupported analog formats:\n\n\n\n\n\n\n\n\nFormat\nTypical Source\nAvailable In\n\n\n\n\ncsv\nSingle-column or time/value table\nData Import Widget and JSON\n\n\nbinary\nRaw interleaved channels\nData Import Widget (build-dependent) and JSON\n\n\nhdf5\nTime/value datasets in HDF5\nJSON workflows\n\n\n\n\n\n\n\n\n\nNoteJSON Data Type Name\n\n\n\nUse \"data_type\": \"analog\" in JSON.",
     "crumbs": [
-      "Data Loading"
+      "Data Loading",
+      "Analog Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/index.html#overview",
-    "href": "user_guide/data_loading/index.html#overview",
-    "title": "Data Loading",
+    "objectID": "user_guide/data_loading/Analog_Loading.html#data-import-widget",
+    "href": "user_guide/data_loading/Analog_Loading.html#data-import-widget",
+    "title": "Analog Loading",
+    "section": "Data Import Widget",
+    "text": "Data Import Widget\nOpen Modules -&gt; Data Import, choose Analog Time Series.\n\nCSV mode\n\nSelect file\nChoose delimiter\nChoose one-column or two-column layout\nIf two-column, set time and data column indices\n\n\n\nBinary mode\n\nSelect file\nSet header_size, num_channels, sample type, and scaling options\nOptional memory-mapped mode for large files",
+    "crumbs": [
+      "Data Loading",
+      "Analog Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Analog_Loading.html#json-csv-analog-format-csv",
+    "href": "user_guide/data_loading/Analog_Loading.html#json-csv-analog-format-csv",
+    "title": "Analog Loading",
+    "section": "JSON: CSV Analog (format: \"csv\")",
+    "text": "JSON: CSV Analog (format: \"csv\")\n\nSingle-column CSV\n{\n  \"filepath\": \"ephys/lfp.csv\",\n  \"data_type\": \"analog\",\n  \"name\": \"lfp\",\n  \"format\": \"csv\",\n  \"single_column_format\": true,\n  \"delimiter\": \",\",\n  \"has_header\": false\n}\n\n\nTwo-column CSV (time + value)\n{\n  \"filepath\": \"ephys/lfp_time_value.csv\",\n  \"data_type\": \"analog\",\n  \"name\": \"lfp\",\n  \"format\": \"csv\",\n  \"single_column_format\": false,\n  \"time_column\": 0,\n  \"data_column\": 1,\n  \"delimiter\": \",\",\n  \"has_header\": true\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\nsingle_column_format\nNo\nboolean\ntrue\ntrue: first column is value and row index is time\n\n\ndelimiter\nNo\nstring\n\",\"\nColumn delimiter\n\n\nhas_header\nNo\nboolean\nfalse\nSkip first row when true\n\n\ntime_column\nNo\ninteger\n0\nTime column when single_column_format is false\n\n\ndata_column\nNo\ninteger\n1\nValue column when single_column_format is false\n\n\nclock\nNo\nstring\n\"time\"\nAssigns this data to an existing TimeFrame",
+    "crumbs": [
+      "Data Loading",
+      "Analog Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Analog_Loading.html#json-binary-analog-format-binary",
+    "href": "user_guide/data_loading/Analog_Loading.html#json-binary-analog-format-binary",
+    "title": "Analog Loading",
+    "section": "JSON: Binary Analog (format: \"binary\")",
+    "text": "JSON: Binary Analog (format: \"binary\")\n{\n  \"filepath\": \"ephys/amplifier.dat\",\n  \"data_type\": \"analog\",\n  \"name\": \"amplifier\",\n  \"format\": \"binary\",\n  \"header_size\": 0,\n  \"num_channels\": 32,\n  \"binary_data_type\": \"int16\",\n  \"use_memory_mapped\": true,\n  \"offset\": 0,\n  \"stride\": 1,\n  \"scale_factor\": 1.0,\n  \"offset_value\": 0.0,\n  \"num_samples\": 0\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\nheader_size\nNo\ninteger\n0\nBytes to skip at file start\n\n\nnum_channels\nNo\ninteger\n1\nInterleaved channel count\n\n\nbinary_data_type\nNo\nstring\n\"int16\"\nOne of: int8, int16, uint16, float32, float64\n\n\nuse_memory_mapped\nNo\nboolean\nfalse\nEnables memory-mapped loading path\n\n\noffset\nNo\ninteger\n0\nStarting element offset (memory-mapped path)\n\n\nstride\nNo\ninteger\n1\nSample stride (memory-mapped path)\n\n\nscale_factor\nNo\nnumber\n1.0\nMultiplicative sample scaling (memory-mapped path)\n\n\noffset_value\nNo\nnumber\n0.0\nAdditive sample offset (memory-mapped path)\n\n\nnum_samples\nNo\ninteger\n0\nMax samples per channel (0 means all)\n\n\n\n\n\n\n\n\n\nTip\n\n\n\nWhen num_channels &gt; 1, JSON batch loading creates one series per channel with names like name_0, name_1, and so on.",
+    "crumbs": [
+      "Data Loading",
+      "Analog Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Analog_Loading.html#json-hdf5-analog-format-hdf5",
+    "href": "user_guide/data_loading/Analog_Loading.html#json-hdf5-analog-format-hdf5",
+    "title": "Analog Loading",
+    "section": "JSON: HDF5 Analog (format: \"hdf5\")",
+    "text": "JSON: HDF5 Analog (format: \"hdf5\")\n{\n  \"filepath\": \"ephys/signals.h5\",\n  \"data_type\": \"analog\",\n  \"name\": \"lfp\",\n  \"format\": \"hdf5\",\n  \"time_key\": \"time_s\",\n  \"value_key\": \"lfp\",\n  \"scale\": 30000.0,\n  \"scale_divide\": false\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\ntime_key\nYes\nstring\n-\nDataset path containing time values\n\n\nvalue_key\nYes\nstring\n-\nDataset path containing analog values\n\n\nscale\nNo\nnumber\n1.0\nMultiply (or divide) times before integer conversion\n\n\nscale_divide\nNo\nboolean\nfalse\nIf true, divide by scale instead of multiply",
+    "crumbs": [
+      "Data Loading",
+      "Analog Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Analog_Loading.html#related",
+    "href": "user_guide/data_loading/Analog_Loading.html#related",
+    "title": "Analog Loading",
+    "section": "Related",
+    "text": "Related\n\nData Viewer Overview\nData Loading Overview",
+    "crumbs": [
+      "Data Loading",
+      "Analog Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Image_Loading.html",
+    "href": "user_guide/data_loading/Image_Loading.html",
+    "title": "Image Stack Loading",
     "section": "",
-    "text": "Neuralyzer supports loading diverse data types commonly used in systems neuroscience experiments. This section covers all data import methods and formats.\nData can be loaded through:\n\nData Import Widget - Unified interface for importing all data types via Modules → Data Import\nJSON configuration files - Reproducible, scriptable data loading for batch workflows",
+    "text": "Image stacks are sequences of image files that Neuralyzer treats as frame-by-frame media, similar to video. This is the standard data format for two-photon microscopy, widefield calcium imaging, and other scientific imaging modalities.\n\n\n\n\n\n\nTipHow-To Guide\n\n\n\nFor step-by-step instructions including multi-channel loading and filename patterns, see How to Import Image Stacks.",
     "crumbs": [
-      "Data Loading"
+      "Data Loading",
+      "Image Stack Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/index.html#using-the-data-import-widget",
-    "href": "user_guide/data_loading/index.html#using-the-data-import-widget",
-    "title": "Data Loading",
-    "section": "Using the Data Import Widget",
-    "text": "Using the Data Import Widget\nThe Data Import Widget provides a unified interface for loading all supported data types. Access it via Modules → Data Import from the main menu.\n\nFeatures\n\nType Selection: Choose the data type you want to import (Lines, Masks, Points, Analog, Events, Intervals, Tensors)\nFormat Selection: Each data type supports multiple file formats (CSV, HDF5, Binary, LMDB, etc.)\nPreview: Many loaders show a preview of the data before importing\nScaling Options: Apply coordinate scaling for spatial data types\nState Persistence: The widget remembers your last used directory and format preferences\n\n\n\nWorkflow\n\nOpen the widget via Modules → Data Import\nSelect your data type from the dropdown\nChoose the appropriate file format\nConfigure format-specific options (columns, datasets, scaling)\nClick “Import” to load the data into the DataManager\n\n\n\n\n\n\n\nTipPassive Type Awareness\n\n\n\nWhen you select a data object in the DataManager, the Data Import Widget automatically switches to show the appropriate import options for that data type.",
+    "objectID": "user_guide/data_loading/Image_Loading.html#overview",
+    "href": "user_guide/data_loading/Image_Loading.html#overview",
+    "title": "Image Stack Loading",
+    "section": "",
+    "text": "Image stacks are sequences of image files that Neuralyzer treats as frame-by-frame media, similar to video. This is the standard data format for two-photon microscopy, widefield calcium imaging, and other scientific imaging modalities.\n\n\n\n\n\n\nTipHow-To Guide\n\n\n\nFor step-by-step instructions including multi-channel loading and filename patterns, see How to Import Image Stacks.",
     "crumbs": [
-      "Data Loading"
+      "Data Loading",
+      "Image Stack Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/index.html#media-data",
-    "href": "user_guide/data_loading/index.html#media-data",
-    "title": "Data Loading",
-    "section": "Media Data",
-    "text": "Media Data\nMedia provides the visual backdrop for data visualization and annotation.\n\n\n\nType\nDescription\nFormats\nReference\n\n\n\n\nVideo\nFrame-by-frame video files\n.mp4, .avi, .mov\nVideo Loading\n\n\nImage Stacks\nSequence of image files\n.tif, .png, .jpg\nImage Loading\n\n\nHDF5\nHierarchical data with image arrays\n.h5, .hdf5, .mat\n—\n\n\n\n\n\n\n\n\n\nTipMedia Import How-To Guides\n\n\n\n\nVideo: See How to Import Video for a complete walkthrough including troubleshooting B-frame issues.\nImage Stacks: See How to Import Image Stacks for loading 2P imaging data and multi-channel stacks.",
+    "objectID": "user_guide/data_loading/Image_Loading.html#supported-formats",
+    "href": "user_guide/data_loading/Image_Loading.html#supported-formats",
+    "title": "Image Stack Loading",
+    "section": "Supported Formats",
+    "text": "Supported Formats\nNeuralyzer uses OpenCV for image loading:\n\n\n\nFormat\nExtensions\nBit Depth\n\n\n\n\nTIFF\n.tif, .tiff, .ome.tif\n8-bit, 16-bit\n\n\nPNG\n.png\n8-bit, 16-bit\n\n\nJPEG\n.jpg, .jpeg\n8-bit\n\n\nBMP\n.bmp\n8-bit\n\n\n\n\n\n\n\n\n\nNote16-bit Support\n\n\n\nTIFF and PNG formats support 16-bit images common in scientific imaging. Neuralyzer automatically detects bit depth and normalizes display accordingly.",
     "crumbs": [
-      "Data Loading"
+      "Data Loading",
+      "Image Stack Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/index.html#spatial-data",
-    "href": "user_guide/data_loading/index.html#spatial-data",
-    "title": "Data Loading",
-    "section": "Spatial Data",
-    "text": "Spatial Data\nSpatial data represents locations and shapes over time, typically overlaid on video.\n\n\n\nType\nDescription\nCommon Sources\nReference\n\n\n\n\nPoints\n(x, y) coordinates per frame\nDeepLabCut, SLEAP, manual annotation\nPoint Loading\n\n\nLines\nOrdered sequences of points\nWhisker trackers, contour detection\nLine Loading\n\n\nMasks\nBinary regions per frame\nSegmentation models, ROI tools\nMask Loading",
+    "objectID": "user_guide/data_loading/Image_Loading.html#loading-methods",
+    "href": "user_guide/data_loading/Image_Loading.html#loading-methods",
+    "title": "Image Stack Loading",
+    "section": "Loading Methods",
+    "text": "Loading Methods\n\nGUI: File Menu\nLoad images through the application menu:\nFile → Load Data → Select any image file → Open\nNeuralyzer loads all images with matching extensions in the same directory.\n\n\nJSON Configuration\nFor reproducible workflows with filtering and multi-channel support:\n{\n  \"data_type\": \"images\",\n  \"name\": \"media\",\n  \"filepath\": \"imaging_data\",\n  \"file_extensions\": [\".tif\", \".tiff\"],\n  \"filename_pattern\": \"_Ch2_\",\n  \"sort_by_name\": true,\n  \"display_format\": \"Gray\",\n  \"recursive_search\": false\n}\nLoad via File → Load JSON Configuration.",
     "crumbs": [
-      "Data Loading"
+      "Data Loading",
+      "Image Stack Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/index.html#time-series-data",
-    "href": "user_guide/data_loading/index.html#time-series-data",
-    "title": "Data Loading",
-    "section": "Time Series Data",
-    "text": "Time Series Data\nContinuous and discrete signals recorded alongside behavior.\n\n\n\nType\nDescription\nCommon Sources\nReference\n\n\n\n\nAnalog Time Series\nContinuous signals\nElectrophysiology, sensor data\n—\n\n\nDigital Events\nPoint events in time\nSpike times, behavioral markers\n—\n\n\nDigital Intervals\nTime periods (start/end)\nTrial epochs, stimulus periods\nJSON Loading",
+    "objectID": "user_guide/data_loading/Image_Loading.html#json-configuration-reference",
+    "href": "user_guide/data_loading/Image_Loading.html#json-configuration-reference",
+    "title": "Image Stack Loading",
+    "section": "JSON Configuration Reference",
+    "text": "JSON Configuration Reference\n\nImage Data Type\n\n\n\n\n\n\n\n\n\n\nElement\nDescription\nRequired?\nType\nDefault\n\n\n\n\ndata_type\nMust be \"images\"\nYes\nstring\n—\n\n\nname\nIdentifier for this data in Neuralyzer\nYes\nstring\n—\n\n\nfilepath\nDirectory containing images, relative to JSON\nYes\nstring\n—\n\n\nfile_extensions\nArray of extensions to include\nNo\narray\n[\".png\", \".jpg\", \".jpeg\"]\n\n\nfilename_pattern\nRegex pattern to filter filenames\nNo\nstring\n\"\" (all files)\n\n\nsort_by_name\nSort files alphabetically by name\nNo\nboolean\ntrue\n\n\ndisplay_format\n\"Gray\" or \"Color\"\nNo\nstring\n\"Color\"\n\n\nrecursive_search\nInclude subdirectories in search\nNo\nboolean\nfalse\n\n\n\n\n\nMulti-Channel Example\nLoad two-photon imaging data with separate channels:\n[\n  {\n    \"data_type\": \"images\",\n    \"name\": \"media\",\n    \"filepath\": \".\",\n    \"file_extensions\": [\".ome.tif\", \".tif\", \".tiff\"],\n    \"filename_pattern\": \"_Ch2_\",\n    \"sort_by_name\": true,\n    \"display_format\": \"Gray\",\n    \"recursive_search\": false\n  },\n  {\n    \"data_type\": \"images\",\n    \"name\": \"media_2\",\n    \"filepath\": \".\",\n    \"file_extensions\": [\".ome.tif\", \".tif\", \".tiff\"],\n    \"filename_pattern\": \"_Ch1_\",\n    \"sort_by_name\": true,\n    \"display_format\": \"Gray\",\n    \"recursive_search\": false\n  }\n]",
     "crumbs": [
-      "Data Loading"
+      "Data Loading",
+      "Image Stack Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/index.html#multi-dimensional-data",
-    "href": "user_guide/data_loading/index.html#multi-dimensional-data",
-    "title": "Data Loading",
-    "section": "Multi-dimensional Data",
-    "text": "Multi-dimensional Data\n\n\n\nType\nDescription\nCommon Sources\nReference\n\n\n\n\nTensors\nN-dimensional arrays\nNeural network outputs, multi-channel data\nTensor Loading",
+    "objectID": "user_guide/data_loading/Image_Loading.html#filename-pattern-matching",
+    "href": "user_guide/data_loading/Image_Loading.html#filename-pattern-matching",
+    "title": "Image Stack Loading",
+    "section": "Filename Pattern Matching",
+    "text": "Filename Pattern Matching\nThe filename_pattern field accepts regex patterns that are searched within each filename:\n\n\n\n\n\n\n\n\nPattern\nDescription\nExample Match\n\n\n\n\n_Ch1_\nContains “Ch1”\nexp_Ch1_001.tif\n\n\ngreen\nContains “green”\nmouse_green_0001.tif\n\n\ntrial[0-9]+\nContains “trial” followed by digits\nexp_trial42.tif\n\n\n^frame_\nStarts with “frame_”\nframe_0001.tif\n\n\n\n\n\n\n\n\n\nWarningCase Sensitivity\n\n\n\nRegex patterns are case-sensitive. _Ch1_ will not match _ch1_.",
     "crumbs": [
-      "Data Loading"
+      "Data Loading",
+      "Image Stack Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/index.html#json-configuration-loading",
-    "href": "user_guide/data_loading/index.html#json-configuration-loading",
-    "title": "Data Loading",
-    "section": "JSON Configuration Loading",
-    "text": "JSON Configuration Loading\nFor reproducible analysis workflows, define all data loading in a JSON file:\n[\n  {\n    \"filepath\": \"experiment.mp4\",\n    \"data_type\": \"video\",\n    \"name\": \"media\"\n  },\n  {\n    \"filepath\": \"tracking.csv\",\n    \"data_type\": \"point\",\n    \"name\": \"nose\"\n  },\n  {\n    \"filepath\": \"trials.csv\",\n    \"data_type\": \"digital_interval\",\n    \"name\": \"stimulus_on\"\n  }\n]\nSee JSON Loading Reference for complete documentation on all supported formats and options.",
+    "objectID": "user_guide/data_loading/Image_Loading.html#display-formats",
+    "href": "user_guide/data_loading/Image_Loading.html#display-formats",
+    "title": "Image Stack Loading",
+    "section": "Display Formats",
+    "text": "Display Formats\n\n\n\nFormat\nDescription\nUse Case\n\n\n\n\n\"Gray\"\nSingle-channel grayscale\nFluorescence imaging\n\n\n\"Color\"\nRGBA color\nBrightfield, histology",
     "crumbs": [
-      "Data Loading"
+      "Data Loading",
+      "Image Stack Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/index.html#how-to-guides",
-    "href": "user_guide/data_loading/index.html#how-to-guides",
-    "title": "Data Loading",
-    "section": "How-To Guides",
-    "text": "How-To Guides\nStep-by-step guides for common data import tasks:\n\nHow to Import Video - Video loading with B-frame handling\nHow to Import Image Stacks - 2P imaging and multi-channel image sequences\nHow to Load Tabular Binary Events - Import digital intervals from DAQ data",
+    "objectID": "user_guide/data_loading/Image_Loading.html#technical-details",
+    "href": "user_guide/data_loading/Image_Loading.html#technical-details",
+    "title": "Image Stack Loading",
+    "section": "Technical Details",
+    "text": "Technical Details\n\nFile Discovery\nWhen loading images:\n\nDirectory is scanned for files matching specified extensions\nIf filename_pattern is provided, files are filtered by regex match\nIf sort_by_name is true, files are sorted alphabetically\nSorted file list determines frame order\n\n\n\nMemory Management\nOnly the current frame is loaded into memory. Large datasets with thousands of frames are handled efficiently.\n\n\nBit Depth Handling\n\n8-bit images: Displayed directly (0-255 range)\n16-bit images: Normalized to display range while preserving underlying data",
     "crumbs": [
-      "Data Loading"
+      "Data Loading",
+      "Image Stack Loading"
     ]
   },
   {
-    "objectID": "user_guide/data_loading/index.html#getting-started",
-    "href": "user_guide/data_loading/index.html#getting-started",
-    "title": "Data Loading",
-    "section": "Getting Started",
-    "text": "Getting Started\n\nSingle video analysis: Use File → Load Data to select your video\nMulti-modal experiments: Create a JSON configuration file referencing all your data files\nReproducible workflows: Save your JSON configuration alongside your data for easy re-loading",
+    "objectID": "user_guide/data_loading/Image_Loading.html#programmatic-access",
+    "href": "user_guide/data_loading/Image_Loading.html#programmatic-access",
+    "title": "Image Stack Loading",
+    "section": "Programmatic Access",
+    "text": "Programmatic Access\nFor developers:\n#include \"Media/IO/Image_Data_Loader.hpp\"\n\nImageLoaderOptions opts;\nopts.directory_path = \"path/to/images\";\nopts.file_extensions = {\".tif\", \".tiff\"};\nopts.filename_pattern = \"_Ch2_\";\nopts.sort_by_name = true;\nopts.display_format = MediaData::DisplayFormat::Gray;\n\nauto image_data = load(opts);\n\n// Access frame count\nint total_frames = image_data-&gt;getTotalFrameCount();",
     "crumbs": [
-      "Data Loading"
+      "Data Loading",
+      "Image Stack Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Image_Loading.html#related-topics",
+    "href": "user_guide/data_loading/Image_Loading.html#related-topics",
+    "title": "Image Stack Loading",
+    "section": "Related Topics",
+    "text": "Related Topics\n\nHow to Import Image Stacks - Step-by-step guide with examples\nJSON Loading Reference - Complete JSON configuration options\nVideo Loading - Loading video files\nMedia Viewer Overview - Working with loaded media",
+    "crumbs": [
+      "Data Loading",
+      "Image Stack Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Interval_Loading.html",
+    "href": "user_guide/data_loading/Interval_Loading.html",
+    "title": "Interval Loading",
+    "section": "",
+    "text": "Digital interval series stores start/end periods (for example stimulus windows, trial epochs, contact bouts).\nSupported interval formats:\n\n\n\n\n\n\n\n\nFormat\nTypical Source\nAvailable In\n\n\n\n\ncsv (start/end pairs)\nInterval tables with two columns\nData Import Widget and JSON\n\n\ncsv with csv_layout: \"binary_state\"\nTime + binary state columns (0/1)\nJSON workflows\n\n\nbinary / uint16\nTTL extraction from packed digital words\nData Import Widget (build-dependent) and JSON\n\n\n\n\n\n\n\n\n\nNoteJSON Data Type Name\n\n\n\nUse \"data_type\": \"digital_interval\" in JSON.",
+    "crumbs": [
+      "Data Loading",
+      "Interval Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Interval_Loading.html#overview",
+    "href": "user_guide/data_loading/Interval_Loading.html#overview",
+    "title": "Interval Loading",
+    "section": "",
+    "text": "Digital interval series stores start/end periods (for example stimulus windows, trial epochs, contact bouts).\nSupported interval formats:\n\n\n\n\n\n\n\n\nFormat\nTypical Source\nAvailable In\n\n\n\n\ncsv (start/end pairs)\nInterval tables with two columns\nData Import Widget and JSON\n\n\ncsv with csv_layout: \"binary_state\"\nTime + binary state columns (0/1)\nJSON workflows\n\n\nbinary / uint16\nTTL extraction from packed digital words\nData Import Widget (build-dependent) and JSON\n\n\n\n\n\n\n\n\n\nNoteJSON Data Type Name\n\n\n\nUse \"data_type\": \"digital_interval\" in JSON.",
+    "crumbs": [
+      "Data Loading",
+      "Interval Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Interval_Loading.html#data-import-widget",
+    "href": "user_guide/data_loading/Interval_Loading.html#data-import-widget",
+    "title": "Interval Loading",
+    "section": "Data Import Widget",
+    "text": "Data Import Widget\nOpen Modules -&gt; Data Import, choose Digital Interval Series.\n\nCSV mode\n\nfile path\ndelimiter\nheader toggle\nstart column\nend column\n\n\n\nBinary mode\nIf enabled in your build, widget options include:\n\nheader_size_bytes\ndata_type_bytes (1/2/4/8)\nchannel\ntransition_type (rising or falling)",
+    "crumbs": [
+      "Data Loading",
+      "Interval Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Interval_Loading.html#json-csv-startend-intervals-format-csv",
+    "href": "user_guide/data_loading/Interval_Loading.html#json-csv-startend-intervals-format-csv",
+    "title": "Interval Loading",
+    "section": "JSON: CSV Start/End Intervals (format: \"csv\")",
+    "text": "JSON: CSV Start/End Intervals (format: \"csv\")\n{\n  \"filepath\": \"behavior/trials.csv\",\n  \"data_type\": \"digital_interval\",\n  \"name\": \"trial_epochs\",\n  \"format\": \"csv\",\n  \"delimiter\": \",\",\n  \"has_header\": true,\n  \"start_column\": 0,\n  \"end_column\": 1,\n  \"clock\": \"master\"\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\ndelimiter\nNo\nstring\n\",\"\nColumn delimiter\n\n\nhas_header\nNo\nboolean\nfalse\nSkip first row when true\n\n\nstart_column\nNo\ninteger\n0\n0-based start-time column\n\n\nend_column\nNo\ninteger\n1\n0-based end-time column\n\n\nclock\nNo\nstring\n\"time\"\nAssigns this data to an existing TimeFrame",
+    "crumbs": [
+      "Data Loading",
+      "Interval Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Interval_Loading.html#json-csv-binary-state-layout-format-csv-csv_layout-binary_state",
+    "href": "user_guide/data_loading/Interval_Loading.html#json-csv-binary-state-layout-format-csv-csv_layout-binary_state",
+    "title": "Interval Loading",
+    "section": "JSON: CSV Binary-State Layout (format: \"csv\", csv_layout: \"binary_state\")",
+    "text": "JSON: CSV Binary-State Layout (format: \"csv\", csv_layout: \"binary_state\")\nUse this when each row is a time sample and each data column is a 0/1 trace.\n\nLoad one binary-state column\n{\n  \"filepath\": \"daq/events_table.dat\",\n  \"data_type\": \"digital_interval\",\n  \"name\": \"laser\",\n  \"format\": \"csv\",\n  \"csv_layout\": \"binary_state\",\n  \"header_lines_to_skip\": 5,\n  \"time_column\": 0,\n  \"data_column\": 3,\n  \"delimiter\": \"\\t\",\n  \"binary_threshold\": 0.5,\n  \"sampling_rate\": 14000.0\n}\n\n\nLoad all binary-state columns\n{\n  \"filepath\": \"daq/events_table.dat\",\n  \"data_type\": \"digital_interval\",\n  \"name\": \"channels\",\n  \"format\": \"csv\",\n  \"csv_layout\": \"binary_state\",\n  \"all_columns\": true,\n  \"header_lines_to_skip\": 5,\n  \"time_column\": 0,\n  \"delimiter\": \"\\t\",\n  \"binary_threshold\": 0.5,\n  \"sampling_rate\": 14000.0\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\ncsv_layout\nYes (for this mode)\nstring\n\"intervals\"\nMust be \"binary_state\"\n\n\nheader_lines_to_skip\nNo\ninteger\n5\nLines skipped before the header row\n\n\ntime_column\nNo\ninteger\n0\n0-based time column\n\n\ndata_column\nNo\ninteger\n1\n0-based binary-state column\n\n\ndelimiter\nNo\nstring\ntab (\"\\t\")\nColumn delimiter\n\n\nbinary_threshold\nNo\nnumber\n0.5\nValues &gt;= threshold are treated as ON\n\n\nsampling_rate\nNo\nnumber\n0.0\nMultiplier for fractional time to integer indices\n\n\nall_columns\nNo\nboolean\nfalse\nIf true, create one series per data column\n\n\n\n\n\n\n\n\n\nTip\n\n\n\nWith all_columns: true, each non-time column is loaded as a separate interval series, and output names are derived from the column headers.",
+    "crumbs": [
+      "Data Loading",
+      "Interval Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Interval_Loading.html#json-binary-ttl-intervals-format-binary-or-uint16",
+    "href": "user_guide/data_loading/Interval_Loading.html#json-binary-ttl-intervals-format-binary-or-uint16",
+    "title": "Interval Loading",
+    "section": "JSON: Binary TTL Intervals (format: \"binary\" or \"uint16\")",
+    "text": "JSON: Binary TTL Intervals (format: \"binary\" or \"uint16\")\n{\n  \"filepath\": \"daq/ttl.bin\",\n  \"data_type\": \"digital_interval\",\n  \"name\": \"laser_window\",\n  \"format\": \"binary\",\n  \"channel\": 2,\n  \"transition\": \"rising\",\n  \"header_size\": 0,\n  \"channel_count\": 1\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\nchannel\nYes\ninteger\n-\nBit index to extract\n\n\ntransition\nYes\nstring\n-\n\"rising\" or \"falling\" interval polarity\n\n\nheader_size\nNo\ninteger\n0\nBytes to skip at file start\n\n\nchannel_count\nNo\ninteger\n1\nInterleaved channel count",
+    "crumbs": [
+      "Data Loading",
+      "Interval Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Interval_Loading.html#related",
+    "href": "user_guide/data_loading/Interval_Loading.html#related",
+    "title": "Interval Loading",
+    "section": "Related",
+    "text": "Related\n\nInterval Labeling Tutorial\nHow to Load Tabular Binary Events\nData Loading Overview",
+    "crumbs": [
+      "Data Loading",
+      "Interval Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Line_Loading.html",
+    "href": "user_guide/data_loading/Line_Loading.html",
+    "title": "Line Loading",
+    "section": "",
+    "text": "Line data stores ordered point traces per frame (for example: whisker contours).\nSupported line formats:\n\n\n\n\n\n\n\n\nFormat\nTypical Source\nAvailable In\n\n\n\n\ncsv (single-file or multi-file)\nTracker output CSVs\nData Import Widget and JSON\n\n\nhdf5\nStructured line datasets\nData Import Widget and JSON\n\n\nbinary / capnp\nCapnProto serialized line files\nData Import Widget and JSON\n\n\n\n\n\n\n\n\n\nNoteJSON Data Type Name\n\n\n\nUse \"data_type\": \"line\" in JSON.",
+    "crumbs": [
+      "Data Loading",
+      "Line Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Line_Loading.html#overview",
+    "href": "user_guide/data_loading/Line_Loading.html#overview",
+    "title": "Line Loading",
+    "section": "",
+    "text": "Line data stores ordered point traces per frame (for example: whisker contours).\nSupported line formats:\n\n\n\n\n\n\n\n\nFormat\nTypical Source\nAvailable In\n\n\n\n\ncsv (single-file or multi-file)\nTracker output CSVs\nData Import Widget and JSON\n\n\nhdf5\nStructured line datasets\nData Import Widget and JSON\n\n\nbinary / capnp\nCapnProto serialized line files\nData Import Widget and JSON\n\n\n\n\n\n\n\n\n\nNoteJSON Data Type Name\n\n\n\nUse \"data_type\": \"line\" in JSON.",
+    "crumbs": [
+      "Data Loading",
+      "Line Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Line_Loading.html#data-import-widget",
+    "href": "user_guide/data_loading/Line_Loading.html#data-import-widget",
+    "title": "Line Loading",
+    "section": "Data Import Widget",
+    "text": "Data Import Widget\nOpen Modules -&gt; Data Import, choose Line Data, then select:\n\nCSV: single-file or one-file-per-frame mode\nHDF5: single file or folder pattern mode\nBinary: CapnProto binary line file\n\nThe widget also supports post-load spatial scaling.",
+    "crumbs": [
+      "Data Loading",
+      "Line Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Line_Loading.html#json-csv-single-file-lines",
+    "href": "user_guide/data_loading/Line_Loading.html#json-csv-single-file-lines",
+    "title": "Line Loading",
+    "section": "JSON: CSV Single-File Lines",
+    "text": "JSON: CSV Single-File Lines\nSingle-file CSV expects one row per frame with quoted x-list and y-list values.\nFrame,\"12.0,13.0,14.0\",\"220.5,221.0,222.1\"\n{\n    \"filepath\": \"tracking/lines.csv\",\n    \"data_type\": \"line\",\n    \"name\": \"whisker_line\",\n    \"format\": \"csv\",\n    \"multi_file\": false,\n    \"delimiter\": \",\",\n    \"coordinate_delimiter\": \",\",\n    \"has_header\": true,\n    \"header_identifier\": \"Frame\",\n    \"image_width\": 640,\n    \"image_height\": 480\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\nmulti_file\nNo\nboolean\nfalse\nfalse selects single-file parsing\n\n\ndelimiter\nNo\nstring\n\",\"\nDelimiter between frame/X/Y columns\n\n\ncoordinate_delimiter\nNo\nstring\n\",\"\nDelimiter inside quoted coordinate lists\n\n\nhas_header\nNo\nboolean\ntrue\nSkip first row if it is a header\n\n\nheader_identifier\nNo\nstring\n\"Frame\"\nHeader label used to identify frame column\n\n\nimage_width\nNo\ninteger\nnone\nOptional image width metadata\n\n\nimage_height\nNo\ninteger\nnone\nOptional image height metadata",
+    "crumbs": [
+      "Data Loading",
+      "Line Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Line_Loading.html#json-csv-multi-file-lines",
+    "href": "user_guide/data_loading/Line_Loading.html#json-csv-multi-file-lines",
+    "title": "Line Loading",
+    "section": "JSON: CSV Multi-File Lines",
+    "text": "JSON: CSV Multi-File Lines\nMulti-file mode expects one CSV per frame, where filename stem is the frame number (for example 000123.csv).\n{\n    \"filepath\": \"tracking/line_frames\",\n    \"data_type\": \"line\",\n    \"name\": \"whisker_line\",\n    \"format\": \"csv\",\n    \"multi_file\": true,\n    \"delimiter\": \",\",\n    \"x_column\": 0,\n    \"y_column\": 1,\n    \"has_header\": true\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\nfilepath\nYes\nstring\n-\nDirectory containing per-frame CSV files\n\n\nx_column\nNo\ninteger\n0\n0-based x column index\n\n\ny_column\nNo\ninteger\n1\n0-based y column index\n\n\nhas_header\nNo\nboolean\ntrue\nSkip first row in each file",
+    "crumbs": [
+      "Data Loading",
+      "Line Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Line_Loading.html#json-hdf5-lines",
+    "href": "user_guide/data_loading/Line_Loading.html#json-hdf5-lines",
+    "title": "Line Loading",
+    "section": "JSON: HDF5 Lines",
+    "text": "JSON: HDF5 Lines\n{\n    \"filepath\": \"tracking/lines.h5\",\n    \"data_type\": \"line\",\n    \"name\": \"whisker_line\",\n    \"format\": \"hdf5\",\n    \"frame_key\": \"frames\",\n    \"x_key\": \"y\",\n    \"y_key\": \"x\",\n    \"image_width\": 640,\n    \"image_height\": 480\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\nframe_key\nNo\nstring\n\"frames\"\nDataset path for frame indices\n\n\nx_key\nNo\nstring\n\"y\"\nDataset path for x values\n\n\ny_key\nNo\nstring\n\"x\"\nDataset path for y values\n\n\nimage_width\nNo\ninteger\nnone\nOptional image width metadata\n\n\nimage_height\nNo\ninteger\nnone\nOptional image height metadata\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nSome HDF5 line exports store coordinate datasets swapped (x_key = \"y\", y_key = \"x\"), which is why those are the current defaults.",
+    "crumbs": [
+      "Data Loading",
+      "Line Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Line_Loading.html#json-binary-capnproto-lines",
+    "href": "user_guide/data_loading/Line_Loading.html#json-binary-capnproto-lines",
+    "title": "Line Loading",
+    "section": "JSON: Binary CapnProto Lines",
+    "text": "JSON: Binary CapnProto Lines\n{\n    \"filepath\": \"tracking/lines.capnp\",\n    \"data_type\": \"line\",\n    \"name\": \"whisker_line\",\n    \"format\": \"binary\",\n    \"image_width\": 640,\n    \"image_height\": 480\n}\nformat may be either \"binary\" or \"capnp\" for line data.",
+    "crumbs": [
+      "Data Loading",
+      "Line Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Line_Loading.html#related",
+    "href": "user_guide/data_loading/Line_Loading.html#related",
+    "title": "Line Loading",
+    "section": "Related",
+    "text": "Related\n\nLine Operations in Media Viewer\nData Loading Overview",
+    "crumbs": [
+      "Data Loading",
+      "Line Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Point_Loading.html",
+    "href": "user_guide/data_loading/Point_Loading.html",
+    "title": "Point Loading",
+    "section": "",
+    "text": "Point data stores one \\((x, y)\\) coordinate per frame (for example: nose tip, tongue tip, whisker base).\nNeuralyzer supports two point-loading paths:\n\n\n\n\n\n\n\n\nPath\nTypical Use\nNotes\n\n\n\n\nData Import Widget\nManual import from a single CSV file\nExposes frame/x/y column mapping and delimiter selection\n\n\nJSON configuration\nReproducible or batch workflows\nSupports both simple CSV and DeepLabCut-style CSV\n\n\n\n\n\n\n\n\n\nNoteJSON Data Type Name\n\n\n\nUse \"data_type\": \"points\" in JSON.",
+    "crumbs": [
+      "Data Loading",
+      "Point Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Point_Loading.html#overview",
+    "href": "user_guide/data_loading/Point_Loading.html#overview",
+    "title": "Point Loading",
+    "section": "",
+    "text": "Point data stores one \\((x, y)\\) coordinate per frame (for example: nose tip, tongue tip, whisker base).\nNeuralyzer supports two point-loading paths:\n\n\n\n\n\n\n\n\nPath\nTypical Use\nNotes\n\n\n\n\nData Import Widget\nManual import from a single CSV file\nExposes frame/x/y column mapping and delimiter selection\n\n\nJSON configuration\nReproducible or batch workflows\nSupports both simple CSV and DeepLabCut-style CSV\n\n\n\n\n\n\n\n\n\nNoteJSON Data Type Name\n\n\n\nUse \"data_type\": \"points\" in JSON.",
+    "crumbs": [
+      "Data Loading",
+      "Point Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Point_Loading.html#data-import-widget-csv",
+    "href": "user_guide/data_loading/Point_Loading.html#data-import-widget-csv",
+    "title": "Point Loading",
+    "section": "Data Import Widget (CSV)",
+    "text": "Data Import Widget (CSV)\nOpen Modules -&gt; Data Import, choose Point Data, then load a CSV file.\nWidget options:\n\n\n\n\n\n\n\nField\nMeaning\n\n\n\n\nframe_column\n0-based column index containing frame numbers\n\n\nx_column\n0-based column index containing x coordinates\n\n\ny_column\n0-based column index containing y coordinates\n\n\ncolumn_delim\nDelimiter used to split columns (Comma or Space in the current widget)\n\n\n\n\nHeader behavior\nThe point CSV parser does not have a dedicated has_header toggle. Rows are accepted when frame_column is numeric; non-numeric frame rows are ignored.",
+    "crumbs": [
+      "Data Loading",
+      "Point Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Point_Loading.html#json-simple-csv-point-format",
+    "href": "user_guide/data_loading/Point_Loading.html#json-simple-csv-point-format",
+    "title": "Point Loading",
+    "section": "JSON: Simple CSV Point Format",
+    "text": "JSON: Simple CSV Point Format\nUse format: \"csv\" for generic frame/x/y CSV files.\n{\n    \"filepath\": \"tracking/nose.csv\",\n    \"data_type\": \"points\",\n    \"name\": \"nose_tip\",\n    \"format\": \"csv\",\n    \"frame_column\": 0,\n    \"x_column\": 1,\n    \"y_column\": 2,\n    \"column_delim\": \",\",\n    \"nan_handling\": \"Skip\"\n}\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\nfilepath\nYes\nstring\n-\nPath to CSV file\n\n\ndata_type\nYes\nstring\n-\nMust be \"points\"\n\n\nname\nYes\nstring\n-\nOutput object name\n\n\nformat\nYes\nstring\n-\n\"csv\"\n\n\nframe_column\nNo\ninteger\n0\n0-based frame column\n\n\nx_column\nNo\ninteger\n1\n0-based x column\n\n\ny_column\nNo\ninteger\n2\n0-based y column\n\n\ncolumn_delim\nNo\nstring\nspace (\" \")\nColumn delimiter (first character is used)\n\n\nnan_handling\nNo\nstring\n\"Skip\"\n\"Skip\" drops rows with NaN coordinates; \"Include\" keeps them\n\n\nclock\nNo\nstring\n\"time\"\nAssigns this data to an existing TimeFrame",
+    "crumbs": [
+      "Data Loading",
+      "Point Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Point_Loading.html#json-deeplabcut-csv-format",
+    "href": "user_guide/data_loading/Point_Loading.html#json-deeplabcut-csv-format",
+    "title": "Point Loading",
+    "section": "JSON: DeepLabCut CSV Format",
+    "text": "JSON: DeepLabCut CSV Format\nUse format: \"dlc_csv\" for DeepLabCut-style files with scorer/bodypart/coord header rows.\n\nLoad one bodypart\n{\n    \"filepath\": \"tracking/dlc_output.csv\",\n    \"data_type\": \"points\",\n    \"name\": \"tongue_tip\",\n    \"format\": \"dlc_csv\",\n    \"bodypart\": \"tongue_tip\",\n    \"frame_column\": 0,\n    \"likelihood_threshold\": 0.9\n}\n\n\nLoad all bodyparts from one file\n{\n    \"filepath\": \"tracking/dlc_output.csv\",\n    \"data_type\": \"points\",\n    \"name\": \"dlc\",\n    \"format\": \"dlc_csv\",\n    \"all_bodyparts\": true,\n    \"frame_column\": 0,\n    \"likelihood_threshold\": 0.8\n}\nWith all_bodyparts: true, one PointData object is created per bodypart.\n\n\n\n\n\n\n\n\n\n\nElement\nRequired?\nType\nDefault\nDescription\n\n\n\n\nformat\nYes\nstring\n-\n\"dlc_csv\"\n\n\nbodypart\nNo\nstring\nfirst bodypart\nSpecific bodypart to load\n\n\nall_bodyparts\nNo\nboolean\nfalse\nLoad all bodyparts as separate outputs\n\n\nframe_column\nNo\ninteger\n0\n0-based frame column\n\n\nlikelihood_threshold\nNo\nnumber\n0.0\nIgnore samples below this likelihood",
+    "crumbs": [
+      "Data Loading",
+      "Point Loading"
+    ]
+  },
+  {
+    "objectID": "user_guide/data_loading/Point_Loading.html#related",
+    "href": "user_guide/data_loading/Point_Loading.html#related",
+    "title": "Point Loading",
+    "section": "Related",
+    "text": "Related\n\nHow to Label Keypoints\nData Loading Overview",
+    "crumbs": [
+      "Data Loading",
+      "Point Loading"
     ]
   },
   {
@@ -19797,7 +20451,7 @@
     "href": "user_guide/index.html#data-loading",
     "title": "User Guide",
     "section": "Data Loading",
-    "text": "Data Loading\n\nOverview\nJSON Loading\nPoint Loading\nMask Loading\nVideo Loading\nImage Loading\nLine Loading\nTensor Loading",
+    "text": "Data Loading\n\nOverview\nJSON Loading\nPoint Loading\nMask Loading\nAnalog Loading\nEvent Loading\nInterval Loading\nVideo Loading\nImage Loading\nLine Loading\nTensor Loading",
     "crumbs": [
       "Introduction"
     ]
@@ -20566,198 +21220,6 @@
     "crumbs": [
       "Python Console",
       "Python Console"
-    ]
-  },
-  {
-    "objectID": "examples/image_stack_import.html#align-image-filenames-with-keypoints-time-master-timeframes",
-    "href": "examples/image_stack_import.html#align-image-filenames-with-keypoints-time-master-timeframes",
-    "title": "How to Import Image Stacks",
-    "section": "Align Image Filenames with Keypoints (time + master TimeFrames)",
-    "text": "Align Image Filenames with Keypoints (time + master TimeFrames)\nIf your image filenames encode frame identity (for example frame_10452.tif) and your keypoint table uses the same frame identity, do not rely on row order alone.\nUse explicit TimeFrames so keypoints map to the filename-derived frame IDs.\n\nStep 1: Create time and master from image filenames\nCreate a sparse time TimeFrame using only values found in filenames, plus a dense master TimeFrame covering the full range.\n[\n  {\n    \"data_type\": \"time\",\n    \"name\": \"time\",\n    \"filepath\": \"imaging\",\n    \"format\": \"filename\",\n    \"file_extension\": \".tif\",\n    \"regex_pattern\": \"frame_(\\\\d+)\\\\.tif$\",\n    \"mode\": \"found_values\",\n    \"sort_ascending\": true\n  },\n  {\n    \"data_type\": \"time\",\n    \"name\": \"master\",\n    \"filepath\": \"imaging\",\n    \"format\": \"filename\",\n    \"file_extension\": \".tif\",\n    \"regex_pattern\": \"frame_(\\\\d+)\\\\.tif$\",\n    \"mode\": \"min_to_max\",\n    \"sort_ascending\": true\n  }\n]\n\n\nStep 2: Load images and keypoints onto the same clock\nAssign both the image stack and point data to time so keypoint frame IDs align to filename-extracted IDs (not just row position).\n[\n  {\n    \"data_type\": \"images\",\n    \"name\": \"media\",\n    \"filepath\": \"imaging\",\n    \"file_extensions\": [\".tif\"],\n    \"sort_by_name\": true,\n    \"display_format\": \"Gray\",\n    \"clock\": \"time\"\n  },\n  {\n    \"data_type\": \"point\",\n    \"name\": \"jaw_keypoint\",\n    \"filepath\": \"keypoints.csv\",\n    \"format\": \"csv\",\n    \"frame_column\": 0,\n    \"x_column\": 1,\n    \"y_column\": 2,\n    \"column_delim\": \",\",\n    \"clock\": \"time\"\n  }\n]\nExpected keypoint CSV format:\nframe_id,x,y\n10452,312.4,188.0\n10453,313.1,187.6\n\n\n\n\n\n\nImportantFrame Column Requirement\n\n\n\nPoint CSV loading expects an integer frame column. If your keypoint rows contain full filenames (for example frame_10452.tif), extract the numeric ID first using the same regex logic you used for the TimeFrame (frame_(\\d+)\\.tif$).\n\n\n\n\n\n\n\n\nNoteWhen to Use master\n\n\n\nUse time for exact filename-ID mapping. Use master when you also need a dense, continuous timeline (for example when combining imaging with other streams).\n\n\n\n\nComplete Example: Image Stack + Keypoints with Filename IDs\n[\n  {\n    \"data_type\": \"time\",\n    \"name\": \"time\",\n    \"filepath\": \"imaging\",\n    \"format\": \"filename\",\n    \"file_extension\": \".tif\",\n    \"regex_pattern\": \"frame_(\\\\d+)\\\\.tif$\",\n    \"mode\": \"found_values\",\n    \"sort_ascending\": true\n  },\n  {\n    \"data_type\": \"time\",\n    \"name\": \"master\",\n    \"filepath\": \"imaging\",\n    \"format\": \"filename\",\n    \"file_extension\": \".tif\",\n    \"regex_pattern\": \"frame_(\\\\d+)\\\\.tif$\",\n    \"mode\": \"min_to_max\",\n    \"sort_ascending\": true\n  },\n  {\n    \"data_type\": \"images\",\n    \"name\": \"media\",\n    \"filepath\": \"imaging\",\n    \"file_extensions\": [\".tif\"],\n    \"sort_by_name\": true,\n    \"display_format\": \"Gray\",\n    \"clock\": \"time\"\n  },\n  {\n    \"data_type\": \"point\",\n    \"name\": \"nose_tip\",\n    \"filepath\": \"tracking_keypoints.csv\",\n    \"format\": \"csv\",\n    \"frame_column\": 0,\n    \"x_column\": 1,\n    \"y_column\": 2,\n    \"column_delim\": \",\",\n    \"clock\": \"time\"\n  }\n]",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Image Stack Import"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/mask_labeling.html#full-video",
-    "href": "learning-resources/tutorials/mask_labeling.html#full-video",
-    "title": "Tutorial: Mask Labeling",
-    "section": "Full Video",
-    "text": "Full Video\nWatch the complete mask labeling workflow:\n\n\nYour browser does not support the video tag. You can download the video here: tongue_mask.mp4.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Mask Labeling"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html",
-    "href": "learning-resources/tutorials/using_deep_learning.html",
-    "title": "Using Deep Learning",
-    "section": "",
-    "text": "This tutorial walks through a practical NeuroSAM workflow in the Deep Learning widget.\nGoal: use the memory attention pathway so your model sees:\n\ndynamic input from current media frames,\nstatic memory inputs from one labeled reference frame (memory image + memory mask),\noutputs written to a mask feature in real time.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html#overview",
-    "href": "learning-resources/tutorials/using_deep_learning.html#overview",
-    "title": "Using Deep Learning",
-    "section": "",
-    "text": "This tutorial walks through a practical NeuroSAM workflow in the Deep Learning widget.\nGoal: use the memory attention pathway so your model sees:\n\ndynamic input from current media frames,\nstatic memory inputs from one labeled reference frame (memory image + memory mask),\noutputs written to a mask feature in real time.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html#prerequisites",
-    "href": "learning-resources/tutorials/using_deep_learning.html#prerequisites",
-    "title": "Using Deep Learning",
-    "section": "Prerequisites",
-    "text": "Prerequisites\n\nA media source is loaded (video or image stack) and visible in Media Viewer.\nYou can open View -&gt; Analysis -&gt; Deep Learning.\nYou have a NeuroSAM-compatible weights file.\nYou have (or can create) a mask feature for output.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-1-create-and-label-the-memory-mask",
-    "href": "learning-resources/tutorials/using_deep_learning.html#step-1-create-and-label-the-memory-mask",
-    "title": "Using Deep Learning",
-    "section": "Step 1: Create and Label the Memory Mask",
-    "text": "Step 1: Create and Label the Memory Mask\n\nOpen Modules -&gt; Data Manager.\nCreate a Mask feature (or reuse an existing one).\nGo to the frame you want to use as your memory frame.\nDraw your reference mask on that frame.\n\nThis labeled frame is your memory-mask anchor for the memory attention module.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-2-open-deep-learning-and-select-device-model",
-    "href": "learning-resources/tutorials/using_deep_learning.html#step-2-open-deep-learning-and-select-device-model",
-    "title": "Using Deep Learning",
-    "section": "Step 2: Open Deep Learning and Select Device + Model",
-    "text": "Step 2: Open Deep Learning and Select Device + Model\n\nOpen View -&gt; Analysis -&gt; Deep Learning.\nIn Device, choose:\n\nGPU (CUDA) for speed, or\nCPU if needed.\n\nIn Model, select NeuroSAM.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-3-load-and-validate-weights",
-    "href": "learning-resources/tutorials/using_deep_learning.html#step-3-load-and-validate-weights",
-    "title": "Using Deep Learning",
-    "section": "Step 3: Load and Validate Weights",
-    "text": "Step 3: Load and Validate Weights\n\nIn Weights, click Browse… and select your weights file.\nConfirm the status becomes Loaded & validated.\n\nIf status is not validated, do not run inference yet.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-4-configure-dynamic-input-media",
-    "href": "learning-resources/tutorials/using_deep_learning.html#step-4-configure-dynamic-input-media",
-    "title": "Using Deep Learning",
-    "section": "Step 4: Configure Dynamic Input (Media)",
-    "text": "Step 4: Configure Dynamic Input (Media)\nFor dynamic image input (usually encoder_image):\n\nset Source to your media key (typically media).\n\nDynamic inputs should come from media so each inference uses the current frame.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-5-configure-memory_images-static-input",
-    "href": "learning-resources/tutorials/using_deep_learning.html#step-5-configure-memory_images-static-input",
-    "title": "Using Deep Learning",
-    "section": "Step 5: Configure memory_images Static Input",
-    "text": "Step 5: Configure memory_images Static Input\nFor memory_images:\n\nSet Source to the same media key (usually media).\nSet Capture Mode to Absolute.\nNavigate to your memory frame.\nClick Capture Current Frame.\n\n\n\n\n\n\n\nWarningKnown Capture Bug Workaround\n\n\n\nSometimes Absolute capture records frame 0 even when you are on a different frame.\nIf that happens:\n\nMove forward one frame.\nMove back to your memory frame.\nCapture again.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-6-configure-memory_masks-static-input",
-    "href": "learning-resources/tutorials/using_deep_learning.html#step-6-configure-memory_masks-static-input",
-    "title": "Using Deep Learning",
-    "section": "Step 6: Configure memory_masks Static Input",
-    "text": "Step 6: Configure memory_masks Static Input\nFor memory_masks:\n\nSet Source to the mask feature containing your memory label.\nSet Capture Mode to Absolute.\nNavigate to the same memory frame you used for memory_images.\nClick Capture Current Frame.\n\nImportant: memory_images and memory_masks should be captured at the same frame.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-7-configure-output-target-and-batch-size",
-    "href": "learning-resources/tutorials/using_deep_learning.html#step-7-configure-output-target-and-batch-size",
-    "title": "Using Deep Learning",
-    "section": "Step 7: Configure Output Target and Batch Size",
-    "text": "Step 7: Configure Output Target and Batch Size\nUnder output settings:\n\nSet Target to either:\n\na new mask object, or\nthe same mask object that already contains your memory frame.\n\nSet Batch Size if your model supports it.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-8-run-inference",
-    "href": "learning-resources/tutorials/using_deep_learning.html#step-8-run-inference",
-    "title": "Using Deep Learning",
-    "section": "Step 8: Run Inference",
-    "text": "Step 8: Run Inference\n\nSingle specific frame\n\nEnter a frame number in the Frame box.\nClick Run Frame.\n\n\n\nCurrent frame in timeline\n\nClick Current to run on the frame you are currently viewing.\n\n\n\nFrame ranges\n\nClick Run Batch.\nChoose either:\n\nManual range, then set start/end frames, or\nFrom interval series, then choose which interval source defines your ranges.\n\n\nYou can use interval data to drive batch inference only over selected epochs.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html#what-happens-after-you-click-run",
-    "href": "learning-resources/tutorials/using_deep_learning.html#what-happens-after-you-click-run",
-    "title": "Using Deep Learning",
-    "section": "What Happens After You Click Run",
-    "text": "What Happens After You Click Run\nInference executes on a background thread. As frames complete, predictions are written to your output mask key, and you can watch results appear in real time.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html#troubleshooting",
-    "href": "learning-resources/tutorials/using_deep_learning.html#troubleshooting",
-    "title": "Using Deep Learning",
-    "section": "Troubleshooting",
-    "text": "Troubleshooting\n\nShape mismatch error\nIf you get a shape mismatch error, the model was likely not exported as a compatible AOTI package for your environment.\nUse the AOTI export workflow first, then retry inference:\n\nHow-To: Exporting an AOTI Encoder Model\n\n\n\nStatic memory capture issues\n\nEnsure memory_images and memory_masks both use Absolute mode.\nEnsure both were captured at the same memory frame.\nIf capture keeps showing frame 0, use the forward/back recapture workaround above.",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
-    ]
-  },
-  {
-    "objectID": "learning-resources/tutorials/using_deep_learning.html#see-also",
-    "href": "learning-resources/tutorials/using_deep_learning.html#see-also",
-    "title": "Using Deep Learning",
-    "section": "See Also",
-    "text": "See Also\n\nDeep Learning Widget\nMask Labeling\nKeypoint Video Labeling\nTimeFrame",
-    "crumbs": [
-      "Learning Resources",
-      "Tutorials",
-      "Using Deep Learning"
     ]
   }
 ]

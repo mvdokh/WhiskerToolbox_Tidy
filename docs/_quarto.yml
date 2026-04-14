@@ -302,6 +302,9 @@ website:
             - user_guide/data_loading/JSON_loading.qmd
             - user_guide/data_loading/Point_Loading.qmd
             - user_guide/data_loading/Mask_Loading.qmd
+            - user_guide/data_loading/Analog_Loading.qmd
+            - user_guide/data_loading/Event_Loading.qmd
+            - user_guide/data_loading/Interval_Loading.qmd
             - user_guide/data_loading/Video_Loading.qmd
             - user_guide/data_loading/Image_Loading.qmd
             - user_guide/data_loading/Line_Loading.qmd

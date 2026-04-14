@@ -1,5 +1,139 @@
 ---
-title: "Line Loader"
+title: "Line Loading"
 format: html
 ---
+
+## Overview
+
+Line data stores ordered point traces per frame (for example: whisker contours).
+
+Supported line formats:
+
+| Format | Typical Source | Available In |
+|---|---|---|
+| `csv` (single-file or multi-file) | Tracker output CSVs | Data Import Widget and JSON |
+| `hdf5` | Structured line datasets | Data Import Widget and JSON |
+| `binary` / `capnp` | CapnProto serialized line files | Data Import Widget and JSON |
+
+::: {.callout-note}
+## JSON Data Type Name
+Use `"data_type": "line"` in JSON.
+:::
+
+## Data Import Widget
+
+Open **Modules -> Data Import**, choose **Line Data**, then select:
+
+- **CSV**: single-file or one-file-per-frame mode
+- **HDF5**: single file or folder pattern mode
+- **Binary**: CapnProto binary line file
+
+The widget also supports post-load spatial scaling.
+
+## JSON: CSV Single-File Lines
+
+Single-file CSV expects one row per frame with quoted x-list and y-list values.
+
+```text
+Frame,"12.0,13.0,14.0","220.5,221.0,222.1"
+```
+
+```json
+{
+	"filepath": "tracking/lines.csv",
+	"data_type": "line",
+	"name": "whisker_line",
+	"format": "csv",
+	"multi_file": false,
+	"delimiter": ",",
+	"coordinate_delimiter": ",",
+	"has_header": true,
+	"header_identifier": "Frame",
+	"image_width": 640,
+	"image_height": 480
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `multi_file` | No | boolean | `false` | `false` selects single-file parsing |
+| `delimiter` | No | string | `","` | Delimiter between frame/X/Y columns |
+| `coordinate_delimiter` | No | string | `","` | Delimiter inside quoted coordinate lists |
+| `has_header` | No | boolean | `true` | Skip first row if it is a header |
+| `header_identifier` | No | string | `"Frame"` | Header label used to identify frame column |
+| `image_width` | No | integer | none | Optional image width metadata |
+| `image_height` | No | integer | none | Optional image height metadata |
+
+## JSON: CSV Multi-File Lines
+
+Multi-file mode expects one CSV per frame, where filename stem is the frame number (for example `000123.csv`).
+
+```json
+{
+	"filepath": "tracking/line_frames",
+	"data_type": "line",
+	"name": "whisker_line",
+	"format": "csv",
+	"multi_file": true,
+	"delimiter": ",",
+	"x_column": 0,
+	"y_column": 1,
+	"has_header": true
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `filepath` | Yes | string | - | Directory containing per-frame CSV files |
+| `x_column` | No | integer | `0` | 0-based x column index |
+| `y_column` | No | integer | `1` | 0-based y column index |
+| `has_header` | No | boolean | `true` | Skip first row in each file |
+
+## JSON: HDF5 Lines
+
+```json
+{
+	"filepath": "tracking/lines.h5",
+	"data_type": "line",
+	"name": "whisker_line",
+	"format": "hdf5",
+	"frame_key": "frames",
+	"x_key": "y",
+	"y_key": "x",
+	"image_width": 640,
+	"image_height": 480
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `frame_key` | No | string | `"frames"` | Dataset path for frame indices |
+| `x_key` | No | string | `"y"` | Dataset path for x values |
+| `y_key` | No | string | `"x"` | Dataset path for y values |
+| `image_width` | No | integer | none | Optional image width metadata |
+| `image_height` | No | integer | none | Optional image height metadata |
+
+::: {.callout-note}
+Some HDF5 line exports store coordinate datasets swapped (`x_key = "y"`, `y_key = "x"`), which is why those are the current defaults.
+:::
+
+## JSON: Binary CapnProto Lines
+
+```json
+{
+	"filepath": "tracking/lines.capnp",
+	"data_type": "line",
+	"name": "whisker_line",
+	"format": "binary",
+	"image_width": 640,
+	"image_height": 480
+}
+```
+
+`format` may be either `"binary"` or `"capnp"` for line data.
+
+## Related
+
+- [Line Operations in Media Viewer](../media_viewer/lines.qmd)
+- [Data Loading Overview](index.qmd)
 

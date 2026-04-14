@@ -1,0 +1,149 @@
+---
+title: "Interval Loading"
+format: html
+---
+
+## Overview
+
+Digital interval series stores start/end periods (for example stimulus windows, trial epochs, contact bouts).
+
+Supported interval formats:
+
+| Format | Typical Source | Available In |
+|---|---|---|
+| `csv` (start/end pairs) | Interval tables with two columns | Data Import Widget and JSON |
+| `csv` with `csv_layout: "binary_state"` | Time + binary state columns (0/1) | JSON workflows |
+| `binary` / `uint16` | TTL extraction from packed digital words | Data Import Widget (build-dependent) and JSON |
+
+::: {.callout-note}
+## JSON Data Type Name
+Use `"data_type": "digital_interval"` in JSON.
+:::
+
+## Data Import Widget
+
+Open **Modules -> Data Import**, choose **Digital Interval Series**.
+
+### CSV mode
+
+- file path
+- delimiter
+- header toggle
+- start column
+- end column
+
+### Binary mode
+
+If enabled in your build, widget options include:
+
+- `header_size_bytes`
+- `data_type_bytes` (1/2/4/8)
+- `channel`
+- `transition_type` (`rising` or `falling`)
+
+## JSON: CSV Start/End Intervals (`format: "csv"`)
+
+```json
+{
+  "filepath": "behavior/trials.csv",
+  "data_type": "digital_interval",
+  "name": "trial_epochs",
+  "format": "csv",
+  "delimiter": ",",
+  "has_header": true,
+  "start_column": 0,
+  "end_column": 1,
+  "clock": "master"
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `delimiter` | No | string | `","` | Column delimiter |
+| `has_header` | No | boolean | `false` | Skip first row when true |
+| `start_column` | No | integer | `0` | 0-based start-time column |
+| `end_column` | No | integer | `1` | 0-based end-time column |
+| `clock` | No | string | `"time"` | Assigns this data to an existing TimeFrame |
+
+## JSON: CSV Binary-State Layout (`format: "csv"`, `csv_layout: "binary_state"`)
+
+Use this when each row is a time sample and each data column is a 0/1 trace.
+
+### Load one binary-state column
+
+```json
+{
+  "filepath": "daq/events_table.dat",
+  "data_type": "digital_interval",
+  "name": "laser",
+  "format": "csv",
+  "csv_layout": "binary_state",
+  "header_lines_to_skip": 5,
+  "time_column": 0,
+  "data_column": 3,
+  "delimiter": "\t",
+  "binary_threshold": 0.5,
+  "sampling_rate": 14000.0
+}
+```
+
+### Load all binary-state columns
+
+```json
+{
+  "filepath": "daq/events_table.dat",
+  "data_type": "digital_interval",
+  "name": "channels",
+  "format": "csv",
+  "csv_layout": "binary_state",
+  "all_columns": true,
+  "header_lines_to_skip": 5,
+  "time_column": 0,
+  "delimiter": "\t",
+  "binary_threshold": 0.5,
+  "sampling_rate": 14000.0
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `csv_layout` | Yes (for this mode) | string | `"intervals"` | Must be `"binary_state"` |
+| `header_lines_to_skip` | No | integer | `5` | Lines skipped before the header row |
+| `time_column` | No | integer | `0` | 0-based time column |
+| `data_column` | No | integer | `1` | 0-based binary-state column |
+| `delimiter` | No | string | tab (`"\t"`) | Column delimiter |
+| `binary_threshold` | No | number | `0.5` | Values >= threshold are treated as ON |
+| `sampling_rate` | No | number | `0.0` | Multiplier for fractional time to integer indices |
+| `all_columns` | No | boolean | `false` | If true, create one series per data column |
+
+::: {.callout-tip}
+With `all_columns: true`, each non-time column is loaded as a separate interval series, and output names are derived from the column headers.
+:::
+
+## JSON: Binary TTL Intervals (`format: "binary"` or `"uint16"`)
+
+```json
+{
+  "filepath": "daq/ttl.bin",
+  "data_type": "digital_interval",
+  "name": "laser_window",
+  "format": "binary",
+  "channel": 2,
+  "transition": "rising",
+  "header_size": 0,
+  "channel_count": 1
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `channel` | Yes | integer | - | Bit index to extract |
+| `transition` | Yes | string | - | `"rising"` or `"falling"` interval polarity |
+| `header_size` | No | integer | `0` | Bytes to skip at file start |
+| `channel_count` | No | integer | `1` | Interleaved channel count |
+
+## Related
+
+- [Interval Labeling Tutorial](../../learning-resources/tutorials/interval_series_labeling.qmd)
+- [How to Load Tabular Binary Events](../../examples/tabular_binary_events.qmd)
+- [Data Loading Overview](index.qmd)

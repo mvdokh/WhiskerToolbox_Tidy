@@ -1,0 +1,130 @@
+---
+title: "Event Loading"
+format: html
+---
+
+## Overview
+
+Digital event series stores timestamped events (for example spike times, lick onsets, cue onsets).
+
+Supported event formats:
+
+| Format | Typical Source | Available In |
+|---|---|---|
+| `csv` | Event timestamp tables | Data Import Widget and JSON |
+| `binary` / `uint16` | TTL bit extraction from packed words | JSON workflows |
+| `hdf5` | Time array + event indicator array | JSON workflows |
+
+::: {.callout-note}
+## JSON Data Type Name
+Use `"data_type": "digital_event"` in JSON.
+:::
+
+## Data Import Widget
+
+Open **Modules -> Data Import**, choose **Digital Event Series**.
+
+Current widget mode focuses on CSV:
+
+- file path
+- delimiter
+- header toggle
+- event column
+- optional identifier column (to split into multiple series)
+
+## JSON: CSV Events (`format: "csv"`)
+
+### Single-series CSV
+
+```json
+{
+  "filepath": "events/reward_times.csv",
+  "data_type": "digital_event",
+  "name": "reward",
+  "format": "csv",
+  "event_column": 0,
+  "has_header": true,
+  "delimiter": ","
+}
+```
+
+### Multi-series CSV using identifiers
+
+```json
+{
+  "filepath": "events/behavior_events.csv",
+  "data_type": "digital_event",
+  "name": "behavior",
+  "format": "csv",
+  "event_column": 1,
+  "identifier_column": 0,
+  "base_name": "behavior",
+  "has_header": true,
+  "delimiter": ","
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `event_column` | No | integer | `0` | 0-based event timestamp column |
+| `identifier_column` | No | integer | `-1` | 0-based grouping column (`-1` disables grouping) |
+| `label_column` | No | integer | - | Alias for `identifier_column` |
+| `base_name` | No | string | `"events"` | Prefix used for generated series names |
+| `delimiter` | No | string | `","` | Column delimiter |
+| `has_header` | No | boolean | `false` | Skip first row when true |
+| `scale` | No | number | `1.0` | Multiply timestamps before integer conversion |
+| `scale_divide` | No | boolean | `false` | If true, divide timestamps by `scale` |
+| `clock` | No | string | `"time"` | Assigns this data to an existing TimeFrame |
+
+::: {.callout-tip}
+With `identifier_column >= 0`, batch loading creates one DigitalEventSeries per unique identifier.
+:::
+
+## JSON: Binary TTL Events (`format: "binary"` or `"uint16"`)
+
+```json
+{
+  "filepath": "daq/ttl.bin",
+  "data_type": "digital_event",
+  "name": "laser_onsets",
+  "format": "binary",
+  "channel": 2,
+  "transition": "rising",
+  "header_size": 0,
+  "channel_count": 1
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `channel` | Yes | integer | - | Bit index to extract |
+| `transition` | Yes | string | - | `"rising"` or `"falling"` edge events |
+| `header_size` | No | integer | `0` | Bytes to skip at file start |
+| `channel_count` | No | integer | `1` | Interleaved channel count in binary file |
+
+## JSON: HDF5 Events (`format: "hdf5"`)
+
+```json
+{
+  "filepath": "daq/events.h5",
+  "data_type": "digital_event",
+  "name": "reward",
+  "format": "hdf5",
+  "time_key": "time_s",
+  "event_key": "reward_binary",
+  "scale": 30000.0,
+  "scale_divide": false
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `time_key` | Yes | string | - | Dataset path for event time values |
+| `event_key` | Yes | string | - | Dataset path for 0/1 event indicator values |
+| `scale` | No | number | `1.0` | Multiply (or divide) times before integer conversion |
+| `scale_divide` | No | boolean | `false` | If true, divide by `scale` instead of multiply |
+
+## Related
+
+- [Event Plot Widget](../Plots/EventPlotWidget/index.qmd)
+- [Data Loading Overview](index.qmd)

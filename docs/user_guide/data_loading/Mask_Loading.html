@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Mask Loader – Neuralyzer</title>
+<title>Mask Loading – Neuralyzer</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -22,6 +22,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -314,7 +349,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../user_guide/data_loading/index.html">Data Loading</a></li><li class="breadcrumb-item"><a href="../../user_guide/data_loading/Mask_Loading.html">Mask Loader</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../user_guide/data_loading/index.html">Data Loading</a></li><li class="breadcrumb-item"><a href="../../user_guide/data_loading/Mask_Loading.html">Mask Loading</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -409,13 +444,31 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../user_guide/data_loading/Point_Loading.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Point Loader</span></a>
+ <span class="menu-text">Point Loading</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../user_guide/data_loading/Mask_Loading.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Mask Loader</span></a>
+ <span class="menu-text">Mask Loading</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../user_guide/data_loading/Analog_Loading.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Analog Loading</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../user_guide/data_loading/Event_Loading.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Event Loading</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../user_guide/data_loading/Interval_Loading.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Interval Loading</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -433,7 +486,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../user_guide/data_loading/Line_Loading.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Line Loader</span></a>
+ <span class="menu-text">Line Loading</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -1006,16 +1059,27 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#data-import-widget" id="toc-data-import-widget" class="nav-link" data-scroll-target="#data-import-widget">Data Import Widget</a></li>
+  <li><a href="#json-image-sequence-masks-format-image" id="toc-json-image-sequence-masks-format-image" class="nav-link" data-scroll-target="#json-image-sequence-masks-format-image">JSON: Image Sequence Masks (<code>format: "image"</code>)</a></li>
+  <li><a href="#json-hdf5-masks-format-hdf5" id="toc-json-hdf5-masks-format-hdf5" class="nav-link" data-scroll-target="#json-hdf5-masks-format-hdf5">JSON: HDF5 Masks (<code>format: "hdf5"</code>)</a></li>
+  <li><a href="#json-csv-rle-masks-format-csv" id="toc-json-csv-rle-masks-format-csv" class="nav-link" data-scroll-target="#json-csv-rle-masks-format-csv">JSON: CSV RLE Masks (<code>format: "csv"</code>)</a></li>
+  <li><a href="#related" id="toc-related" class="nav-link" data-scroll-target="#related">Related</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../user_guide/data_loading/index.html">Data Loading</a></li><li class="breadcrumb-item"><a href="../../user_guide/data_loading/Mask_Loading.html">Mask Loader</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../user_guide/data_loading/index.html">Data Loading</a></li><li class="breadcrumb-item"><a href="../../user_guide/data_loading/Mask_Loading.html">Mask Loading</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Mask Loader</h1>
+<h1 class="title">Mask Loading</h1>
 </div>
 
 
@@ -1032,8 +1096,343 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>Mask data represents foreground regions over time (for example: tongue segmentation, whisker pad ROIs, or behavior-state masks).</p>
+<p>Supported mask formats:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Format</th>
+<th>Typical Source</th>
+<th>Available In</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>image</code></td>
+<td>One binary image per frame (<code>.png</code>, <code>.jpg</code>, <code>.bmp</code>, <code>.tiff</code>)</td>
+<td>Data Import Widget and JSON</td>
+</tr>
+<tr class="even">
+<td><code>hdf5</code></td>
+<td>Frame array + ragged coordinate arrays</td>
+<td>Data Import Widget and JSON</td>
+</tr>
+<tr class="odd">
+<td><code>csv</code> (RLE)</td>
+<td>Frame + run-length encoded mask rows</td>
+<td>JSON workflows</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>JSON Data Type Name
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Use <code>"data_type": "mask"</code> in JSON.</p>
+</div>
+</div>
+</section>
+<section id="data-import-widget" class="level2">
+<h2 class="anchored" data-anchor-id="data-import-widget">Data Import Widget</h2>
+<p>Open <strong>Modules -&gt; Data Import</strong>, choose <strong>Mask Data</strong>, then choose the loader type:</p>
+<ul>
+<li><strong>Image</strong>: load a directory of mask images.</li>
+<li><strong>HDF5</strong>: load one or multiple HDF5 mask files.</li>
+</ul>
+<p>The widget also lets you apply spatial scaling after load.</p>
+</section>
+<section id="json-image-sequence-masks-format-image" class="level2">
+<h2 class="anchored" data-anchor-id="json-image-sequence-masks-format-image">JSON: Image Sequence Masks (<code>format: "image"</code>)</h2>
+<p>Each file in a directory is treated as one frame. Frame number is parsed from the filename stem.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"filepath"</span><span class="fu">:</span> <span class="st">"segmentation/masks"</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"data_type"</span><span class="fu">:</span> <span class="st">"mask"</span><span class="fu">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"tongue_mask"</span><span class="fu">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"format"</span><span class="fu">:</span> <span class="st">"image"</span><span class="fu">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"file_pattern"</span><span class="fu">:</span> <span class="st">"*.png"</span><span class="fu">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"filename_prefix"</span><span class="fu">:</span> <span class="st">"mask_"</span><span class="fu">,</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"frame_number_padding"</span><span class="fu">:</span> <span class="dv">4</span><span class="fu">,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"threshold_value"</span><span class="fu">:</span> <span class="dv">128</span><span class="fu">,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"invert_mask"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"clock"</span><span class="fu">:</span> <span class="st">"time"</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Element</th>
+<th>Required?</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>filepath</code></td>
+<td>Yes</td>
+<td>string</td>
+<td>-</td>
+<td>Directory containing mask images</td>
+</tr>
+<tr class="even">
+<td><code>data_type</code></td>
+<td>Yes</td>
+<td>string</td>
+<td>-</td>
+<td>Must be <code>"mask"</code></td>
+</tr>
+<tr class="odd">
+<td><code>name</code></td>
+<td>Yes</td>
+<td>string</td>
+<td>-</td>
+<td>Output object name</td>
+</tr>
+<tr class="even">
+<td><code>format</code></td>
+<td>Yes</td>
+<td>string</td>
+<td>-</td>
+<td><code>"image"</code></td>
+</tr>
+<tr class="odd">
+<td><code>file_pattern</code></td>
+<td>No</td>
+<td>string</td>
+<td><code>"*.png"</code></td>
+<td>Glob-like filter for filenames</td>
+</tr>
+<tr class="even">
+<td><code>filename_prefix</code></td>
+<td>No</td>
+<td>string</td>
+<td><code>""</code></td>
+<td>Prefix before numeric frame ID</td>
+</tr>
+<tr class="odd">
+<td><code>frame_number_padding</code></td>
+<td>No</td>
+<td>integer</td>
+<td><code>0</code></td>
+<td>Expected zero-padding in frame number (<code>0</code> allows unpadded)</td>
+</tr>
+<tr class="even">
+<td><code>threshold_value</code></td>
+<td>No</td>
+<td>integer</td>
+<td><code>128</code></td>
+<td>Pixels at or above threshold are mask (unless inverted)</td>
+</tr>
+<tr class="odd">
+<td><code>invert_mask</code></td>
+<td>No</td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>If true, invert foreground/background logic</td>
+</tr>
+<tr class="even">
+<td><code>image_width</code></td>
+<td>No</td>
+<td>integer</td>
+<td>inferred</td>
+<td>Optional output width override</td>
+</tr>
+<tr class="odd">
+<td><code>image_height</code></td>
+<td>No</td>
+<td>integer</td>
+<td>inferred</td>
+<td>Optional output height override</td>
+</tr>
+<tr class="even">
+<td><code>clock</code></td>
+<td>No</td>
+<td>string</td>
+<td><code>"time"</code></td>
+<td>Assigns this data to an existing TimeFrame</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="json-hdf5-masks-format-hdf5" class="level2">
+<h2 class="anchored" data-anchor-id="json-hdf5-masks-format-hdf5">JSON: HDF5 Masks (<code>format: "hdf5"</code>)</h2>
+<p>HDF5 masks are loaded from one frame dataset and two ragged coordinate datasets.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"filepath"</span><span class="fu">:</span> <span class="st">"session/masks.h5"</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"data_type"</span><span class="fu">:</span> <span class="st">"mask"</span><span class="fu">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"tongue_mask"</span><span class="fu">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"format"</span><span class="fu">:</span> <span class="st">"hdf5"</span><span class="fu">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"frame_key"</span><span class="fu">:</span> <span class="st">"frames"</span><span class="fu">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"x_key"</span><span class="fu">:</span> <span class="st">"widths"</span><span class="fu">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"y_key"</span><span class="fu">:</span> <span class="st">"heights"</span><span class="fu">,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"width"</span><span class="fu">:</span> <span class="dv">640</span><span class="fu">,</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"height"</span><span class="fu">:</span> <span class="dv">480</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Element</th>
+<th>Required?</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>frame_key</code></td>
+<td>No</td>
+<td>string</td>
+<td><code>"frames"</code></td>
+<td>Dataset path for frame indices</td>
+</tr>
+<tr class="even">
+<td><code>x_key</code></td>
+<td>No</td>
+<td>string</td>
+<td><code>"widths"</code></td>
+<td>Ragged dataset path for x coordinates</td>
+</tr>
+<tr class="odd">
+<td><code>y_key</code></td>
+<td>No</td>
+<td>string</td>
+<td><code>"heights"</code></td>
+<td>Ragged dataset path for y coordinates</td>
+</tr>
+<tr class="even">
+<td><code>width</code></td>
+<td>No</td>
+<td>integer</td>
+<td>none</td>
+<td>Optional image width to store in MaskData</td>
+</tr>
+<tr class="odd">
+<td><code>height</code></td>
+<td>No</td>
+<td>integer</td>
+<td>none</td>
+<td>Optional image height to store in MaskData</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="json-csv-rle-masks-format-csv" class="level2">
+<h2 class="anchored" data-anchor-id="json-csv-rle-masks-format-csv">JSON: CSV RLE Masks (<code>format: "csv"</code>)</h2>
+<p>CSV RLE uses one row per mask with a frame column and a quoted RLE payload.</p>
+<pre class="text"><code>Frame,"y,x_start,length,y,x_start,length,..."
+0,"12,31,5,13,30,7"</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"filepath"</span><span class="fu">:</span> <span class="st">"segmentation/masks_rle.csv"</span><span class="fu">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"data_type"</span><span class="fu">:</span> <span class="st">"mask"</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"tongue_mask"</span><span class="fu">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"format"</span><span class="fu">:</span> <span class="st">"csv"</span><span class="fu">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"delimiter"</span><span class="fu">:</span> <span class="st">","</span><span class="fu">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"rle_delimiter"</span><span class="fu">:</span> <span class="st">","</span><span class="fu">,</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"has_header"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"header_identifier"</span><span class="fu">:</span> <span class="st">"Frame"</span><span class="fu">,</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"image_width"</span><span class="fu">:</span> <span class="dv">640</span><span class="fu">,</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"image_height"</span><span class="fu">:</span> <span class="dv">480</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Element</th>
+<th>Required?</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>delimiter</code></td>
+<td>No</td>
+<td>string</td>
+<td><code>","</code></td>
+<td>Delimiter between CSV columns</td>
+</tr>
+<tr class="even">
+<td><code>rle_delimiter</code></td>
+<td>No</td>
+<td>string</td>
+<td><code>","</code></td>
+<td>Delimiter within RLE triplets</td>
+</tr>
+<tr class="odd">
+<td><code>has_header</code></td>
+<td>No</td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Skip first row when true</td>
+</tr>
+<tr class="even">
+<td><code>header_identifier</code></td>
+<td>No</td>
+<td>string</td>
+<td><code>"Frame"</code></td>
+<td>Expected header label for frame column</td>
+</tr>
+<tr class="odd">
+<td><code>image_width</code></td>
+<td>No</td>
+<td>integer</td>
+<td>none</td>
+<td>Optional image width metadata</td>
+</tr>
+<tr class="even">
+<td><code>image_height</code></td>
+<td>No</td>
+<td>integer</td>
+<td>none</td>
+<td>Optional image height metadata</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="related" class="level2">
+<h2 class="anchored" data-anchor-id="related">Related</h2>
+<ul>
+<li><a href="../../learning-resources/tutorials/mask_labeling.html">Mask Labeling Tutorial</a></li>
+<li><a href="../../user_guide/data_loading/index.html">Data Loading Overview</a></li>
+</ul>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

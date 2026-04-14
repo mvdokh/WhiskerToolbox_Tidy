@@ -69,9 +69,9 @@ Continuous and discrete signals recorded alongside behavior.
 
 | Type | Description | Common Sources | Reference |
 |------|-------------|----------------|-----------|
-| **Analog Time Series** | Continuous signals | Electrophysiology, sensor data | — |
-| **Digital Events** | Point events in time | Spike times, behavioral markers | — |
-| **Digital Intervals** | Time periods (start/end) | Trial epochs, stimulus periods | [JSON Loading](JSON_loading.qmd) |
+| **Analog Time Series** | Continuous signals | Electrophysiology, sensor data | [Analog Loading](Analog_Loading.qmd) |
+| **Digital Events** | Point events in time | Spike times, behavioral markers | [Event Loading](Event_Loading.qmd) |
+| **Digital Intervals** | Time periods (start/end) | Trial epochs, stimulus periods | [Interval Loading](Interval_Loading.qmd) |
 
 ## Multi-dimensional Data
 

@@ -1,5 +1,129 @@
 ---
-title: "Mask Loader"
+title: "Mask Loading"
 format: html
 ---
+
+## Overview
+
+Mask data represents foreground regions over time (for example: tongue segmentation, whisker pad ROIs, or behavior-state masks).
+
+Supported mask formats:
+
+| Format | Typical Source | Available In |
+|---|---|---|
+| `image` | One binary image per frame (`.png`, `.jpg`, `.bmp`, `.tiff`) | Data Import Widget and JSON |
+| `hdf5` | Frame array + ragged coordinate arrays | Data Import Widget and JSON |
+| `csv` (RLE) | Frame + run-length encoded mask rows | JSON workflows |
+
+::: {.callout-note}
+## JSON Data Type Name
+Use `"data_type": "mask"` in JSON.
+:::
+
+## Data Import Widget
+
+Open **Modules -> Data Import**, choose **Mask Data**, then choose the loader type:
+
+- **Image**: load a directory of mask images.
+- **HDF5**: load one or multiple HDF5 mask files.
+
+The widget also lets you apply spatial scaling after load.
+
+## JSON: Image Sequence Masks (`format: "image"`)
+
+Each file in a directory is treated as one frame. Frame number is parsed from the filename stem.
+
+```json
+{
+	"filepath": "segmentation/masks",
+	"data_type": "mask",
+	"name": "tongue_mask",
+	"format": "image",
+	"file_pattern": "*.png",
+	"filename_prefix": "mask_",
+	"frame_number_padding": 4,
+	"threshold_value": 128,
+	"invert_mask": false,
+	"clock": "time"
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `filepath` | Yes | string | - | Directory containing mask images |
+| `data_type` | Yes | string | - | Must be `"mask"` |
+| `name` | Yes | string | - | Output object name |
+| `format` | Yes | string | - | `"image"` |
+| `file_pattern` | No | string | `"*.png"` | Glob-like filter for filenames |
+| `filename_prefix` | No | string | `""` | Prefix before numeric frame ID |
+| `frame_number_padding` | No | integer | `0` | Expected zero-padding in frame number (`0` allows unpadded) |
+| `threshold_value` | No | integer | `128` | Pixels at or above threshold are mask (unless inverted) |
+| `invert_mask` | No | boolean | `false` | If true, invert foreground/background logic |
+| `image_width` | No | integer | inferred | Optional output width override |
+| `image_height` | No | integer | inferred | Optional output height override |
+| `clock` | No | string | `"time"` | Assigns this data to an existing TimeFrame |
+
+## JSON: HDF5 Masks (`format: "hdf5"`)
+
+HDF5 masks are loaded from one frame dataset and two ragged coordinate datasets.
+
+```json
+{
+	"filepath": "session/masks.h5",
+	"data_type": "mask",
+	"name": "tongue_mask",
+	"format": "hdf5",
+	"frame_key": "frames",
+	"x_key": "widths",
+	"y_key": "heights",
+	"width": 640,
+	"height": 480
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `frame_key` | No | string | `"frames"` | Dataset path for frame indices |
+| `x_key` | No | string | `"widths"` | Ragged dataset path for x coordinates |
+| `y_key` | No | string | `"heights"` | Ragged dataset path for y coordinates |
+| `width` | No | integer | none | Optional image width to store in MaskData |
+| `height` | No | integer | none | Optional image height to store in MaskData |
+
+## JSON: CSV RLE Masks (`format: "csv"`)
+
+CSV RLE uses one row per mask with a frame column and a quoted RLE payload.
+
+```text
+Frame,"y,x_start,length,y,x_start,length,..."
+0,"12,31,5,13,30,7"
+```
+
+```json
+{
+	"filepath": "segmentation/masks_rle.csv",
+	"data_type": "mask",
+	"name": "tongue_mask",
+	"format": "csv",
+	"delimiter": ",",
+	"rle_delimiter": ",",
+	"has_header": true,
+	"header_identifier": "Frame",
+	"image_width": 640,
+	"image_height": 480
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `delimiter` | No | string | `","` | Delimiter between CSV columns |
+| `rle_delimiter` | No | string | `","` | Delimiter within RLE triplets |
+| `has_header` | No | boolean | `true` | Skip first row when true |
+| `header_identifier` | No | string | `"Frame"` | Expected header label for frame column |
+| `image_width` | No | integer | none | Optional image width metadata |
+| `image_height` | No | integer | none | Optional image height metadata |
+
+## Related
+
+- [Mask Labeling Tutorial](../../learning-resources/tutorials/mask_labeling.qmd)
+- [Data Loading Overview](index.qmd)
 

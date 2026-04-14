@@ -1,5 +1,116 @@
 ---
-title: "Point Loader"
+title: "Point Loading"
 format: html
 ---
+
+## Overview
+
+Point data stores one $(x, y)$ coordinate per frame (for example: nose tip, tongue tip, whisker base).
+
+Neuralyzer supports two point-loading paths:
+
+| Path | Typical Use | Notes |
+|---|---|---|
+| Data Import Widget | Manual import from a single CSV file | Exposes frame/x/y column mapping and delimiter selection |
+| JSON configuration | Reproducible or batch workflows | Supports both simple CSV and DeepLabCut-style CSV |
+
+::: {.callout-note}
+## JSON Data Type Name
+Use `"data_type": "points"` in JSON.
+:::
+
+## Data Import Widget (CSV)
+
+Open **Modules -> Data Import**, choose **Point Data**, then load a CSV file.
+
+Widget options:
+
+| Field | Meaning |
+|---|---|
+| `frame_column` | 0-based column index containing frame numbers |
+| `x_column` | 0-based column index containing x coordinates |
+| `y_column` | 0-based column index containing y coordinates |
+| `column_delim` | Delimiter used to split columns (`Comma` or `Space` in the current widget) |
+
+### Header behavior
+
+The point CSV parser does not have a dedicated `has_header` toggle. Rows are accepted when `frame_column` is numeric; non-numeric frame rows are ignored.
+
+## JSON: Simple CSV Point Format
+
+Use `format: "csv"` for generic frame/x/y CSV files.
+
+```json
+{
+	"filepath": "tracking/nose.csv",
+	"data_type": "points",
+	"name": "nose_tip",
+	"format": "csv",
+	"frame_column": 0,
+	"x_column": 1,
+	"y_column": 2,
+	"column_delim": ",",
+	"nan_handling": "Skip"
+}
+```
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `filepath` | Yes | string | - | Path to CSV file |
+| `data_type` | Yes | string | - | Must be `"points"` |
+| `name` | Yes | string | - | Output object name |
+| `format` | Yes | string | - | `"csv"` |
+| `frame_column` | No | integer | `0` | 0-based frame column |
+| `x_column` | No | integer | `1` | 0-based x column |
+| `y_column` | No | integer | `2` | 0-based y column |
+| `column_delim` | No | string | space (`" "`) | Column delimiter (first character is used) |
+| `nan_handling` | No | string | `"Skip"` | `"Skip"` drops rows with NaN coordinates; `"Include"` keeps them |
+| `clock` | No | string | `"time"` | Assigns this data to an existing TimeFrame |
+
+## JSON: DeepLabCut CSV Format
+
+Use `format: "dlc_csv"` for DeepLabCut-style files with scorer/bodypart/coord header rows.
+
+### Load one bodypart
+
+```json
+{
+	"filepath": "tracking/dlc_output.csv",
+	"data_type": "points",
+	"name": "tongue_tip",
+	"format": "dlc_csv",
+	"bodypart": "tongue_tip",
+	"frame_column": 0,
+	"likelihood_threshold": 0.9
+}
+```
+
+### Load all bodyparts from one file
+
+```json
+{
+	"filepath": "tracking/dlc_output.csv",
+	"data_type": "points",
+	"name": "dlc",
+	"format": "dlc_csv",
+	"all_bodyparts": true,
+	"frame_column": 0,
+	"likelihood_threshold": 0.8
+}
+```
+
+With `all_bodyparts: true`, one PointData object is created per bodypart.
+
+| Element | Required? | Type | Default | Description |
+|---|---|---|---|---|
+| `format` | Yes | string | - | `"dlc_csv"` |
+| `bodypart` | No | string | first bodypart | Specific bodypart to load |
+| `all_bodyparts` | No | boolean | `false` | Load all bodyparts as separate outputs |
+| `frame_column` | No | integer | `0` | 0-based frame column |
+| `likelihood_threshold` | No | number | `0.0` | Ignore samples below this likelihood |
+
+## Related
+
+- [How to Label Keypoints](../../examples/keypoint_labeling.qmd)
+- [Data Loading Overview](index.qmd)
 
