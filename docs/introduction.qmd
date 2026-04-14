@@ -3,12 +3,16 @@ title: "Introduction"
 ---
 
 ::: {.text-center}
+![](images/example.png){width="86%"}
+:::
+
+::: {.text-center}
 ![](images/Apple_logo_black.svg){width="36"} ![](images/Linux_Logo_in_Linux_Libertine_Font.svg){width="36"} ![](images/Windows_logo_-_2021.svg){width="36"}
 :::
 
 Neuralyzer (WhiskerToolbox) is an open-source desktop platform for neural and behavioral data analysis, developed by neuroscientists who use it every day. Its primary purpose is to act as both a reproducibility machine and a practical toolkit for data exploration.
 
-In real experiments, it is hard to align all your data and visualize everything together. Doing this repeatedly across many concurrent data modalities can become complex and tedious. Neuralyzer is built as a workbench for behavioral and neural recordings so those multimodal workflows stay connected, time-aligned, and manageable.
+In real experiments, it is tedious to align all your data simply to visualize everything together, make changes, or prepare training data. Doint this repeatedly and across many concurrent data modalities can become complex. Neuralyzer is built as a workbench for behavioral and neural recordings so those multimodal workflows stay connected, time-aligned, and manageable.
 
 Suppose you want to load a video of a mouse licking a spout and also
 load predicted tongue masks so you can track tongue area while

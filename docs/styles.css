@@ -30,5 +30,6 @@ main img[src*="Windows_logo_-_2021.svg"] {
 
 /* Render the Windows logo in black and white. */
 main img[src*="Windows_logo_-_2021.svg"] {
-	filter: grayscale(100%) contrast(170%);
+	filter: grayscale(100%) brightness(0%) contrast(180%);
+	opacity: 0.55;
 }
