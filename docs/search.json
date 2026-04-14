@@ -1759,7 +1759,7 @@
     "href": "learning-resources/tutorials/using_deep_learning.html",
     "title": "Using Deep Learning",
     "section": "",
-    "text": "This tutorial walks through a practical NeuroSAM workflow in the Deep Learning widget.\nGoal: use the memory attention pathway so your model sees:\n\ndynamic input from current media frames,\nstatic memory inputs from one labeled reference frame (memory image + memory mask),\noutputs written to a mask feature in real time.",
+    "text": "This tutorial walks through a practical NeuroSAM workflow in the Deep Learning widget.\n\n\nYour browser does not support the video tag. You can download the video neuroSAM_example.mp4. \nGoal: use the memory attention pathway so your model sees:\n\ndynamic input from current media frames,\nstatic memory inputs from one labeled reference frame (memory image + memory mask),\noutputs written to a mask feature in real time.",
     "crumbs": [
       "Learning Resources",
       "Tutorials",
@@ -1771,7 +1771,7 @@
     "href": "learning-resources/tutorials/using_deep_learning.html#overview",
     "title": "Using Deep Learning",
     "section": "",
-    "text": "This tutorial walks through a practical NeuroSAM workflow in the Deep Learning widget.\nGoal: use the memory attention pathway so your model sees:\n\ndynamic input from current media frames,\nstatic memory inputs from one labeled reference frame (memory image + memory mask),\noutputs written to a mask feature in real time.",
+    "text": "This tutorial walks through a practical NeuroSAM workflow in the Deep Learning widget.\n\n\nYour browser does not support the video tag. You can download the video neuroSAM_example.mp4. \nGoal: use the memory attention pathway so your model sees:\n\ndynamic input from current media frames,\nstatic memory inputs from one labeled reference frame (memory image + memory mask),\noutputs written to a mask feature in real time.",
     "crumbs": [
       "Learning Resources",
       "Tutorials",
