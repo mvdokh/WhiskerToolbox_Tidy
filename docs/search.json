@@ -18177,7 +18177,7 @@
     "href": "learning-resources/index.html#tutorials",
     "title": "Learning Resources",
     "section": "Tutorials",
-    "text": "Tutorials\nDetailed step-by-step guides to help you learn the basics.\n\nVideo Import\nImage Stack Import\nKeypoint Labeling\nMask Labeling\nInterval Series Labeling\nEvent Labeling\nUsing the Data Viewer\nPerforming Data Transforms\nUsing a Hidden Markov Model to Predict Behavioral Epochs with Deep Learning Features\nIs this neuron real? Following a signal between results and raw data\nIdentifying Clusters in High Dimensional Data\nLoad Tabular Binary Events\nExporting Pytorch Models for Neuralyzer\nUsing NeuroSAM for Object Segmentation\nTriage Line Data — review predictions and move correct lines to ground truth\nLabel Video Intervals — inspect scattered video regions and record what you reviewed",
+    "text": "Tutorials\nDetailed step-by-step guides to help you learn the basics.\n\nVideo Import\nImage Stack Import\nKeypoint Labeling\nMask Labeling\nInterval Series Labeling\nEvent Labeling\nUsing the Data Viewer\nUsing Deep Learning\nPerforming Data Transforms\nUsing a Hidden Markov Model to Predict Behavioral Epochs with Deep Learning Features\nIs this neuron real? Following a signal between results and raw data\nIdentifying Clusters in High Dimensional Data\nLoad Tabular Binary Events\nExporting Pytorch Models for Neuralyzer\nUsing NeuroSAM for Object Segmentation\nTriage Line Data — review predictions and move correct lines to ground truth\nLabel Video Intervals — inspect scattered video regions and record what you reviewed",
     "crumbs": [
       "Learning Resources"
     ]
@@ -20590,6 +20590,174 @@
       "Learning Resources",
       "Tutorials",
       "Mask Labeling"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html",
+    "href": "learning-resources/tutorials/using_deep_learning.html",
+    "title": "Using Deep Learning",
+    "section": "",
+    "text": "This tutorial walks through a practical NeuroSAM workflow in the Deep Learning widget.\nGoal: use the memory attention pathway so your model sees:\n\ndynamic input from current media frames,\nstatic memory inputs from one labeled reference frame (memory image + memory mask),\noutputs written to a mask feature in real time.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#overview",
+    "href": "learning-resources/tutorials/using_deep_learning.html#overview",
+    "title": "Using Deep Learning",
+    "section": "",
+    "text": "This tutorial walks through a practical NeuroSAM workflow in the Deep Learning widget.\nGoal: use the memory attention pathway so your model sees:\n\ndynamic input from current media frames,\nstatic memory inputs from one labeled reference frame (memory image + memory mask),\noutputs written to a mask feature in real time.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#prerequisites",
+    "href": "learning-resources/tutorials/using_deep_learning.html#prerequisites",
+    "title": "Using Deep Learning",
+    "section": "Prerequisites",
+    "text": "Prerequisites\n\nA media source is loaded (video or image stack) and visible in Media Viewer.\nYou can open View -&gt; Analysis -&gt; Deep Learning.\nYou have a NeuroSAM-compatible weights file.\nYou have (or can create) a mask feature for output.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-1-create-and-label-the-memory-mask",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-1-create-and-label-the-memory-mask",
+    "title": "Using Deep Learning",
+    "section": "Step 1: Create and Label the Memory Mask",
+    "text": "Step 1: Create and Label the Memory Mask\n\nOpen Modules -&gt; Data Manager.\nCreate a Mask feature (or reuse an existing one).\nGo to the frame you want to use as your memory frame.\nDraw your reference mask on that frame.\n\nThis labeled frame is your memory-mask anchor for the memory attention module.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-2-open-deep-learning-and-select-device-model",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-2-open-deep-learning-and-select-device-model",
+    "title": "Using Deep Learning",
+    "section": "Step 2: Open Deep Learning and Select Device + Model",
+    "text": "Step 2: Open Deep Learning and Select Device + Model\n\nOpen View -&gt; Analysis -&gt; Deep Learning.\nIn Device, choose:\n\nGPU (CUDA) for speed, or\nCPU if needed.\n\nIn Model, select NeuroSAM.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-3-load-and-validate-weights",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-3-load-and-validate-weights",
+    "title": "Using Deep Learning",
+    "section": "Step 3: Load and Validate Weights",
+    "text": "Step 3: Load and Validate Weights\n\nIn Weights, click Browse… and select your weights file.\nConfirm the status becomes Loaded & validated.\n\nIf status is not validated, do not run inference yet.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-4-configure-dynamic-input-media",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-4-configure-dynamic-input-media",
+    "title": "Using Deep Learning",
+    "section": "Step 4: Configure Dynamic Input (Media)",
+    "text": "Step 4: Configure Dynamic Input (Media)\nFor dynamic image input (usually encoder_image):\n\nset Source to your media key (typically media).\n\nDynamic inputs should come from media so each inference uses the current frame.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-5-configure-memory_images-static-input",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-5-configure-memory_images-static-input",
+    "title": "Using Deep Learning",
+    "section": "Step 5: Configure memory_images Static Input",
+    "text": "Step 5: Configure memory_images Static Input\nFor memory_images:\n\nSet Source to the same media key (usually media).\nSet Capture Mode to Absolute.\nNavigate to your memory frame.\nClick Capture Current Frame.\n\n\n\n\n\n\n\nWarningKnown Capture Bug Workaround\n\n\n\nSometimes Absolute capture records frame 0 even when you are on a different frame.\nIf that happens:\n\nMove forward one frame.\nMove back to your memory frame.\nCapture again.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-6-configure-memory_masks-static-input",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-6-configure-memory_masks-static-input",
+    "title": "Using Deep Learning",
+    "section": "Step 6: Configure memory_masks Static Input",
+    "text": "Step 6: Configure memory_masks Static Input\nFor memory_masks:\n\nSet Source to the mask feature containing your memory label.\nSet Capture Mode to Absolute.\nNavigate to the same memory frame you used for memory_images.\nClick Capture Current Frame.\n\nImportant: memory_images and memory_masks should be captured at the same frame.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-7-configure-output-target-and-batch-size",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-7-configure-output-target-and-batch-size",
+    "title": "Using Deep Learning",
+    "section": "Step 7: Configure Output Target and Batch Size",
+    "text": "Step 7: Configure Output Target and Batch Size\nUnder output settings:\n\nSet Target to either:\n\na new mask object, or\nthe same mask object that already contains your memory frame.\n\nSet Batch Size if your model supports it.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#step-8-run-inference",
+    "href": "learning-resources/tutorials/using_deep_learning.html#step-8-run-inference",
+    "title": "Using Deep Learning",
+    "section": "Step 8: Run Inference",
+    "text": "Step 8: Run Inference\n\nSingle specific frame\n\nEnter a frame number in the Frame box.\nClick Run Frame.\n\n\n\nCurrent frame in timeline\n\nClick Current to run on the frame you are currently viewing.\n\n\n\nFrame ranges\n\nClick Run Batch.\nChoose either:\n\nManual range, then set start/end frames, or\nFrom interval series, then choose which interval source defines your ranges.\n\n\nYou can use interval data to drive batch inference only over selected epochs.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#what-happens-after-you-click-run",
+    "href": "learning-resources/tutorials/using_deep_learning.html#what-happens-after-you-click-run",
+    "title": "Using Deep Learning",
+    "section": "What Happens After You Click Run",
+    "text": "What Happens After You Click Run\nInference executes on a background thread. As frames complete, predictions are written to your output mask key, and you can watch results appear in real time.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#troubleshooting",
+    "href": "learning-resources/tutorials/using_deep_learning.html#troubleshooting",
+    "title": "Using Deep Learning",
+    "section": "Troubleshooting",
+    "text": "Troubleshooting\n\nShape mismatch error\nIf you get a shape mismatch error, the model was likely not exported as a compatible AOTI package for your environment.\nUse the AOTI export workflow first, then retry inference:\n\nHow-To: Exporting an AOTI Encoder Model\n\n\n\nStatic memory capture issues\n\nEnsure memory_images and memory_masks both use Absolute mode.\nEnsure both were captured at the same memory frame.\nIf capture keeps showing frame 0, use the forward/back recapture workaround above.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/using_deep_learning.html#see-also",
+    "href": "learning-resources/tutorials/using_deep_learning.html#see-also",
+    "title": "Using Deep Learning",
+    "section": "See Also",
+    "text": "See Also\n\nDeep Learning Widget\nMask Labeling\nKeypoint Video Labeling\nTimeFrame",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Using Deep Learning"
     ]
   }
 ]

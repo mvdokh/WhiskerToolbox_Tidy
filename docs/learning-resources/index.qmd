@@ -22,6 +22,7 @@ Detailed step-by-step guides to help you learn the basics.
 - [Interval Series Labeling](tutorials/interval_series_labeling.qmd)
 - [Event Labeling](tutorials/event_labeling.qmd)
 - [Using the Data Viewer](tutorials/using_data_viewer.qmd)
+- [Using Deep Learning](tutorials/using_deep_learning.qmd)
 - [Performing Data Transforms](tutorials/performing_data_transforms.qmd)
 - [Using a Hidden Markov Model to Predict Behavioral Epochs with Deep Learning Features](tutorials/hmm_behavioral_epochs.qmd)
 - [Is this neuron real? Following a signal between results and raw data](tutorials/is_this_neuron_real_tutorial.qmd)

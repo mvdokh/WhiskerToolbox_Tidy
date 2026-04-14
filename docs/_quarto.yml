@@ -260,6 +260,8 @@ website:
               href: learning-resources/tutorials/event_labeling.qmd
             - text: "Using the Data Viewer"
               href: learning-resources/tutorials/using_data_viewer.qmd
+            - text: "Using Deep Learning"
+              href: learning-resources/tutorials/using_deep_learning.qmd
             - text: "Performing Data Transforms"
               href: learning-resources/tutorials/performing_data_transforms.qmd
             - text: "HMM Behavioral Epoch Prediction"
