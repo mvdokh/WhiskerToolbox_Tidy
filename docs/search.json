@@ -2415,7 +2415,7 @@
     "href": "examples/keypoint_labeling.html#full-video",
     "title": "Keypoint Video Labeling",
     "section": "Full Video",
-    "text": "Full Video\nWatch the complete keypoint labeling workflow from start to finish:\n\n\nYour browser does not support the video tag. You can download the video here: keypoint_example.mp4.",
+    "text": "Full Video\nWatch the complete keypoint labeling workflow from start to finish:\n\n\nYour browser does not support the video tag. You can download the video here: tongue_tip.mp4.",
     "crumbs": [
       "Learning Resources",
       "Tutorials",
@@ -20578,6 +20578,18 @@
       "Learning Resources",
       "Tutorials",
       "Image Stack Import"
+    ]
+  },
+  {
+    "objectID": "learning-resources/tutorials/mask_labeling.html#full-video",
+    "href": "learning-resources/tutorials/mask_labeling.html#full-video",
+    "title": "Tutorial: Mask Labeling",
+    "section": "Full Video",
+    "text": "Full Video\nWatch the complete mask labeling workflow:\n\n\nYour browser does not support the video tag. You can download the video here: tongue_mask.mp4.",
+    "crumbs": [
+      "Learning Resources",
+      "Tutorials",
+      "Mask Labeling"
     ]
   }
 ]

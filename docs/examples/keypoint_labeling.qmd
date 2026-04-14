@@ -27,9 +27,9 @@ This tutorial will guide you through the process of labeling keypoints on a vide
 Watch the complete keypoint labeling workflow from start to finish:
 
 <video controls preload="metadata" width="100%" style="max-width: 960px; display: block; margin: 0 auto;">
-    <source src="../images/keypoint_example.mp4" type="video/mp4">
+    <source src="../images/tongue_tip.mp4" type="video/mp4">
     Your browser does not support the video tag. You can download the video here:
-    <a href="../images/keypoint_example.mp4">keypoint_example.mp4</a>.
+    <a href="../images/tongue_tip.mp4">tongue_tip.mp4</a>.
 </video>
 
 ## Step-by-Step

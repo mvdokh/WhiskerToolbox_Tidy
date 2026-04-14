@@ -13,6 +13,16 @@ Mask labeling is useful when you need full object shapes (not just
 single points) across time. This tutorial walks through a practical
 workflow for creating and refining masks in video data.
 
+## Full Video
+
+Watch the complete mask labeling workflow:
+
+<video controls preload="metadata" width="100%" style="max-width: 960px; display: block; margin: 0 auto;">
+  <source src="../../images/tongue_mask.mp4" type="video/mp4">
+  Your browser does not support the video tag. You can download the video here:
+  <a href="../../images/tongue_mask.mp4">tongue_mask.mp4</a>.
+</video>
+
 ## Prerequisites
 
 - A video loaded in the Media Viewer.
