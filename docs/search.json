@@ -18664,7 +18664,7 @@
     "href": "learning-resources/tutorials/interval_series_labeling.html",
     "title": "Tutorial: Interval Series Labeling",
     "section": "",
-    "text": "Use interval series labeling when behavior spans a duration, such as a contact bout, grooming epoch, or movement window. The output is a DigitalIntervalSeries that stores start and end frames for each labeled region.",
+    "text": "Use interval series labeling when behavior spans a duration, such as a contact bout, grooming epoch, or movement window. The output is a DigitalIntervalSeries that stores start and end frames for each labeled region.\n\n\nYour browser does not support the video tag. You can download the video interval.mp4.",
     "crumbs": [
       "Learning Resources",
       "Tutorials",
@@ -18676,7 +18676,7 @@
     "href": "learning-resources/tutorials/interval_series_labeling.html#overview",
     "title": "Tutorial: Interval Series Labeling",
     "section": "",
-    "text": "Use interval series labeling when behavior spans a duration, such as a contact bout, grooming epoch, or movement window. The output is a DigitalIntervalSeries that stores start and end frames for each labeled region.",
+    "text": "Use interval series labeling when behavior spans a duration, such as a contact bout, grooming epoch, or movement window. The output is a DigitalIntervalSeries that stores start and end frames for each labeled region.\n\n\nYour browser does not support the video tag. You can download the video interval.mp4.",
     "crumbs": [
       "Learning Resources",
       "Tutorials",

@@ -12,6 +12,12 @@ contact bout, grooming epoch, or movement window. The output is a
 `DigitalIntervalSeries` that stores start and end frames for each
 labeled region.
 
+<video controls preload="metadata" width="100%" style="max-width: 960px; display: block; margin: 0 auto;">
+  <source src="../../images/interval.mp4" type="video/mp4">
+  Your browser does not support the video tag. You can download the video
+  <a href="../../images/interval.mp4">interval.mp4</a>.
+</video>
+
 ## Prerequisites
 
 - A video loaded in the Media Viewer.
