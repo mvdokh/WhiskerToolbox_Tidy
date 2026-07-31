@@ -166,8 +166,8 @@ FetchContent_Declare(
 #Torch Stable URLs cpu
 https://https://download.pytorch.org/libtorch/cpu
 
-Cuda 12.6
-https://download.pytorch.org/libtorch/cu126
+Cuda 12.8
+https://download.pytorch.org/libtorch/cu128/libtorch-win-shared-with-deps-2.9.0%2Bcu128.zip
 
 ]]
 if (LINUX)
@@ -196,7 +196,7 @@ elseif (WIN32)
         FetchContent_Declare(
             Torch
             #URL https://download.pytorch.org/libtorch/cu121/libtorch-win-shared-with-deps-2.5.1%2Bcu121.zip
-            URL https://download.pytorch.org/libtorch/cu126/libtorch-win-shared-with-deps-2.9.0%2Bcu126.zip
+            URL https://download.pytorch.org/libtorch/cu128/libtorch-win-shared-with-deps-2.9.0%2Bcu128.zip
         )
     else()
         FetchContent_Declare(
