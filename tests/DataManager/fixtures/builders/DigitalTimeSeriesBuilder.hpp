@@ -3,11 +3,26 @@
 
 #include "DigitalTimeSeries/Digital_Event_Series.hpp"
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
-#include "TimeFrame/interval_data.hpp"
+#include "fixtures/UniformIntervalTestTimeFrame.hpp"
 #include "TimeFrame/StrongTimeTypes.hpp"
+#include "TimeFrame/TimeFrame.hpp"
+#include "TimeFrame/interval_data.hpp"
 
-#include <vector>
+#include <algorithm>
+#include <cstdint>
 #include <memory>
+#include <vector>
+
+/**
+ * @brief Create an identity TimeFrame large enough for generated digital test data.
+ *
+ * @pre @p max_time is the largest generated time index, or zero for empty data.
+ * @post The returned TimeFrame maps each index to the same physical time value.
+ */
+[[nodiscard]] inline std::shared_ptr<TimeFrame> makeDigitalBuilderIdentityTimeFrame(int64_t max_time) {
+    auto const frame_count = static_cast<std::size_t>(std::max<int64_t>(max_time + 10'000, 10'000));
+    return uniform_interval_test::uniformIntervalTestTimeFrame(frame_count);
+}
 
 /**
  * @brief Lightweight builder for DigitalEventSeries objects
@@ -29,9 +44,9 @@ public:
      * @brief Specify event times explicitly
      * @param times Vector of event time indices
      */
-    DigitalEventSeriesBuilder& withEvents(std::vector<int> times) {
+    DigitalEventSeriesBuilder & withEvents(std::vector<int> times) {
         m_event_times.clear();
-        for (int t : times) {
+        for (int t: times) {
             m_event_times.emplace_back(t);
         }
         return *this;
@@ -41,7 +56,7 @@ public:
      * @brief Add a single event
      * @param time Event time index
      */
-    DigitalEventSeriesBuilder& addEvent(int time) {
+    DigitalEventSeriesBuilder & addEvent(int time) {
         m_event_times.emplace_back(time);
         return *this;
     }
@@ -52,7 +67,7 @@ public:
      * @param end Ending time (inclusive)
      * @param interval Interval between events
      */
-    DigitalEventSeriesBuilder& withInterval(int start, int end, int interval) {
+    DigitalEventSeriesBuilder & withInterval(int start, int end, int interval) {
         m_event_times.clear();
         for (int t = start; t <= end; t += interval) {
             m_event_times.emplace_back(t);
@@ -65,7 +80,12 @@ public:
      * @return Shared pointer to constructed DigitalEventSeries
      */
     std::shared_ptr<DigitalEventSeries> build() const {
-        return std::make_shared<DigitalEventSeries>(m_event_times);
+        auto series = std::make_shared<DigitalEventSeries>(m_event_times);
+        auto const max_time = m_event_times.empty()
+                                      ? int64_t{0}
+                                      : std::ranges::max(m_event_times).getValue();
+        series->setTimeFrame(makeDigitalBuilderIdentityTimeFrame(max_time));
+        return series;
     }
 
 private:
@@ -94,8 +114,8 @@ public:
      * @param start Interval start time
      * @param end Interval end time
      */
-    DigitalIntervalSeriesBuilder& withInterval(int start, int end) {
-        m_intervals.emplace_back(start, end);
+    DigitalIntervalSeriesBuilder & withInterval(int start, int end) {
+        m_intervals.emplace_back(TimeFrameIndex(start), TimeFrameIndex(end));
         return *this;
     }
 
@@ -104,8 +124,8 @@ public:
      * @param start Interval start time
      * @param end Interval end time
      */
-    DigitalIntervalSeriesBuilder& withInterval(TimeFrameIndex start, TimeFrameIndex end) {
-        m_intervals.emplace_back(start.getValue(), end.getValue());
+    DigitalIntervalSeriesBuilder & withInterval(TimeFrameIndex start, TimeFrameIndex end) {
+        m_intervals.emplace_back(start, end);
         return *this;
     }
 
@@ -113,7 +133,7 @@ public:
      * @brief Add multiple intervals
      * @param intervals Vector of intervals
      */
-    DigitalIntervalSeriesBuilder& withIntervals(const std::vector<Interval>& intervals) {
+    DigitalIntervalSeriesBuilder & withIntervals(std::vector<TimeFrameInterval> const & intervals) {
         m_intervals.insert(m_intervals.end(), intervals.begin(), intervals.end());
         return *this;
     }
@@ -125,11 +145,11 @@ public:
      * @param interval_duration Duration of each interval
      * @param gap Gap between intervals
      */
-    DigitalIntervalSeriesBuilder& withPattern(int start, int end, int interval_duration, int gap) {
+    DigitalIntervalSeriesBuilder & withPattern(int start, int end, int interval_duration, int gap) {
         m_intervals.clear();
         int current = start;
         while (current + interval_duration <= end) {
-            m_intervals.emplace_back(current, current + interval_duration);
+            m_intervals.emplace_back(TimeFrameIndex(current), TimeFrameIndex(current + interval_duration));
             current += interval_duration + gap;
         }
         return *this;
@@ -140,11 +160,17 @@ public:
      * @return Shared pointer to constructed DigitalIntervalSeries
      */
     std::shared_ptr<DigitalIntervalSeries> build() const {
-        return std::make_shared<DigitalIntervalSeries>(m_intervals);
+        auto series = std::make_shared<DigitalIntervalSeries>(m_intervals);
+        int64_t max_time = 0;
+        for (auto const & interval: m_intervals) {
+            max_time = std::max(max_time, interval.end.getValue());
+        }
+        series->setTimeFrame(makeDigitalBuilderIdentityTimeFrame(max_time));
+        return series;
     }
 
 private:
-    std::vector<Interval> m_intervals;
+    std::vector<TimeFrameInterval> m_intervals;
 };
 
-#endif // DIGITAL_TIME_SERIES_BUILDER_HPP
+#endif// DIGITAL_TIME_SERIES_BUILDER_HPP

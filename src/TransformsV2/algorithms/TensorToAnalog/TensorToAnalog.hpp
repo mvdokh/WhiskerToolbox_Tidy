@@ -2,13 +2,12 @@
  * @file TensorToAnalog.hpp
  * @brief Container transform to extract TensorData columns as AnalogTimeSeries
  *
- * Phase 1 of the multi-channel storage roadmap.
  * Extracts selected columns from a 2D TensorData and returns them as
  * independent AnalogTimeSeries objects (owning copies).
  */
 
-#ifndef WHISKERTOOLBOX_V2_TENSOR_TO_ANALOG_HPP
-#define WHISKERTOOLBOX_V2_TENSOR_TO_ANALOG_HPP
+#ifndef NEURALYZER_V2_TENSOR_TO_ANALOG_HPP
+#define NEURALYZER_V2_TENSOR_TO_ANALOG_HPP
 
 #include <memory>
 #include <string>
@@ -17,11 +16,11 @@
 class AnalogTimeSeries;
 class TensorData;
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 /**
  * @brief Parameters for TensorToAnalog transform (reflect-cpp compatible)
@@ -54,6 +53,6 @@ struct TensorToAnalogParams {
         TensorToAnalogParams const & params,
         ComputeContext const & ctx) -> std::vector<std::shared_ptr<AnalogTimeSeries>>;
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
-#endif// WHISKERTOOLBOX_V2_TENSOR_TO_ANALOG_HPP
+#endif// NEURALYZER_V2_TENSOR_TO_ANALOG_HPP

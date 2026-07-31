@@ -3,6 +3,7 @@
 #include "core/ComputeContext.hpp"
 #include "core/RangeReductionRegistry.hpp"
 #include "extension/RangeReductionTypes.hpp"
+#include "extension/gatherResult/GatherResultRowContext.hpp"
 
 #include "AnalogTimeSeries/Analog_Time_Series.hpp"
 #include "DigitalTimeSeries/Digital_Event_Series.hpp"
@@ -18,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 namespace {
 
@@ -74,13 +75,10 @@ float castReductionResult(std::any const & result) {
  */
 std::vector<TimeFrameInterval> buildTimeFrameIntervals(
         DigitalIntervalSeries const & intervals) {
-    auto const & interval_data = intervals.view();
     std::vector<TimeFrameInterval> tf_intervals;
-    tf_intervals.reserve(interval_data.size());
-    for (auto const & interval: interval_data) {
-        tf_intervals.push_back(TimeFrameInterval{
-                TimeFrameIndex(interval.value().start),
-                TimeFrameIndex(interval.value().end)});
+    tf_intervals.reserve(intervals.size());
+    for (size_t i = 0; i < intervals.size(); ++i) {
+        tf_intervals.push_back(intervals.getStoredInterval(i));
     }
     return tf_intervals;
 }
@@ -103,15 +101,19 @@ std::shared_ptr<TimeFrame> getOrCreateTimeFrame(
 }
 
 /**
- * @brief Create a non-owning shared_ptr alias for use with GatherResult.
+ * @brief Create a non-owning source shared_ptr alias for use with GatherResult.
  *
  * The resulting shared_ptr does NOT own the object; it merely provides a
  * compatible smart-pointer interface. The caller must ensure the referenced
  * object outlives the shared_ptr (which is guaranteed within a single
  * transform function call).
+ *
+ * Current DataObject view APIs used by GatherResult require non-const source
+ * pointers, so this source alias remains mutable until those APIs are
+ * const-correct.
  */
 template<typename T>
-std::shared_ptr<T> borrowAsShared(T const & obj) {
+std::shared_ptr<T> borrowSourceAsShared(T const & obj) {
     // Aliasing constructor with null controlling block → no-op deleter
     return std::shared_ptr<T>(
             std::shared_ptr<T>{},
@@ -119,46 +121,13 @@ std::shared_ptr<T> borrowAsShared(T const & obj) {
 }
 
 /**
- * @brief Prepare intervals for gathering, with cross-TimeFrame conversion if needed.
- *
- * If the source data and interval series have different TimeFrames, the interval
- * boundaries are converted from the interval's coordinate system to the source's
- * coordinate system so that GatherResult queries the correct data range.
- *
- * When no conversion is needed (same TimeFrame, or either is null), a non-owning
- * alias of the original intervals is returned to avoid unnecessary copies.
- *
- * @param intervals The original interval series (in its own TimeFrame)
- * @param source_tf The source data's TimeFrame
- * @return Shared pointer to intervals with boundaries in the source's TimeFrame
+ * @brief Create a non-owning const shared_ptr alias for row-defining intervals.
  */
-std::shared_ptr<DigitalIntervalSeries> prepareIntervalsForGather(
-        DigitalIntervalSeries const & intervals,
-        std::shared_ptr<TimeFrame> const & source_tf) {
-
-    auto interval_tf = intervals.getTimeFrame();
-
-    // No conversion needed if same TimeFrame or either is null
-    if (!source_tf || !interval_tf || source_tf.get() == interval_tf.get()) {
-        return borrowAsShared(intervals);
-    }
-
-    // Convert interval boundaries from interval's TimeFrame to source's TimeFrame
-    auto const & interval_data = intervals.view();
-    std::vector<Interval> converted;
-    converted.reserve(interval_data.size());
-
-    for (auto const & iv: interval_data) {
-        auto [new_start, new_end] = convertTimeFrameRange(
-                TimeFrameIndex(iv.interval.start),
-                TimeFrameIndex(iv.interval.end),
-                *interval_tf, *source_tf);
-        converted.push_back(Interval{new_start.getValue(), new_end.getValue()});
-    }
-
-    auto result = std::make_shared<DigitalIntervalSeries>(converted);
-    result->setTimeFrame(source_tf);
-    return result;
+std::shared_ptr<DigitalIntervalSeries const> borrowIntervalsAsShared(
+        DigitalIntervalSeries const & intervals) {
+    return {
+            std::shared_ptr<DigitalIntervalSeries const>{},
+            &intervals};
 }
 
 }// anonymous namespace
@@ -197,17 +166,18 @@ std::shared_ptr<TensorData> analogIntervalReduction(
 
     using TimeValuePoint = AnalogTimeSeries::TimeValuePoint;
 
-    // Create GatherResult with cross-TimeFrame conversion if needed
-    auto analog_ptr = borrowAsShared(analog);
-    auto gather_intervals = prepareIntervalsForGather(intervals, analog.getTimeFrame());
-    auto gather = GatherResult<AnalogTimeSeries>::create(analog_ptr, gather_intervals);
+    // GatherResult converts interval bounds to the source TimeFrame at query time.
+    auto analog_ptr = borrowSourceAsShared(analog);
+    auto gather = GatherResult<AnalogTimeSeries>::create(
+            analog_ptr,
+            borrowIntervalsAsShared(intervals));
 
     ctx.reportProgress(15);
 
     // Build reducer factory
-    Gather::ReducerFactoryV2<TimeValuePoint, float> const factory =
+    Neuralyzer::Gather::ReducerFactoryV2<TimeValuePoint, float> const factory =
             [&reduction_name, &reduction_params](
-                    PipelineValueStore const &) -> WhiskerToolbox::Gather::ReducerFn<TimeValuePoint, float> {
+                    PipelineValueStore const &) -> Neuralyzer::Gather::ReducerFn<TimeValuePoint, float> {
         return [&reduction_name, &reduction_params](
                        std::span<TimeValuePoint const> input) -> float {
             auto & reg = RangeReductionRegistry::instance();
@@ -219,7 +189,7 @@ std::shared_ptr<TensorData> analogIntervalReduction(
     };
 
     // Reduce all gathered views
-    auto values = gather.template reduce<float>(factory);
+    auto values = Neuralyzer::Gather::reduceGatherRows(gather, factory);
 
     ctx.reportProgress(85);
 
@@ -272,19 +242,20 @@ std::shared_ptr<TensorData> eventIntervalReduction(
     std::string const reduction_name = params.reduction_name;
     std::any reduction_params = ensureReductionParams(params.reduction_params_json);
 
-    using EventElement = WhiskerToolbox::Gather::element_type_of_t<DigitalEventSeries>;
+    using EventElement = Neuralyzer::Gather::element_type_of_t<DigitalEventSeries>;
 
-    // Create GatherResult with cross-TimeFrame conversion if needed
-    auto events_ptr = borrowAsShared(events);
-    auto gather_intervals = prepareIntervalsForGather(intervals, events.getTimeFrame());
-    auto gather = GatherResult<DigitalEventSeries>::create(events_ptr, gather_intervals);
+    // GatherResult converts interval bounds to the source TimeFrame at query time.
+    auto events_ptr = borrowSourceAsShared(events);
+    auto gather = GatherResult<DigitalEventSeries>::create(
+            events_ptr,
+            borrowIntervalsAsShared(intervals));
 
     ctx.reportProgress(15);
 
     // Build reducer factory
-    Gather::ReducerFactoryV2<EventElement, float> const factory =
+    Neuralyzer::Gather::ReducerFactoryV2<EventElement, float> const factory =
             [&reduction_name, &reduction_params](
-                    PipelineValueStore const &) -> WhiskerToolbox::Gather::ReducerFn<EventElement, float> {
+                    PipelineValueStore const &) -> Neuralyzer::Gather::ReducerFn<EventElement, float> {
         return [&reduction_name, &reduction_params](
                        std::span<EventElement const> input) -> float {
             auto & reg = RangeReductionRegistry::instance();
@@ -296,7 +267,7 @@ std::shared_ptr<TensorData> eventIntervalReduction(
     };
 
     // Reduce all gathered views
-    auto values = gather.template reduce<float>(factory);
+    auto values = Neuralyzer::Gather::reduceGatherRows(gather, factory);
 
     ctx.reportProgress(85);
 
@@ -321,6 +292,9 @@ std::shared_ptr<TensorData> eventIntervalReduction(
 // IntervalOverlapReduction
 // ============================================================================
 
+// The two interval-series parameters intentionally distinguish row windows from
+// the source interval series gathered inside each row.
+// NOLINTBEGIN(bugprone-easily-swappable-parameters)
 std::shared_ptr<TensorData> intervalOverlapReduction(
         DigitalIntervalSeries const & intervals,
         DigitalIntervalSeries const & source,
@@ -349,19 +323,20 @@ std::shared_ptr<TensorData> intervalOverlapReduction(
     std::string const reduction_name = params.reduction_name;
     std::any reduction_params = ensureReductionParams(params.reduction_params_json);
 
-    using IntervalElement = WhiskerToolbox::Gather::element_type_of_t<DigitalIntervalSeries>;
+    using IntervalElement = Neuralyzer::Gather::element_type_of_t<DigitalIntervalSeries>;
 
-    // Create GatherResult with cross-TimeFrame conversion if needed
-    auto source_ptr = borrowAsShared(source);
-    auto gather_intervals = prepareIntervalsForGather(intervals, source.getTimeFrame());
-    auto gather = GatherResult<DigitalIntervalSeries>::create(source_ptr, gather_intervals);
+    // GatherResult converts interval bounds to the source TimeFrame at query time.
+    auto source_ptr = borrowSourceAsShared(source);
+    auto gather = GatherResult<DigitalIntervalSeries>::create(
+            source_ptr,
+            borrowIntervalsAsShared(intervals));
 
     ctx.reportProgress(15);
 
     // Build reducer factory
-    Gather::ReducerFactoryV2<IntervalElement, float> const factory =
+    Neuralyzer::Gather::ReducerFactoryV2<IntervalElement, float> const factory =
             [&reduction_name, &reduction_params](
-                    PipelineValueStore const &) -> WhiskerToolbox::Gather::ReducerFn<IntervalElement, float> {
+                    PipelineValueStore const &) -> Neuralyzer::Gather::ReducerFn<IntervalElement, float> {
         return [&reduction_name, &reduction_params](
                        std::span<IntervalElement const> input) -> float {
             auto & reg = RangeReductionRegistry::instance();
@@ -373,7 +348,7 @@ std::shared_ptr<TensorData> intervalOverlapReduction(
     };
 
     // Reduce all gathered views
-    auto values = gather.template reduce<float>(factory);
+    auto values = Neuralyzer::Gather::reduceGatherRows(gather, factory);
 
     ctx.reportProgress(85);
 
@@ -393,5 +368,6 @@ std::shared_ptr<TensorData> intervalOverlapReduction(
     ctx.reportProgress(100);
     return result;
 }
+// NOLINTEND(bugprone-easily-swappable-parameters)
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2

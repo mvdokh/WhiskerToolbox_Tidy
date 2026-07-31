@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_LINE_RESAMPLE_TRANSFORM_HPP
-#define WHISKERTOOLBOX_V2_LINE_RESAMPLE_TRANSFORM_HPP
+#ifndef NEURALYZER_V2_LINE_RESAMPLE_TRANSFORM_HPP
+#define NEURALYZER_V2_LINE_RESAMPLE_TRANSFORM_HPP
 
 #include <rfl.hpp>
 #include <rfl/json.hpp>
@@ -8,11 +8,11 @@
 
 class Line2D;
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 /**
  * @brief Line simplification algorithm selection
@@ -112,6 +112,6 @@ Line2D resampleLineWithContext(
         LineResampleParams const & params,
         ComputeContext const & ctx);
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
-#endif// WHISKERTOOLBOX_V2_LINE_RESAMPLE_TRANSFORM_HPP
+#endif// NEURALYZER_V2_LINE_RESAMPLE_TRANSFORM_HPP

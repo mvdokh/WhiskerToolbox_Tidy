@@ -7,8 +7,8 @@
  * TransformsV2 pattern but are tailored for data generators that produce
  * data from parameters alone (no input data required).
  */
-#ifndef WHISKERTOOLBOX_GENERATOR_TYPES_HPP
-#define WHISKERTOOLBOX_GENERATOR_TYPES_HPP
+#ifndef NEURALYZER_GENERATOR_TYPES_HPP
+#define NEURALYZER_GENERATOR_TYPES_HPP
 
 #include "DataManager/DataManagerTypes.hpp"
 #include "ParameterSchema/ParameterSchema.hpp"
@@ -18,7 +18,7 @@
 
 class DataManager;
 
-namespace WhiskerToolbox::DataSynthesizer {
+namespace Neuralyzer::DataSynthesizer {
 
 /**
  * @brief Context passed to generators during execution.
@@ -63,6 +63,6 @@ struct GeneratorEntry {
     GeneratorMetadata metadata;
 };
 
-}// namespace WhiskerToolbox::DataSynthesizer
+}// namespace Neuralyzer::DataSynthesizer
 
-#endif// WHISKERTOOLBOX_GENERATOR_TYPES_HPP
+#endif// NEURALYZER_GENERATOR_TYPES_HPP

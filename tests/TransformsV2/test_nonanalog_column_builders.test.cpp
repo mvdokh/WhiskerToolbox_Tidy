@@ -50,10 +50,10 @@
 #include <memory>
 #include <vector>
 
-using namespace WhiskerToolbox::TensorBuilders;
-using WhiskerToolbox::Transforms::V2::TransformPipeline;
-using WhiskerToolbox::Transforms::V2::Examples::MaskAreaParams;
-using WhiskerToolbox::Transforms::V2::Examples::LineLengthParams;
+using namespace Neuralyzer::TensorBuilders;
+using Neuralyzer::Transforms::V2::TransformPipeline;
+using Neuralyzer::Transforms::V2::Examples::MaskAreaParams;
+using Neuralyzer::Transforms::V2::Examples::LineLengthParams;
 using Catch::Matchers::WithinAbs;
 
 // =============================================================================
@@ -117,10 +117,10 @@ std::shared_ptr<PointData> createPoints(
 std::shared_ptr<DigitalIntervalSeries> createIntervalSeries(
     std::vector<std::pair<int64_t, int64_t>> const & intervals)
 {
-    std::vector<Interval> vec;
+    std::vector<TimeFrameInterval> vec;
     vec.reserve(intervals.size());
     for (auto const & [s, e] : intervals) {
-        vec.push_back(Interval{s, e});
+        vec.push_back(TimeFrameInterval(TimeFrameIndex(s), TimeFrameIndex(e)));
     }
     return std::make_shared<DigitalIntervalSeries>(vec);
 }

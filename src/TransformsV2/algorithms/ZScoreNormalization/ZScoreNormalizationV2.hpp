@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_ZSCORE_NORMALIZATION_V2_HPP
-#define WHISKERTOOLBOX_V2_ZSCORE_NORMALIZATION_V2_HPP
+#ifndef NEURALYZER_V2_ZSCORE_NORMALIZATION_V2_HPP
+#define NEURALYZER_V2_ZSCORE_NORMALIZATION_V2_HPP
 
 /**
  * @file ZScoreNormalizationV2.hpp
@@ -62,7 +62,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 /**
  * @brief V2 parameters for Z-Score normalization
@@ -152,6 +152,6 @@ inline auto const register_zscore_v2_binding_applicator =
 
 }// namespace
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-#endif// WHISKERTOOLBOX_V2_ZSCORE_NORMALIZATION_V2_HPP
+#endif// NEURALYZER_V2_ZSCORE_NORMALIZATION_V2_HPP

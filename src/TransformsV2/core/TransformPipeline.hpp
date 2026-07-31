@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_TRANSFORM_PIPELINE_HPP
-#define WHISKERTOOLBOX_V2_TRANSFORM_PIPELINE_HPP
+#ifndef NEURALYZER_V2_TRANSFORM_PIPELINE_HPP
+#define NEURALYZER_V2_TRANSFORM_PIPELINE_HPP
 
 #include "ElementRegistry.hpp"// ElementRegistry
 #include "PipelineValueStore/PipelineValueStore.hpp"
@@ -15,8 +15,8 @@
 //#include "CoreGeometry/lines.hpp"
 //#include "CoreGeometry/masks.hpp"
 //#include "CoreGeometry/points.hpp"
-#include "DataManager/DataManagerTypes.hpp"// DataTypeVariant
-#include "TransformTypes/TransformTypes.hpp"      // ElementVariant, BatchVariant
+#include "DataManager/DataManagerTypes.hpp" // DataTypeVariant
+#include "TransformTypes/TransformTypes.hpp"// ElementVariant, BatchVariant
 
 #include <any>       // std::any
 #include <functional>// std::function
@@ -32,9 +32,9 @@
 #include <variant>
 #include <vector>// std::vector
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
-using TypeTraits::ElementFor_t;
+using Neuralyzer::TypeTraits::ElementFor_t;
 
 
 // ============================================================================
@@ -1095,7 +1095,7 @@ private:
  * auto factory = bindValueProjectionV2<EventWithId, float>(pipeline);
  *
  * for (size_t i = 0; i < gather_result.size(); ++i) {
- *     auto store = gather_result.buildTrialStore(i);  // V2 method
+ *     auto store = buildGatherRowStore(gather_result, i);
  *     auto projection = factory(store);
  *
  *     for (auto const& event : gather_result[i]->view()) {
@@ -1121,7 +1121,7 @@ private:
  * @throws std::runtime_error if pipeline is empty or contains unsupported transforms
  *
  * @see PipelineValueStore For value store documentation
- * @see GatherResult::buildTrialStore() For populating store with trial values
+ * @see buildGatherRowStore() For populating store with trial values
  */
 template<typename InElement, typename Value>
 ValueProjectionFactoryV2<InElement, Value> bindValueProjectionV2(TransformPipeline const & pipeline);
@@ -1202,12 +1202,11 @@ ValueProjectionFactoryV2<InElement, Value> bindValueProjectionV2(TransformPipeli
         // Return projection function that applies all transforms and extracts Value
         return [chain = std::move(chain)](InElement const & input) -> Value {
             // Convert input to ElementVariant. If InElement is directly in the variant, use it.
-            // Otherwise, extract .time() for types like EventWithId that have a TimeFrameIndex member.
+            // Otherwise extract .time() (TimeFrameIndex for EventWithId, ClockTicks for ClockTicksWithId).
             ElementVariant current = [&]() -> ElementVariant {
                 if constexpr (std::is_constructible_v<ElementVariant, InElement>) {
                     return ElementVariant{input};
                 } else {
-                    // For types like EventWithId, extract the time member
                     return ElementVariant{input.time()};
                 }
             }();
@@ -1219,6 +1218,6 @@ ValueProjectionFactoryV2<InElement, Value> bindValueProjectionV2(TransformPipeli
     };
 }
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-#endif// WHISKERTOOLBOX_V2_TRANSFORM_PIPELINE_HPP
+#endif// NEURALYZER_V2_TRANSFORM_PIPELINE_HPP

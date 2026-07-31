@@ -32,6 +32,7 @@ add_executable(test_TransformsV2
         test_nonanalog_column_builders.test.cpp
         test_phase1_3_4_reductions_transforms.test.cpp
         test_multistep_column_builders.test.cpp
+        test_tensor_whisker_contact_scenario.cpp
         test_executor_timekey.test.cpp
         test_store_output_merge.test.cpp
 
@@ -40,6 +41,9 @@ add_executable(test_TransformsV2
     ${CMAKE_SOURCE_DIR}/src/TransformsV2/algorithms/AnalogIntervalPeak/AnalogIntervalPeak.test.cpp
     ${CMAKE_SOURCE_DIR}/src/TransformsV2/algorithms/AnalogIntervalThreshold/AnalogIntervalThreshold.test.cpp
     ${CMAKE_SOURCE_DIR}/src/TransformsV2/algorithms/DigitalIntervalBoolean/DigitalIntervalBoolean.test.cpp
+    ${CMAKE_SOURCE_DIR}/src/TransformsV2/algorithms/EventToInterval/EventToInterval.test.cpp
+    ${CMAKE_SOURCE_DIR}/src/TransformsV2/algorithms/IntervalToEvent/IntervalToEvent.test.cpp
+    ${CMAKE_SOURCE_DIR}/src/TransformsV2/algorithms/PruneOverlappingIntervals/PruneOverlappingIntervals.test.cpp
     ${CMAKE_SOURCE_DIR}/src/TransformsV2/algorithms/IntervalReduction/IntervalReduction.test.cpp
         ${CMAKE_SOURCE_DIR}/src/TransformsV2/algorithms/LineAngle/LineAngle.test.cpp
         ${CMAKE_SOURCE_DIR}/src/TransformsV2/algorithms/LineBaseFlip/LineBaseFlip.test.cpp
@@ -90,6 +94,7 @@ target_link_libraries(test_TransformsV2 PRIVATE DeepLearning)
 target_link_libraries(test_TransformsV2 PRIVATE DataSynthesizer)
 
 target_link_libraries(test_TransformsV2 PRIVATE DataManager)
+target_link_libraries(test_TransformsV2 PRIVATE TensorDesign)
 target_link_libraries(test_TransformsV2 PRIVATE WhiskerToolbox::TensorData)
 
 if(TENSOR_BACKEND_LIBTORCH)

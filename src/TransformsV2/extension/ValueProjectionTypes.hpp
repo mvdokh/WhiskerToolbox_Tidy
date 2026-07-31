@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_VALUE_PROJECTION_TYPES_HPP
-#define WHISKERTOOLBOX_V2_VALUE_PROJECTION_TYPES_HPP
+#ifndef NEURALYZER_V2_VALUE_PROJECTION_TYPES_HPP
+#define NEURALYZER_V2_VALUE_PROJECTION_TYPES_HPP
 
 /**
  * @file ValueProjectionTypes.hpp
@@ -53,7 +53,7 @@
  * auto factory = bindValueProjectionV2<EventWithId, float>(pipeline);
  *
  * for (size_t i = 0; i < gather_result.size(); ++i) {
- *     auto store = gather_result.buildTrialStore(i);
+ *     auto store = buildGatherRowStore(gather_result, i);
  *     auto projection = factory(store);
  *
  *     for (auto const& event : gather_result[i]->view()) {
@@ -85,7 +85,7 @@
 #include <ranges>
 #include <utility>
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 class PipelineValueStore;
 
@@ -146,7 +146,7 @@ using ValueProjectionFn = std::function<Value(InElement const &)>;
  * auto factory = bindValueProjectionV2<EventWithId, float>(pipeline);
  *
  * for (size_t i = 0; i < result.size(); ++i) {
- *     auto store = result.buildTrialStore(i);  // V2 method
+ *     auto store = buildGatherRowStore(result, i);
  *     auto projection = factory(store);
  *
  *     for (auto const& event : result[i]->view()) {
@@ -160,7 +160,7 @@ using ValueProjectionFn = std::function<Value(InElement const &)>;
  *
  * @see PipelineValueStore for store documentation
  * @see bindValueProjectionV2() for creating factories from pipelines
- * @see GatherResult::buildTrialStore() for populating store with trial values
+ * @see buildGatherRowStore() for populating store with trial values
  */
 template<typename InElement, typename Value>
 using ValueProjectionFactoryV2 = std::function<ValueProjectionFn<InElement, Value>(PipelineValueStore const &)>;
@@ -387,6 +387,6 @@ ValueProjectionFactoryV2<InElement, Value> recoverValueProjectionFactoryV2(
     };
 }
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-#endif// WHISKERTOOLBOX_V2_VALUE_PROJECTION_TYPES_HPP
+#endif// NEURALYZER_V2_VALUE_PROJECTION_TYPES_HPP

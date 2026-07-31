@@ -158,7 +158,6 @@ std::unique_ptr<IRowSelector> PaginatedTableModel::createRowSelectorFromSource(Q
                 return nullptr;
             }
 
-            auto events = event_series->view();
             auto timeframe_key = _data_manager->getTimeKey(source_name_str);
             auto timeframe_obj = _data_manager->getTime(timeframe_key);
             if (!timeframe_obj) {
@@ -166,10 +165,11 @@ std::unique_ptr<IRowSelector> PaginatedTableModel::createRowSelectorFromSource(Q
                 return nullptr;
             }
 
-            // Convert events to TimeFrameIndex
+            // Convert events to TimeFrameIndex from storage
             std::vector<TimeFrameIndex> timestamps;
-            for (auto const & event: events) {
-                timestamps.push_back(event.time());
+            timestamps.reserve(event_series->size());
+            for (std::size_t i = 0; i < event_series->size(); ++i) {
+                timestamps.push_back(event_series->getStoredEvent(i));
             }
 
             return std::make_unique<TimestampSelector>(std::move(timestamps), timeframe_obj);
@@ -183,12 +183,7 @@ std::unique_ptr<IRowSelector> PaginatedTableModel::createRowSelectorFromSource(Q
             }
 
             auto intervals = interval_series->view();
-            auto timeframe_key = _data_manager->getTimeKey(source_name_str);
-            auto timeframe_obj = _data_manager->getTime(timeframe_key);
-            if (!timeframe_obj) {
-                qDebug() << "TimeFrame not found for intervals:" << timeframe_key.str();
-                return nullptr;
-            }
+            auto timeframe_obj = interval_series->getTimeFrame();
 
             // Create intervals (using default capture range of 30000)
             int capture_range = 30000;
@@ -197,16 +192,20 @@ std::unique_ptr<IRowSelector> PaginatedTableModel::createRowSelectorFromSource(Q
 
             std::vector<TimeFrameInterval> tf_intervals;
             for (auto const & interval: intervals) {
+
+
+                TimeFrameIndex start_index = timeframe_obj->getIndexAtTime(interval.value().start);
+                TimeFrameIndex end_index = timeframe_obj->getIndexAtTime(interval.value().end);
                 if (use_interval_itself) {
                     // Use the interval as-is
-                    tf_intervals.emplace_back(TimeFrameIndex(interval.value().start), TimeFrameIndex(interval.value().end));
+                    tf_intervals.emplace_back(start_index, end_index);
                 } else {
                     // Determine the reference point (beginning or end of interval)
                     int64_t reference_point;
                     if (use_beginning) {
-                        reference_point = interval.value().start;
+                        reference_point = start_index.getValue();
                     } else {
-                        reference_point = interval.value().end;
+                        reference_point = end_index.getValue();
                     }
 
                     // Create a new interval around the reference point

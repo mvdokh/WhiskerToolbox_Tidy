@@ -7,18 +7,18 @@
  * frame ±1. Supports configurable boundary policies (NaN, Drop, Clamp, Zero).
  */
 
-#ifndef WHISKERTOOLBOX_V2_TENSOR_TEMPORAL_NEIGHBORS_HPP
-#define WHISKERTOOLBOX_V2_TENSOR_TEMPORAL_NEIGHBORS_HPP
+#ifndef NEURALYZER_V2_TENSOR_TEMPORAL_NEIGHBORS_HPP
+#define NEURALYZER_V2_TENSOR_TEMPORAL_NEIGHBORS_HPP
 
 #include <memory>
 #include <vector>
 
 class TensorData;
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 /**
  * @brief Policy for handling boundary rows where a neighbor offset is out-of-range
@@ -90,6 +90,6 @@ struct TensorTemporalNeighborParams {
         TensorTemporalNeighborParams const & params,
         ComputeContext const & ctx) -> std::shared_ptr<TensorData>;
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
-#endif// WHISKERTOOLBOX_V2_TENSOR_TEMPORAL_NEIGHBORS_HPP
+#endif// NEURALYZER_V2_TENSOR_TEMPORAL_NEIGHBORS_HPP

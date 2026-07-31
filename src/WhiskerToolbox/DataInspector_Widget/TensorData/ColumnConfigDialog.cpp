@@ -30,7 +30,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 
-using namespace WhiskerToolbox::TensorBuilders;
+using namespace Neuralyzer::TensorBuilders;
 
 // =============================================================================
 // Construction
@@ -440,7 +440,7 @@ void ColumnConfigDialog::_onValidateClicked() {
     }
 
     // Try to load as a TransformPipeline
-    auto result = WhiskerToolbox::Transforms::V2::Examples::loadPipelineFromJson(json_text);
+    auto result = Neuralyzer::Transforms::V2::Examples::loadPipelineFromJson(json_text);
     if (result) {
         auto const & pipeline = result.value();
         QString detail;

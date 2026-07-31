@@ -1,13 +1,13 @@
 /// @file ContainerTypeIndex.hpp
 /// @brief Runtime std::type_index and string mapping for DataManager container types.
 
-#ifndef WHISKERTOOLBOX_CONTAINER_TYPE_INDEX_HPP
-#define WHISKERTOOLBOX_CONTAINER_TYPE_INDEX_HPP
+#ifndef NEURALYZER_CONTAINER_TYPE_INDEX_HPP
+#define NEURALYZER_CONTAINER_TYPE_INDEX_HPP
 
 #include <string>
 #include <typeindex>
 
-namespace WhiskerToolbox::TypeTraits {
+namespace Neuralyzer::TypeTraits {
 
 /// @brief Runtime mapping between element/container types, strings, and raggedness.
 class TypeIndexMapper {
@@ -31,6 +31,6 @@ public:
     [[nodiscard]] static bool isContainerRagged(std::type_index container_type);
 };
 
-} // namespace WhiskerToolbox::TypeTraits
+} // namespace Neuralyzer::TypeTraits
 
-#endif // WHISKERTOOLBOX_CONTAINER_TYPE_INDEX_HPP
+#endif // NEURALYZER_CONTAINER_TYPE_INDEX_HPP

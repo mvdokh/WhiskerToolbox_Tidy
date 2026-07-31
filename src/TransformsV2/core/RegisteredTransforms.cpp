@@ -6,7 +6,9 @@
 #include "algorithms/AnalogIntervalThreshold/AnalogIntervalThreshold.hpp"
 #include "algorithms/AnalogToTensor/AnalogToTensor.hpp"
 #include "algorithms/DigitalIntervalBoolean/DigitalIntervalBoolean.hpp"
+#include "algorithms/EventToInterval/EventToInterval.hpp"
 #include "algorithms/IntervalReduction/IntervalReduction.hpp"
+#include "algorithms/IntervalToEvent/IntervalToEvent.hpp"
 #include "algorithms/LineAngle/LineAngle.hpp"
 #include "algorithms/LineBaseFlip/LineBaseFlip.hpp"
 #include "algorithms/LineClip/LineClip.hpp"
@@ -21,6 +23,7 @@
 #include "algorithms/MaskMedianFilter/MaskMedianFilter.hpp"
 #include "algorithms/MaskSkeletonize/MaskSkeletonize.hpp"
 #include "algorithms/MaskToLine/MaskToLine.hpp"
+#include "algorithms/PruneOverlappingIntervals/PruneOverlappingIntervals.hpp"
 #include "algorithms/RemoveLineOutliers/RemoveLineOutliers.hpp"
 #include "algorithms/SincInterpolation/SincInterpolation.hpp"
 #include "algorithms/SumReduction/SumReduction.hpp"
@@ -45,7 +48,7 @@
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
 #include "Tensors/TensorData.hpp"
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 // ============================================================================
 // Pipeline Step Factory Registration
@@ -83,6 +86,9 @@ bool const init_pipeline_factories = []() {
     registerPipelineStepFactoryFor<AnalogIntervalPeakParams>();
     registerPipelineStepFactoryFor<AnalogIntervalThresholdParams>();
     registerPipelineStepFactoryFor<DigitalIntervalBooleanParams>();
+    registerPipelineStepFactoryFor<EventToIntervalParams>();
+    registerPipelineStepFactoryFor<IntervalToEventParams>();
+    registerPipelineStepFactoryFor<PruneOverlappingIntervalsParams>();
     registerPipelineStepFactoryFor<IntervalReductionParams>();
     registerPipelineStepFactoryFor<ZScoreNormalizationParamsV2>();
     registerPipelineStepFactoryFor<AnalogDifferenceParams>();
@@ -966,6 +972,48 @@ auto const register_sinc_interpolation = RegisterContainerTransform<
                 .is_deterministic = true,
                 .supports_cancellation = true});
 
+auto const register_event_to_interval = RegisterContainerTransform<
+        DigitalEventSeries, DigitalIntervalSeries, EventToIntervalParams>(
+        "EventToInterval",
+        eventToInterval,
+        ContainerTransformMetadata{
+                .description = "Expand each event into a pre/post window interval",
+                .category = "Signal Processing",
+                .input_type_name = "DigitalEventSeries",
+                .output_type_name = "DigitalIntervalSeries",
+                .params_type_name = "EventToIntervalParams",
+                .is_expensive = false,
+                .is_deterministic = true,
+                .supports_cancellation = true});
+
+auto const register_interval_to_event = RegisterContainerTransform<
+        DigitalIntervalSeries, DigitalEventSeries, IntervalToEventParams>(
+        "IntervalToEvent",
+        intervalToEvent,
+        ContainerTransformMetadata{
+                .description = "Extract one event per interval at start, end, or center",
+                .category = "Signal Processing",
+                .input_type_name = "DigitalIntervalSeries",
+                .output_type_name = "DigitalEventSeries",
+                .params_type_name = "IntervalToEventParams",
+                .is_expensive = false,
+                .is_deterministic = true,
+                .supports_cancellation = true});
+
+auto const register_prune_overlapping_intervals = RegisterContainerTransform<
+        DigitalIntervalSeries, DigitalIntervalSeries, PruneOverlappingIntervalsParams>(
+        "PruneOverlappingIntervals",
+        pruneOverlappingIntervals,
+        ContainerTransformMetadata{
+                .description = "Greedy keep-first pruning of overlapping intervals",
+                .category = "Signal Processing",
+                .input_type_name = "DigitalIntervalSeries",
+                .output_type_name = "DigitalIntervalSeries",
+                .params_type_name = "PruneOverlappingIntervalsParams",
+                .is_expensive = false,
+                .is_deterministic = true,
+                .supports_cancellation = true});
+
 auto const container_transform_registration = []() {
     registerAnalogEventThreshold();
     registerAnalogIntervalPeak();
@@ -977,4 +1025,4 @@ auto const container_transform_registration = []() {
 
 }// anonymous namespace
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples

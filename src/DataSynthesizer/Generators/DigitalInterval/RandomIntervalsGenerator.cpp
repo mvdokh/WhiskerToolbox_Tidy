@@ -12,6 +12,7 @@
 
 #include "DataManager/DataManagerTypes.hpp"
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
+#include "TimeFrame/TimeFrame.hpp"
 #include "TimeFrame/interval_data.hpp"
 
 #include <algorithm>
@@ -50,7 +51,7 @@ DataTypeVariant generateRandomIntervals(RandomIntervalsParams const & params) {
             1.0 / static_cast<double>(params.mean_gap));
 
     auto const n = static_cast<double>(params.num_samples);
-    std::vector<Interval> intervals;
+    std::vector<TimeFrameInterval> intervals;
 
     // Start with a gap before the first interval
     double t = gap_dist(rng);
@@ -62,20 +63,29 @@ DataTypeVariant generateRandomIntervals(RandomIntervalsParams const & params) {
                 static_cast<int64_t>(n) - 1);
 
         if (start < static_cast<int64_t>(n)) {
-            intervals.push_back(Interval{start, end});
+            intervals.push_back(TimeFrameInterval{TimeFrameIndex{static_cast<int64_t>(start)},
+                                                  TimeFrameIndex{static_cast<int64_t>(end)}});
         }
 
         t += duration + gap_dist(rng);
     }
 
-    return std::make_shared<DigitalIntervalSeries>(std::move(intervals));
+    auto series = std::make_shared<DigitalIntervalSeries>(std::move(intervals));
+
+    std::vector<int> frame_times(static_cast<std::size_t>(params.num_samples));
+    for (int i = 0; i < params.num_samples; ++i) {
+        frame_times[static_cast<std::size_t>(i)] = i;
+    }
+    series->setTimeFrame(std::make_shared<TimeFrame>(frame_times));
+
+    return series;
 }
 
 auto const random_intervals_reg =
-        WhiskerToolbox::DataSynthesizer::RegisterGenerator<RandomIntervalsParams>(
+        Neuralyzer::DataSynthesizer::RegisterGenerator<RandomIntervalsParams>(
                 "RandomIntervals",
                 generateRandomIntervals,
-                WhiskerToolbox::DataSynthesizer::GeneratorMetadata{
+                Neuralyzer::DataSynthesizer::GeneratorMetadata{
                         .description = "Generates randomly spaced intervals with exponentially "
                                        "distributed durations and gaps. "
                                        "Deterministic: same seed always produces the same output.",

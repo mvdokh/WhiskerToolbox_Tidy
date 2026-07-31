@@ -31,7 +31,7 @@
  * ### Lazy Storage (DigitalIntervalStorageType::Lazy)
  * - **On-demand computation** from transform views
  * - Created via createFromView() template method
- * - Stores a C++20 ranges view that computes IntervalWithId on access
+ * - Stores a C++20 ranges view that computes interval elements on access
  * - Useful for transform pipelines without materializing intermediate results
  * - **Read-only**: mutation operations will materialize to owning storage first
  * - Always returns invalid cache (forces virtual dispatch)
@@ -54,32 +54,51 @@
  * - Cross-data-type entity tracking
  * 
  * @see DigitalIntervalStorage.hpp for storage implementation details
- * @see IntervalWithId for the element type returned by iterators
+ * @see ClockTicksIntervalWithId for the element type returned by view()
+ * @see IntervalWithId for index-based lazy-pipeline element type
  * @see TimeFrame for time base management
  * @see EntityRegistry for entity ID management
  */
 
-#include "DigitalTimeSeries/IntervalWithId.hpp"     // IntervalWithId struct for element access
-#include "Entity/EntityTypes.hpp"                   // EntityId
-#include "Observer/Observer_Data.hpp"               // ObserverData base class
-#include "TimeFrame/TimeFrame.hpp"                  // TimeFrame and TimeFrameIndex
+#include "DigitalTimeSeries/IntervalWithId.hpp"// IntervalWithId struct for element access
+#include "Entity/EntityTypes.hpp"              // EntityId
+#include "Observer/Observer_Data.hpp"          // ObserverData base class
+#include "TimeFrame/TimeFrame.hpp"             // TimeFrame and TimeFrameIndex
+#include "TimeFrame/interval_data.hpp"         // Interval struct
 #include "TypeTraits/DataTypeTraits.hpp"
-#include "TimeFrame/interval_data.hpp"              // Interval struct
 #include "storage/DigitalIntervalStorage.hpp"
 
+#include <cassert>
 #include <cstdint>
-#include <memory>           // std::shared_ptr
-#include <optional>         // std::optional
-#include <ranges>           // std::ranges::views
-#include <unordered_set>    // std::unordered_set
-#include <utility>          // std::pair
-#include <vector>           // std::vector
+#include <memory>       // std::shared_ptr
+#include <optional>     // std::optional
+#include <ranges>       // std::ranges::views
+#include <unordered_set>// std::unordered_set
+#include <utility>      // std::pair
+#include <vector>       // std::vector
 
 
 class EntityRegistry;
 template<typename T>
 inline constexpr bool always_false_v = false;
 
+/**
+ * @brief Controls whether intervals in a series may overlap in time.
+ *
+ * - Disjoint: intervals are merged on insert via addEvent(); suitable for user annotations.
+ * - Overlapping: intervals are inserted without merging; suitable for transform intermediates.
+ *
+ * Layout is fixed at construction and exposed via layout() only (no setter).
+ *
+ * Range-query behavior in storage backends depends on layout; see
+ * @ref OwningDigitalIntervalStorage::assumeDisjointIntervals(),
+ * @ref ViewDigitalIntervalStorage::filterByOverlappingRange(), and
+ * @ref LazyDigitalIntervalStorage::getOverlappingRangeImpl().
+ */
+enum class IntervalLayout {
+    Disjoint,   ///< Non-overlapping intervals; addEvent merges on insert
+    Overlapping,///< Overlapping intervals allowed; addEvent does not merge
+};
 
 /**
  * @brief A sorted collection of time intervals with entity tracking
@@ -90,7 +109,8 @@ inline constexpr bool always_false_v = false;
  * 
  * ## Primary Interface
  * 
- * - **view()**: Returns a lazy range of IntervalWithId objects for iteration
+ * - **view()**: Returns a lazy range of ClockTicksIntervalWithId objects for iteration
+ * - **getStoredInterval()**: Returns index-space interval at storage index (save/export)
  * - **viewInRange()**: Returns intervals overlapping a time range (requires TimeFrame)
  * - **hasIntervalAtTime()**: Check if any interval contains a time (requires TimeFrame)
  * - **addEvent()/removeInterval()**: Modify intervals (owning storage only)
@@ -132,12 +152,12 @@ inline constexpr bool always_false_v = false;
  * @note Intervals are always sorted by start time.
  * @note View and Lazy storage will auto-materialize on mutation.
  * 
- * @see IntervalWithId for element accessors (time(), id(), value())
+ * @see ClockTicksIntervalWithId for view() element accessors (time(), id(), value())
  * @see DigitalEventSeries for discrete event data
  */
 class DigitalIntervalSeries : public ObserverData {
 public:
-    struct DataTraits : WhiskerToolbox::TypeTraits::DataTypeTraitsBase<DigitalIntervalSeries, IntervalWithId> {
+    struct DataTraits : Neuralyzer::TypeTraits::DataTypeTraitsBase<DigitalIntervalSeries, ClockTicksIntervalWithId> {
         static constexpr bool is_ragged = false;
         static constexpr bool is_temporal = true;
         static constexpr bool has_entity_ids = true;
@@ -158,7 +178,7 @@ public:
      * 
      * @param digital_vector Vector of intervals (will be sorted)
      */
-    explicit DigitalIntervalSeries(std::vector<Interval> digital_vector);
+    explicit DigitalIntervalSeries(std::vector<TimeFrameInterval> digital_vector);
 
     /**
      * @brief Constructor from float pairs (legacy support)
@@ -172,25 +192,33 @@ public:
     // =============================================================
 
     /**
-     * @brief Get a std::ranges compatible view of the series.
-     * 
-     * Returns a random-access view that synthesizes IntervalWithId objects on demand.
-     * Uses cached pointers for fast-path iteration when storage is contiguous.
-     * Allows iterating over IntervalWithId objects directly.
+     * @brief Get a std::ranges compatible view of the series in absolute clock-tick time.
+     *
+     * Returns a random-access view that synthesizes ClockTicksIntervalWithId objects on demand.
+     *
+     * @pre series time frame must be set (@ref getTimeFrame() non-null)
+     * @see getStoredInterval for index-space access (save/export)
      */
     [[nodiscard]] auto view() const {
-        return std::views::iota(size_t{0}, size()) | std::views::transform([this](size_t idx) {
-                   // Fast path: use cached pointers if valid
-                   if (_cached_storage.isValid()) {
-                       return IntervalWithId(
-                               _cached_storage.getInterval(idx),
-                               _cached_storage.getEntityId(idx));
-                   }
-                   // Slow path: virtual dispatch through wrapper
-                   return IntervalWithId(
-                           _storage.getInterval(idx),
+        assert(_time_frame != nullptr && "view() requires series time frame");
+        TimeFrame const * time_frame = _time_frame.get();
+        return std::views::iota(size_t{0}, size()) | std::views::transform([this, time_frame](size_t idx) {
+                   return ClockTicksIntervalWithId(
+                           toClockTicksInterval(_storage.getInterval(idx), *time_frame),
                            _storage.getEntityId(idx));
                });
+    }
+
+    /**
+     * @brief Get the stored interval at a flat storage index in TimeFrameIndex space.
+     *
+     * Use for save/export and other persistence paths that must write index coordinates.
+     *
+     * @param index Flat index in [0, size())
+     * @return TimeFrameInterval from internal storage
+     */
+    [[nodiscard]] TimeFrameInterval getStoredInterval(size_t index) const {
+        return _storage.getInterval(index);
     }
 
     /**
@@ -205,47 +233,45 @@ public:
      * @param start_index Start time index (inclusive)
      * @param stop_index Stop time index (inclusive)
      * @param source_time_frame The time frame that start_index/stop_index are expressed in
-     * @return Lazy view of IntervalWithId objects in the range
-     * 
-     * @note If source_time_frame matches the series' time frame, no conversion occurs
-     * @note If the series has no time frame set, indices are used directly
+     * @return Lazy view of ClockTicksIntervalWithId objects overlapping the range
+     *
+     * @pre series time frame must be set (@ref getTimeFrame() non-null)
      */
     [[nodiscard]] auto viewInRange(TimeFrameIndex start_index,
                                    TimeFrameIndex stop_index,
                                    TimeFrame const & source_time_frame) const {
-        auto time_range = _getConvertedTimeRange(start_index, stop_index, source_time_frame);
-        int64_t const range_start = time_range.first;
-        int64_t const range_stop = time_range.second;
-        return std::views::iota(size_t{0}, size()) | std::views::filter([this, range_start, range_stop](size_t idx) {
-                   Interval const interval = _storage.getInterval(idx);
-                   // Overlapping: interval.start <= stop_time && interval.end >= start_time
-                   return interval.start <= range_stop && interval.end >= range_start;
-               }) |
-               std::views::transform([this](size_t idx) {
-                   return IntervalWithId(_storage.getInterval(idx), _storage.getEntityId(idx));
+        assert(_time_frame != nullptr && "viewInRange requires series time frame");
+        auto const time_range = _getConvertedTimeRange(start_index, stop_index, source_time_frame);
+        TimeFrame const * time_frame = _time_frame.get();
+        auto const [lo, hi] = _storage.getOverlappingRange(time_range.first, time_range.second);
+        return std::views::iota(lo, hi) |
+               std::views::transform([this, time_frame](size_t idx) {
+                   return ClockTicksIntervalWithId(
+                           toClockTicksInterval(_storage.getInterval(idx), *time_frame),
+                           _storage.getEntityId(idx));
                });
     }
 
     /**
-     * @brief Get just the Interval values in a range as a lazy view
-     * 
+     * @brief Get overlapping intervals in a range as a lazy view of clock-tick intervals.
+     *
+     * @pre series time frame must be set (@ref getTimeFrame() non-null)
+     *
      * @param start_index Start time index (inclusive)
      * @param stop_index Stop time index (inclusive)
      * @param source_time_frame The time frame that start_index/stop_index are expressed in
-     * @return Lazy view of Interval values in the range
+     * @return Lazy view of ClockTicksInterval values overlapping the range
      */
     [[nodiscard]] auto viewIntervalsInRange(TimeFrameIndex start_index,
                                             TimeFrameIndex stop_index,
                                             TimeFrame const & source_time_frame) const {
-        auto time_range = _getConvertedTimeRange(start_index, stop_index, source_time_frame);
-        int64_t const range_start = time_range.first;
-        int64_t const range_stop = time_range.second;
-        return std::views::iota(size_t{0}, size()) | std::views::filter([this, range_start, range_stop](size_t idx) {
-                   Interval const interval = _storage.getInterval(idx);
-                   return interval.start <= range_stop && interval.end >= range_start;
-               }) |
-               std::views::transform([this](size_t idx) {
-                   return _storage.getInterval(idx);
+        assert(_time_frame != nullptr && "viewIntervalsInRange requires series time frame");
+        auto const time_range = _getConvertedTimeRange(start_index, stop_index, source_time_frame);
+        TimeFrame const * time_frame = _time_frame.get();
+        auto const [lo, hi] = _storage.getOverlappingRange(time_range.first, time_range.second);
+        return std::views::iota(lo, hi) |
+               std::views::transform([this, time_frame](size_t idx) {
+                   return toClockTicksInterval(_storage.getInterval(idx), *time_frame);
                });
     }
 
@@ -263,7 +289,7 @@ public:
 
     // ========== Setters ==========
 
-    void addEvent(Interval new_interval);
+    void addEvent(TimeFrameInterval new_interval);
 
     void addEvent(TimeFrameIndex start, TimeFrameIndex end);
 
@@ -275,7 +301,7 @@ public:
      * @param interval The interval to remove
      * @return True if the interval was found and removed, false otherwise
      */
-    bool removeInterval(Interval const & interval);
+    bool removeInterval(TimeFrameInterval const & interval);
 
     /**
      * @brief Remove multiple intervals from the series
@@ -283,7 +309,7 @@ public:
      * @param intervals The intervals to remove
      * @return The number of intervals that were successfully removed
      */
-    size_t removeIntervals(std::vector<Interval> const & intervals);
+    size_t removeIntervals(std::vector<TimeFrameInterval> const & intervals);
 
     template<typename T, typename B>
     void setEventsAtTimes(std::vector<T> times, std::vector<B> events) {
@@ -294,36 +320,6 @@ public:
         notifyObservers();
     }
 
-    /*
-    template<typename T>
-    void createIntervalsFromBool(std::vector<T> const & bool_vector) {
-        // Clear existing storage and rebuild
-        auto * owning = _storage.tryGetMutableOwning();
-        if (owning) {
-            owning->clear();
-        }
-
-        bool in_interval = false;
-        int start = 0;
-        for (size_t i = 0; i < bool_vector.size(); ++i) {
-            if (bool_vector[i] && !in_interval) {
-                start = static_cast<int>(i);
-                in_interval = true;
-            } else if (!bool_vector[i] && in_interval) {
-                if (owning) {
-                    owning->addInterval(Interval{start, static_cast<int64_t>(i - 1)}, EntityId{0});
-                }
-                in_interval = false;
-            }
-        }
-        if (in_interval && owning) {
-            owning->addInterval(Interval{start, static_cast<int64_t>(bool_vector.size() - 1)}, EntityId{0});
-        }
-
-        _cacheOptimizationPointers();
-        notifyObservers();
-    }
-    */
     // ========== Entity-Based Bulk Operations ==========
 
     /**
@@ -333,8 +329,8 @@ public:
      * Copied intervals get new EntityIds in the target based on the target's
      * identity context (via addEvent which auto-assigns EntityIds).
      *
-     * @note Because addEvent merges overlapping intervals, the number of intervals
-     *       added to the target may be fewer than the number of EntityIds matched.
+     * @note When the target layout is Disjoint, addEvent merges overlapping intervals and
+     *       the number of intervals added may be fewer than the number of EntityIds matched.
      *
      * @param target The target series to copy intervals to
      * @param entity_ids Set of EntityIds to copy
@@ -348,7 +344,7 @@ public:
     // NOTE: moveByEntityIds is intentionally NOT implemented for DigitalIntervalSeries.
     //
     // Moving intervals between series has unresolved edge cases due to interval merging:
-    //   - DigitalIntervalSeries guarantees non-overlapping intervals by merging on insert.
+    //   - Disjoint-layout series merge overlapping intervals on insert.
     //   - If a moved interval overlaps with an existing interval in the target, the two
     //     will be merged into a single new interval.
     //   - The original EntityId of the moved interval is lost during merging, but any
@@ -365,6 +361,11 @@ public:
 
     [[nodiscard]] size_t size() const { return _storage.size(); };
 
+    /**
+     * @brief Get the interval layout fixed at construction.
+     * @return IntervalLayout::Disjoint (default) or IntervalLayout::Overlapping
+     */
+    [[nodiscard]] IntervalLayout layout() const noexcept { return _layout; }
 
     // ========== Range-Mode Interval Queries ==========
 
@@ -379,15 +380,17 @@ public:
 
     /**
      * @brief Get intervals in a time range with TimeFrame conversion
-     * 
-     * @deprecated For OVERLAPPING mode, prefer viewInRange() or viewIntervalsInRange() 
+     *
+     * @deprecated For OVERLAPPING mode, prefer viewInRange() or viewIntervalsInRange()
      *             which provide lazy evaluation.
-     * 
+     *
+     * @pre series time frame must be set (@ref getTimeFrame() non-null)
+     *
      * @tparam mode RangeMode::CONTAINED (default), OVERLAPPING, or CLIP
      * @param start_time Start time index in source_timeframe
      * @param stop_time Stop time index in source_timeframe
      * @param source_timeframe TimeFrame the indices are expressed in
-     * @return Lazy view of Interval objects (or vector for CLIP mode)
+     * @return Lazy view of ClockTicksInterval objects (or vector for CLIP mode)
      * @see viewIntervalsInRange for preferred alternative
      */
     template<RangeMode mode = RangeMode::CONTAINED>
@@ -395,21 +398,24 @@ public:
             TimeFrameIndex start_time,
             TimeFrameIndex stop_time,
             TimeFrame const & source_timeframe) const {
-        if (&source_timeframe == _time_frame.get()) {
-            return _getIntervalsInRange<mode>(start_time.getValue(), stop_time.getValue());
+        assert(_time_frame != nullptr && "getIntervalsInRange requires series time frame");
+
+        TimeFrameIndex query_start = start_time;
+        TimeFrameIndex query_stop = stop_time;
+        if (&source_timeframe != _time_frame.get()) {
+            auto converted = convertTimeFrameRange(start_time,
+                                                   stop_time,
+                                                   source_timeframe,
+                                                   *_time_frame);
+            query_start = converted.first;
+            query_stop = converted.second;
         }
 
-        // If either timeframe is null, fall back to original behavior
-        if (!_time_frame.get()) {
-            return _getIntervalsInRange<mode>(start_time.getValue(), stop_time.getValue());
+        if constexpr (mode == RangeMode::CLIP) {
+            return _getClockTicksIntervalsClipped(query_start, query_stop);
+        } else {
+            return _getIntervalsInRangeLazy<mode>(query_start, query_stop);
         }
-
-        // Use helper function for time frame conversion
-        auto [target_start_index, target_stop_index] = convertTimeFrameRange(start_time,
-                                                                             stop_time,
-                                                                             source_timeframe,
-                                                                             *_time_frame);
-        return _getIntervalsInRange<mode>(target_start_index.getValue(), target_stop_index.getValue());
     }
 
     // ========== Time Frame ==========
@@ -446,7 +452,7 @@ public:
      * @param entity_id The EntityId to look up
      * @return Optional containing the interval data if found, std::nullopt otherwise
      */
-    [[nodiscard]] std::optional<Interval> getIntervalByEntityId(EntityId entity_id) const;
+    [[nodiscard]] std::optional<ClockTicksInterval> getIntervalByEntityId(EntityId entity_id) const;
 
     /**
      * @brief Get all intervals that match the given EntityIds.
@@ -457,7 +463,7 @@ public:
      * @param entity_ids Vector of EntityIds to look up
      * @return Vector of pairs containing {EntityId, Interval} for found entities
      */
-    [[nodiscard]] std::vector<std::pair<EntityId, Interval>> getIntervalsByEntityIds(std::vector<EntityId> const & entity_ids) const;
+    [[nodiscard]] std::vector<std::pair<EntityId, ClockTicksInterval>> getIntervalsByEntityIds(std::vector<EntityId> const & entity_ids) const;
 
     // ========== Storage Type Queries ==========
 
@@ -482,6 +488,20 @@ public:
     // ========== Factory Methods ==========
 
     /**
+     * @brief Create a series that preserves overlapping intervals on insert.
+     *
+     * Intervals are sorted and stored without merging. Intended for transform
+     * pipeline intermediates rather than interactive annotation.
+     *
+     * @param intervals Initial intervals (sorted during construction)
+     * @param time_frame Optional time frame for the series
+     * @return Shared pointer to new owning series with Overlapping layout
+     */
+    [[nodiscard]] static std::shared_ptr<DigitalIntervalSeries> createOverlapping(
+            std::vector<TimeFrameInterval> intervals,
+            std::shared_ptr<TimeFrame> time_frame = nullptr);
+
+    /**
      * @brief Create a view of this series filtered by time range
      * 
      * Returns a new DigitalIntervalSeries that references this series' data
@@ -492,9 +512,9 @@ public:
      * @return Shared pointer to new view-based series
      */
     [[nodiscard]] static std::shared_ptr<DigitalIntervalSeries> createView(
-            const std::shared_ptr<DigitalIntervalSeries const>& source,
-            int64_t start,
-            int64_t end);
+            std::shared_ptr<DigitalIntervalSeries const> const & source,
+            TimeFrameIndex start,
+            TimeFrameIndex end);
 
     /**
      * @brief Create a view of this series filtered by EntityIds
@@ -504,7 +524,7 @@ public:
      * @return Shared pointer to new view-based series
      */
     [[nodiscard]] static std::shared_ptr<DigitalIntervalSeries> createView(
-            const std::shared_ptr<DigitalIntervalSeries const>& source,
+            std::shared_ptr<DigitalIntervalSeries const> const & source,
             std::unordered_set<EntityId> const & entity_ids);
 
     /**
@@ -524,10 +544,10 @@ public:
      * elements on-demand from the provided view. Useful for transform pipelines
      * where you want to defer computation until elements are accessed.
      * 
-     * The view must yield objects that are convertible to IntervalWithId, or
-     * have .interval and .entity_id members, or be a pair/tuple of (Interval, EntityId).
-     * 
-     * @tparam ViewType Random-access range type yielding IntervalWithId-like objects
+     * The view must yield objects with .interval and .entity_id members (ClockTicksIntervalWithId
+     * or IntervalWithId), or be a pair/tuple of (Interval, EntityId).
+     *
+     * @tparam ViewType Random-access range type yielding interval-with-id-like objects
      * @param view The transform view (will be moved)
      * @param num_elements Number of elements in the view
      * @param time_frame Optional time frame for the new series
@@ -541,10 +561,10 @@ public:
      * auto source = std::make_shared<DigitalIntervalSeries>(...);
      * 
      * // Create a lazy transform that shifts all intervals by 100
-     * auto shifted_view = source->view() 
-     *     | std::views::transform([](IntervalWithId const& iwid) {
-     *           return IntervalWithId(
-     *               Interval{iwid.interval.start + 100, iwid.interval.end + 100},
+     * auto shifted_view = source->view()
+     *     | std::views::transform([](ClockTicksIntervalWithId const& iwid) {
+     *           return ClockTicksIntervalWithId(
+     *               ClockTicksInterval{iwid.interval.start + 100, iwid.interval.end + 100},
      *               iwid.entity_id);
      *       });
      * 
@@ -556,7 +576,8 @@ public:
     [[nodiscard]] static std::shared_ptr<DigitalIntervalSeries> createFromView(
             ViewType view,
             size_t num_elements,
-            std::shared_ptr<TimeFrame> time_frame = nullptr);
+            std::shared_ptr<TimeFrame> time_frame = nullptr,
+            IntervalLayout layout = IntervalLayout::Overlapping);
 
     /**
      * @brief Get the storage cache for fast-path iteration
@@ -571,65 +592,76 @@ private:
     DigitalIntervalStorageWrapper _storage;
     DigitalIntervalStorageCache _cached_storage;// Fast-path cache
     std::shared_ptr<TimeFrame> _time_frame{nullptr};
+    IntervalLayout _layout{IntervalLayout::Disjoint};
 
     // Cache management
     void _cacheOptimizationPointers();
 
-    void _addEventInternal(Interval new_interval);// Core mutation logic
+    /**
+     * @brief Sync owning storage disjoint-interval hint for range-query fast paths.
+     *
+     * Maps `IntervalLayout::Disjoint` to `OwningDigitalIntervalStorage::setAssumeDisjointIntervals(true)`
+     * and `IntervalLayout::Overlapping` to `false`. View storage reads the source hint via
+     * @ref ViewDigitalIntervalStorage::filterByOverlappingRange().
+     *
+     * @see OwningDigitalIntervalStorage::setAssumeDisjointIntervals()
+     * @see OwningDigitalIntervalStorage::getOverlappingRangeImpl()
+     */
+    void _syncStorageDisjointHint();
+
+    /**
+     * @brief Core mutation logic for adding/merging intervals.
+     * @return The merged interval if storage changed, std::nullopt if the new interval
+     *         was fully contained in an existing interval (no-op).
+     */
+    std::optional<TimeFrameInterval> _addEventInternal(TimeFrameInterval new_interval);
     void _setEventAtTimeInternal(TimeFrameIndex time, bool event);
     void _removeEventAtTimeInternal(TimeFrameIndex time);
 
     /**
-     * @brief Get intervals in a time range with configurable boundary handling
-     * 
-     * @deprecated For OVERLAPPING mode, prefer viewInRange() or viewIntervalsInRange() 
-     *             which provide lazy evaluation with TimeFrame support.
-     * 
-     * @tparam mode RangeMode::CONTAINED (default), OVERLAPPING, or CLIP
-     * @param start_time Start time value
-     * @param stop_time Stop time value
-     * @return Lazy view of Interval objects (or vector for CLIP mode)
-     * @see viewIntervalsInRange for TimeFrame-aware alternative
+     * @brief Lazy range of clock-tick intervals for CONTAINED or OVERLAPPING queries.
+     *
+     * @pre @ref getTimeFrame() must be non-null
+     * @tparam mode RangeMode::CONTAINED or RangeMode::OVERLAPPING
      */
-    template<RangeMode mode = RangeMode::CONTAINED>
-    auto _getIntervalsInRange(
-            int64_t start_time,
-            int64_t stop_time) const {
+    template<RangeMode mode>
+    auto _getIntervalsInRangeLazy(
+            TimeFrameIndex start_time,
+            TimeFrameIndex stop_time) const {
+        static_assert(mode == RangeMode::CONTAINED || mode == RangeMode::OVERLAPPING,
+                      "_getIntervalsInRangeLazy supports CONTAINED and OVERLAPPING only");
 
-        if constexpr (mode == RangeMode::CONTAINED) {
-            // Direct storage access like DigitalEventSeries - returns by value
-            return std::views::iota(size_t{0}, _storage.size()) | std::views::filter([this, start_time, stop_time](size_t idx) {
-                       Interval const interval = _storage.getInterval(idx);
-                       return interval.start >= start_time && interval.end <= stop_time;
-                   }) |
-                   std::views::transform([this](size_t idx) {
-                       return _storage.getInterval(idx);
-                   });
-        } else if constexpr (mode == RangeMode::OVERLAPPING) {
-            return std::views::iota(size_t{0}, _storage.size()) | std::views::filter([this, start_time, stop_time](size_t idx) {
-                       Interval const interval = _storage.getInterval(idx);
-                       return interval.start <= stop_time && interval.end >= start_time;
-                   }) |
-                   std::views::transform([this](size_t idx) {
-                       return _storage.getInterval(idx);
-                   });
-        } else if constexpr (mode == RangeMode::CLIP) {
-            // For CLIP mode, we return a vector since we need to modify intervals
-            return _getIntervalsAsVectorClipped(start_time, stop_time);
-        } else {
-            return std::views::empty<Interval>;
-        }
+        TimeFrame const * time_frame = _time_frame.get();
+        assert(time_frame != nullptr && "_getIntervalsInRangeLazy requires series time frame");
+
+        auto const [lo, hi] = (mode == RangeMode::OVERLAPPING)
+                                      ? _storage.getOverlappingRange(start_time, stop_time)
+                                      : _storage.getContainedRange(start_time, stop_time);
+
+        return std::views::iota(lo, hi) |
+               std::views::transform([this, time_frame](size_t idx) {
+                   return toClockTicksInterval(_storage.getInterval(idx), *time_frame);
+               });
     }
 
-    // Helper method to handle clipping intervals at range boundaries
-    std::vector<Interval> _getIntervalsAsVectorClipped(
-            int64_t start_time,
-            int64_t stop_time) const {
+    /**
+     * @brief Materialized clipped intervals in clock-tick space.
+     *
+     * @pre @ref getTimeFrame() must be non-null
+     */
+    [[nodiscard]] std::vector<ClockTicksInterval> _getClockTicksIntervalsClipped(
+            TimeFrameIndex start_time,
+            TimeFrameIndex stop_time) const;
 
-        std::vector<Interval> result;
+    // Helper method to handle clipping intervals at range boundaries
+    std::vector<TimeFrameInterval> _getIntervalsAsVectorClipped(
+            TimeFrameIndex start_time,
+            TimeFrameIndex stop_time) const {
+
+        std::vector<TimeFrameInterval> result;
 
         for (size_t i = 0; i < _storage.size(); ++i) {
-            Interval const interval = _storage.getInterval(i);
+            TimeFrameInterval const interval = _storage.getInterval(i);
 
             // Skip if not overlapping
             if (interval.end < start_time || interval.start > stop_time)
@@ -637,7 +669,7 @@ private:
 
             // Create a new clipped interval based on original interval values
             // but clipped at the transformed boundaries
-            int64_t clipped_start = interval.start;
+            TimeFrameIndex clipped_start = interval.start;
             if (clipped_start < start_time) {
                 // Binary search or interpolation to find the original value
                 // that transforms to start_time would be ideal here
@@ -646,13 +678,13 @@ private:
                     clipped_start++;
             }
 
-            int64_t clipped_end = interval.end;
+            TimeFrameIndex clipped_end = interval.end;
             if (clipped_end > stop_time) {
                 while (clipped_end > interval.start && clipped_end > stop_time)
-                    clipped_end--;
+                    clipped_end = clipped_end - TimeFrameIndex{1};
             }
 
-            result.push_back(Interval{clipped_start, clipped_end});
+            result.push_back(TimeFrameInterval{clipped_start, clipped_end});
         }
 
         return result;
@@ -666,9 +698,11 @@ private:
      * 
      * @param start_index Start time index
      * @param stop_index Stop time index
-     * @return std::pair<int64_t, int64_t> Start and stop time values
+     * @return std::pair<ClockTicks, ClockTicks> Start and stop time values
+     * 
+     * @throw std::runtime_error if no time frame is set
      */
-    [[nodiscard]] std::pair<int64_t, int64_t> _getTimeRangeFromIndices(
+    [[nodiscard]] std::pair<ClockTicks, ClockTicks> _getTimeRangeFromIndices(
             TimeFrameIndex start_index,
             TimeFrameIndex stop_index) const;
 
@@ -680,20 +714,20 @@ private:
      * @param start_index Start time index in source_time_frame
      * @param stop_index Stop time index in source_time_frame
      * @param source_time_frame The time frame the indices are expressed in
-     * @return Pair of (start_time, stop_time) as int64_t values for internal use
+     * @return Pair of (start_time, stop_time) as TimeFrameIndex values for internal use
      */
-    [[nodiscard]] std::pair<int64_t, int64_t> _getConvertedTimeRange(
+    [[nodiscard]] std::pair<TimeFrameIndex, TimeFrameIndex> _getConvertedTimeRange(
             TimeFrameIndex start_index,
             TimeFrameIndex stop_index,
             TimeFrame const & source_time_frame) const {
         // Fast path: same time frame or no conversion needed
         if (&source_time_frame == _time_frame.get() || !_time_frame.get()) {
-            return {start_index.getValue(), stop_index.getValue()};
+            return {start_index, stop_index};
         }
         // Convert to our time frame
         auto [target_start, target_stop] = convertTimeFrameRange(
                 start_index, stop_index, source_time_frame, *_time_frame);
-        return {target_start.getValue(), target_stop.getValue()};
+        return {target_start, target_stop};
     }
 
     /**
@@ -703,16 +737,16 @@ private:
      * @param source_time_frame The time frame the index is expressed in
      * @return int64_t time value for internal use
      */
-    [[nodiscard]] int64_t _getConvertedTime(
+    [[nodiscard]] TimeFrameIndex _getConvertedTime(
             TimeFrameIndex time_index,
             TimeFrame const & source_time_frame) const {
         if (&source_time_frame == _time_frame.get() || !_time_frame.get()) {
-            return time_index.getValue();
+            return time_index;
         }
         // Convert using the same logic as range conversion
         auto [target, _] = convertTimeFrameRange(
                 time_index, time_index, source_time_frame, *_time_frame);
-        return target.getValue();
+        return target;
     }
 
     /**
@@ -721,9 +755,9 @@ private:
      * @param time The time value to check (already in internal coordinates)
      * @return true if any interval contains the time
      */
-    [[nodiscard]] bool _hasIntervalAtTime(int64_t time) const {
+    [[nodiscard]] bool _hasIntervalAtTime(TimeFrameIndex time) const {
         for (size_t i = 0; i < _storage.size(); ++i) {
-            Interval const & interval = _storage.getInterval(i);
+            TimeFrameInterval const & interval = _storage.getInterval(i);
             if (interval.start <= time && time <= interval.end) {
                 return true;
             }
@@ -740,13 +774,14 @@ template<typename ViewType>
 std::shared_ptr<DigitalIntervalSeries> DigitalIntervalSeries::createFromView(
         ViewType view,
         size_t num_elements,
-        std::shared_ptr<TimeFrame> time_frame) {
+        std::shared_ptr<TimeFrame> time_frame,
+        IntervalLayout layout) {
     auto result = std::make_shared<DigitalIntervalSeries>();
+    result->_layout = layout;
+    result->_time_frame = time_frame;
     result->_storage = DigitalIntervalStorageWrapper{
-            LazyDigitalIntervalStorage<ViewType>{std::move(view), num_elements}};
-    result->_time_frame = std::move(time_frame);
+            LazyDigitalIntervalStorage<ViewType>{std::move(view), num_elements, time_frame}};
     result->_cacheOptimizationPointers();
-    // Note: _data vector left empty - storage wrapper handles all access
     return result;
 }
 

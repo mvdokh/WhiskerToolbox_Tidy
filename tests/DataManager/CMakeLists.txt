@@ -41,6 +41,10 @@ add_executable(test_data_manager
         
         # Builder tests
         fixtures/test_builders.cpp
+        fixtures/test_stochastic.cpp
+
+        # Whisker-contact scenario tests
+        test_whisker_contact_scenario.cpp
 
         # Shared RaggedTimeSeries tests (templated across LineData, MaskData, PointData)
         ragged_shared_unit.test.cpp
@@ -57,6 +61,7 @@ add_executable(test_data_manager
         test_time_entity.cpp
         test_time_entity_groups.cpp
        JsonPipelineRunner.test.cpp
+       json_data_load_expansion.test.cpp
 
         ${CMAKE_SOURCE_DIR}/src/DataObjects/AnalogTimeSeries/Analog_Time_Series.test.cpp
         ${CMAKE_SOURCE_DIR}/src/DataObjects/AnalogTimeSeries/utils/statistics.test.cpp

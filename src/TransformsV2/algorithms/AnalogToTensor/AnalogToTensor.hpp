@@ -2,13 +2,12 @@
  * @file AnalogToTensor.hpp
  * @brief N-ary container transform that packs N AnalogTimeSeries into one TensorData
  *
- * Phase 1 of the multi-channel storage roadmap.
  * Takes a vector of AnalogTimeSeries channels (sharing the same TimeFrame)
  * and produces a 2D TensorData with shape (num_samples, num_channels).
  */
 
-#ifndef WHISKERTOOLBOX_V2_ANALOG_TO_TENSOR_HPP
-#define WHISKERTOOLBOX_V2_ANALOG_TO_TENSOR_HPP
+#ifndef NEURALYZER_V2_ANALOG_TO_TENSOR_HPP
+#define NEURALYZER_V2_ANALOG_TO_TENSOR_HPP
 
 #include <memory>
 #include <string>
@@ -17,11 +16,11 @@
 class AnalogTimeSeries;
 class TensorData;
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 /**
  * @brief Parameters for AnalogToTensor transform (reflect-cpp compatible)
@@ -54,6 +53,6 @@ struct AnalogToTensorParams {
         AnalogToTensorParams const & params,
         ComputeContext const & ctx) -> std::shared_ptr<TensorData>;
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
-#endif// WHISKERTOOLBOX_V2_ANALOG_TO_TENSOR_HPP
+#endif// NEURALYZER_V2_ANALOG_TO_TENSOR_HPP

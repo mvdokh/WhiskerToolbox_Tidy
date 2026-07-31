@@ -8,9 +8,9 @@
 #include "ElementRegistry.hpp"
 #include "DataManager/utils/ContainerTypeIndex.hpp"
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
-using TypeTraits::TypeIndexMapper;
+using Neuralyzer::TypeTraits::TypeIndexMapper;
 
 // ---------------------------------------------------------------------------
 // Local helper — mirrors the dispatch in TransformPipeline::execute()
@@ -140,4 +140,4 @@ TypeChainResult resolveTypeChain(
     return result;
 }
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2

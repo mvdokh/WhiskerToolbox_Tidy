@@ -15,16 +15,18 @@
 
 #include "TransformsV2/core/TensorColumnBuilders.hpp"
 
-#include "DataManager/DataManager.hpp"
+#include "../fixtures/GatherAlignmentFixtures.hpp"
 #include "AnalogTimeSeries/Analog_Time_Series.hpp"
+#include "DataManager/DataManager.hpp"
 #include "DigitalTimeSeries/Digital_Event_Series.hpp"
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
 #include "Points/Point_Data.hpp"
 #include "Tensors/TensorData.hpp"
 #include "Tensors/storage/LazyColumnTensorStorage.hpp"
 
-#include "TransformsV2/core/TransformPipeline.hpp"
 #include "TransformsV2/core/RangeReductionRegistry.hpp"
+#include "TransformsV2/core/TransformPipeline.hpp"
+#include "TransformsV2/extension/gatherResult/RowGatherGeometry.hpp"
 
 #include "TimeFrame/StrongTimeTypes.hpp"
 #include "TimeFrame/TimeFrame.hpp"
@@ -32,21 +34,46 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <algorithm>
 #include <any>
 #include <cmath>
 #include <memory>
 #include <numeric>
+#include <string>
 #include <vector>
 
-using namespace WhiskerToolbox::TensorBuilders;
-using WhiskerToolbox::Transforms::V2::TransformPipeline;
+using namespace Neuralyzer::TensorBuilders;
 using Catch::Matchers::WithinAbs;
+using Neuralyzer::Transforms::V2::TransformPipeline;
 
 // =============================================================================
 // Test Helpers
 // =============================================================================
 
 namespace {
+
+using Neuralyzer::Test::GatherFixtures::createIdentityTimeFrameForMax;
+
+constexpr char const * kMeanValuePipelineJson =
+        R"({"steps": [], "range_reduction": {"reduction_name": "MeanValue"}})";
+constexpr char const * kIdentityRowPipelineJson = R"({"steps": []})";
+constexpr char const * kNonIdentityRowPipelineJson =
+        R"({"steps": [{"step_id": "interval_start", "transform_name": "IntervalToEvent"}]})";
+constexpr char const * kStartWindowRowPipelineJson =
+        R"({"steps": [{"step_id": "interval_start", "transform_name": "IntervalToEvent", "parameters": {"point": "start"}}, {"step_id": "start_window", "transform_name": "EventToInterval", "parameters": {"pre_expansion": 2, "post_expansion": 3}}]})";
+constexpr char const * kOverlappingWindowRowPipelineJson =
+        R"({"steps": [{"step_id": "interval_start", "transform_name": "IntervalToEvent", "parameters": {"point": "start"}}, {"step_id": "start_window", "transform_name": "EventToInterval", "parameters": {"pre_expansion": 5, "post_expansion": 5}}]})";
+constexpr char const * kPrunedWindowRowPipelineJson =
+        R"({"steps": [{"step_id": "interval_start", "transform_name": "IntervalToEvent", "parameters": {"point": "start"}}, {"step_id": "start_window", "transform_name": "EventToInterval", "parameters": {"pre_expansion": 5, "post_expansion": 5}}, {"step_id": "prune", "transform_name": "PruneOverlappingIntervals"}]})";
+
+/**
+ * @brief Replace DataManager's default clock with a non-empty identity TimeFrame.
+ * @pre max_time must cover all source and row indices inserted under TimeKey("time").
+ * @post Data registered with TimeKey("time") receives a usable TimeFrame.
+ */
+void setDefaultIdentityTimeFrame(DataManager & dm, int64_t max_time) {
+    REQUIRE(dm.setTime(TimeKey("time"), createIdentityTimeFrameForMax(max_time), true));
+}
 
 /**
  * @brief Create an AnalogTimeSeries with values = index (0, 1, 2, ..., num_samples-1)
@@ -59,35 +86,46 @@ std::shared_ptr<AnalogTimeSeries> createLinearAnalog(std::size_t num_samples) {
     times.reserve(num_samples);
     for (std::size_t i = 0; i < num_samples; ++i) {
         data.push_back(static_cast<float>(i));
-        times.push_back(TimeFrameIndex(static_cast<int64_t>(i)));
+        times.emplace_back(static_cast<int64_t>(i));
     }
-    return std::make_shared<AnalogTimeSeries>(std::move(data), std::move(times));
+    auto series = std::make_shared<AnalogTimeSeries>(std::move(data), std::move(times));
+    series->setTimeFrame(createIdentityTimeFrameForMax(static_cast<int64_t>(num_samples)));
+    return series;
 }
 
 /**
  * @brief Create a DigitalIntervalSeries from (start, end) pairs
  */
 std::shared_ptr<DigitalIntervalSeries> createIntervalSeries(
-    std::vector<std::pair<int64_t, int64_t>> const & intervals)
-{
-    std::vector<Interval> vec;
+        std::vector<std::pair<int64_t, int64_t>> const & intervals) {
+    std::vector<TimeFrameInterval> vec;
     vec.reserve(intervals.size());
-    for (auto const & [s, e] : intervals) {
-        vec.push_back(Interval{s, e});
+    for (auto const & [s, e]: intervals) {
+        vec.push_back(TimeFrameInterval(TimeFrameIndex(s), TimeFrameIndex(e)));
     }
-    return std::make_shared<DigitalIntervalSeries>(vec);
+    auto series = std::make_shared<DigitalIntervalSeries>(vec);
+    int64_t max_time = 0;
+    for (auto const & [s, e]: intervals) {
+        max_time = std::max(max_time, std::max(s, e));
+    }
+    series->setTimeFrame(createIdentityTimeFrameForMax(max_time));
+    return series;
 }
 
 /**
  * @brief Create a DigitalEventSeries at specified times
  */
 std::shared_ptr<DigitalEventSeries> createEventSeries(
-    std::vector<int64_t> const & times)
-{
+        std::vector<int64_t> const & times) {
     auto series = std::make_shared<DigitalEventSeries>();
-    for (auto t : times) {
+    for (auto t: times) {
         series->addEvent(TimeFrameIndex(t));
     }
+    int64_t max_time = 0;
+    for (auto t: times) {
+        max_time = std::max(max_time, t);
+    }
+    series->setTimeFrame(createIdentityTimeFrameForMax(max_time));
     return series;
 }
 
@@ -97,6 +135,7 @@ std::shared_ptr<DigitalEventSeries> createEventSeries(
  */
 std::unique_ptr<DataManager> makeDMWithAnalog(std::string const & key, std::size_t samples) {
     auto dm = std::make_unique<DataManager>();
+    setDefaultIdentityTimeFrame(*dm, static_cast<int64_t>(samples));
     auto analog = createLinearAnalog(samples);
     dm->setData<AnalogTimeSeries>(key, analog, TimeKey("time"));
     return dm;
@@ -108,13 +147,13 @@ std::unique_ptr<DataManager> makeDMWithAnalog(std::string const & key, std::size
 std::vector<TimeFrameIndex> makeRowTimes(std::vector<int64_t> const & ts) {
     std::vector<TimeFrameIndex> result;
     result.reserve(ts.size());
-    for (auto t : ts) {
-        result.push_back(TimeFrameIndex(t));
+    for (auto t: ts) {
+        result.emplace_back(t);
     }
     return result;
 }
 
-} // anonymous namespace
+}// anonymous namespace
 
 // =============================================================================
 // buildPipelineColumnProvider — Passthrough Tests (Pattern A, empty pipeline)
@@ -151,15 +190,17 @@ TEST_CASE("buildPipelineColumnProvider - missing timestamps produce NaN", "[Tens
 
 TEST_CASE("buildPipelineColumnProvider - invalid source key throws", "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     auto row_times = makeRowTimes({0, 1, 2});
 
     CHECK_THROWS_AS(
-        buildPipelineColumnProvider(dm, "nonexistent", row_times, TransformPipeline{}),
-        std::runtime_error);
+            buildPipelineColumnProvider(dm, "nonexistent", row_times, TransformPipeline{}),
+            std::runtime_error);
 }
 
 TEST_CASE("buildPipelineColumnProvider - reflects data changes on re-invoke", "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     auto analog = createLinearAnalog(10);
     dm.setData<AnalogTimeSeries>("src", analog, TimeKey("time"));
 
@@ -174,7 +215,8 @@ TEST_CASE("buildPipelineColumnProvider - reflects data changes on re-invoke", "[
     std::vector<float> new_data{100.0f, 101.0f, 102.0f, 103.0f, 104.0f,
                                 105.0f, 106.0f, 107.0f, 108.0f, 109.0f};
     std::vector<TimeFrameIndex> new_times;
-    for (int i = 0; i < 10; ++i) new_times.push_back(TimeFrameIndex(i));
+    new_times.reserve(10);
+    for (int i = 0; i < 10; ++i) new_times.emplace_back(i);
     auto new_analog = std::make_shared<AnalogTimeSeries>(std::move(new_data), std::move(new_times));
     dm.setData<AnalogTimeSeries>("src", new_analog, TimeKey("time"));
 
@@ -185,11 +227,11 @@ TEST_CASE("buildPipelineColumnProvider - reflects data changes on re-invoke", "[
 
 TEST_CASE("buildPipelineColumnProvider - empty row times throws", "[TensorColumnBuilders]") {
     auto dm = makeDMWithAnalog("src", 10);
-    std::vector<TimeFrameIndex> empty_times;
+    std::vector<TimeFrameIndex> const empty_times;
 
     CHECK_THROWS_AS(
-        buildPipelineColumnProvider(*dm, "src", empty_times, TransformPipeline{}),
-        std::runtime_error);
+            buildPipelineColumnProvider(*dm, "src", empty_times, TransformPipeline{}),
+            std::runtime_error);
 }
 
 // =============================================================================
@@ -234,8 +276,237 @@ TEST_CASE("buildIntervalPropertyProvider - Duration", "[TensorColumnBuilders]") 
 
 TEST_CASE("buildIntervalPropertyProvider - null intervals throws", "[TensorColumnBuilders]") {
     CHECK_THROWS_AS(
-        buildIntervalPropertyProvider(nullptr, IntervalProperty::Start),
-        std::runtime_error);
+            buildIntervalPropertyProvider(nullptr, IntervalProperty::Start),
+            std::runtime_error);
+}
+
+// =============================================================================
+// Row gather geometry identity helpers
+// =============================================================================
+
+TEST_CASE("isIdentityRowPipelineJson recognizes empty row pipelines",
+          "[TensorColumnBuilders][Phase3]") {
+    CHECK(Neuralyzer::Gather::isIdentityRowPipelineJson(""));
+    CHECK(Neuralyzer::Gather::isIdentityRowPipelineJson("   \n\t  "));
+    CHECK(Neuralyzer::Gather::isIdentityRowPipelineJson(kIdentityRowPipelineJson));
+    CHECK_FALSE(Neuralyzer::Gather::isIdentityRowPipelineJson(kNonIdentityRowPipelineJson));
+}
+
+TEST_CASE("resolveIntervalGatherWindows returns source intervals for identity",
+          "[TensorColumnBuilders][Phase3]") {
+    auto intervals = createIntervalSeries({{10, 20}, {50, 60}});
+
+    auto const resolved = Neuralyzer::Gather::resolveIntervalGatherWindows(
+            intervals, kIdentityRowPipelineJson, intervals->size());
+
+    REQUIRE(resolved == intervals);
+    REQUIRE(resolved->size() == intervals->size());
+}
+
+TEST_CASE("resolveIntervalGatherWindows rejects non-identity row pipelines",
+          "[TensorColumnBuilders][Phase3]") {
+    auto intervals = createIntervalSeries({{10, 20}, {50, 60}});
+
+    CHECK_THROWS_AS(
+            Neuralyzer::Gather::resolveIntervalGatherWindows(
+                    intervals, kNonIdentityRowPipelineJson, intervals->size()),
+            std::runtime_error);
+}
+
+TEST_CASE("resolveIntervalGatherWindows executes DigitalIntervalSeries row pipelines",
+          "[TensorColumnBuilders][Phase4]") {
+    auto intervals = createIntervalSeries({{10, 20}, {50, 60}});
+
+    auto const resolved = Neuralyzer::Gather::resolveIntervalGatherWindows(
+            intervals, kStartWindowRowPipelineJson, intervals->size());
+
+    REQUIRE(resolved != nullptr);
+    REQUIRE(resolved != intervals);
+    REQUIRE(resolved->size() == intervals->size());
+    REQUIRE(resolved->layout() == IntervalLayout::Overlapping);
+
+    std::vector<ClockTicksInterval> windows;
+    for (auto const & interval_with_id: resolved->view()) {
+        windows.push_back(interval_with_id.interval);
+    }
+
+    REQUIRE(windows.size() == 2);
+    CHECK(windows[0].start == ClockTicks(8));
+    CHECK(windows[0].end == ClockTicks(13));
+    CHECK(windows[1].start == ClockTicks(48));
+    CHECK(windows[1].end == ClockTicks(53));
+}
+
+TEST_CASE("resolveIntervalGatherWindows preserves overlapping output windows",
+          "[TensorColumnBuilders][Phase4]") {
+    auto intervals = createIntervalSeries({{10, 20}, {12, 22}});
+
+    auto const resolved = Neuralyzer::Gather::resolveIntervalGatherWindows(
+            intervals, kOverlappingWindowRowPipelineJson, intervals->size());
+
+    REQUIRE(resolved->size() == intervals->size());
+    REQUIRE(resolved->layout() == IntervalLayout::Overlapping);
+
+    std::vector<ClockTicksInterval> windows;
+    for (auto const & interval_with_id: resolved->view()) {
+        windows.push_back(interval_with_id.interval);
+    }
+
+    REQUIRE(windows.size() == 2);
+    CHECK(windows[0].start == ClockTicks(5));
+    CHECK(windows[0].end == ClockTicks(15));
+    CHECK(windows[1].start == ClockTicks(7));
+    CHECK(windows[1].end == ClockTicks(17));
+}
+
+TEST_CASE("resolveIntervalGatherWindows rejects row-count-changing pipelines",
+          "[TensorColumnBuilders][Phase4]") {
+    auto intervals = createIntervalSeries({{10, 20}, {12, 22}});
+
+    CHECK_THROWS_AS(
+            Neuralyzer::Gather::resolveIntervalGatherWindows(
+                    intervals, kPrunedWindowRowPipelineJson, intervals->size()),
+            std::runtime_error);
+}
+
+// =============================================================================
+// buildProviderFromRecipe row-pipeline identity dispatch
+// =============================================================================
+
+TEST_CASE("buildProviderFromRecipe - empty row_pipeline_json matches interval gather",
+          "[TensorColumnBuilders][Phase3]") {
+    DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
+    auto analog = createLinearAnalog(100);
+    dm.setData<AnalogTimeSeries>("analog", analog, TimeKey("time"));
+    auto intervals = createIntervalSeries({{10, 20}, {50, 60}});
+
+    ColumnRecipe const recipe{
+            .column_name = "mean_signal",
+            .source_key = "analog",
+            .pipeline_json = kMeanValuePipelineJson,
+            .row_pipeline_json = "",
+    };
+
+    auto provider = buildProviderFromRecipe(dm, recipe, {}, intervals);
+    auto const values = provider();
+
+    REQUIRE(values.size() == intervals->size());
+    CHECK_THAT(values[0], WithinAbs(15.0, 0.01));
+    CHECK_THAT(values[1], WithinAbs(55.0, 0.01));
+}
+
+TEST_CASE("buildProviderFromRecipe - explicit identity row_pipeline_json matches interval gather",
+          "[TensorColumnBuilders][Phase3]") {
+    DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
+    auto analog = createLinearAnalog(100);
+    dm.setData<AnalogTimeSeries>("analog", analog, TimeKey("time"));
+    auto intervals = createIntervalSeries({{10, 20}, {50, 60}});
+
+    ColumnRecipe const recipe{
+            .column_name = "mean_signal",
+            .source_key = "analog",
+            .pipeline_json = kMeanValuePipelineJson,
+            .row_pipeline_json = kIdentityRowPipelineJson,
+    };
+
+    auto provider = buildProviderFromRecipe(dm, recipe, {}, intervals);
+    auto const values = provider();
+
+    REQUIRE(values.size() == intervals->size());
+    CHECK_THAT(values[0], WithinAbs(15.0, 0.01));
+    CHECK_THAT(values[1], WithinAbs(55.0, 0.01));
+}
+
+TEST_CASE("buildProviderFromRecipe - interval_property ignores row_pipeline_json",
+          "[TensorColumnBuilders][Phase3]") {
+    auto intervals = createIntervalSeries({{10, 30}, {50, 80}});
+    DataManager dm;
+
+    ColumnRecipe const recipe{
+            .column_name = "start",
+            .source_key = "",
+            .pipeline_json = "",
+            .row_pipeline_json = kNonIdentityRowPipelineJson,
+            .interval_property = IntervalProperty::Start,
+    };
+
+    auto provider = buildProviderFromRecipe(dm, recipe, {}, intervals);
+    auto const values = provider();
+
+    REQUIRE(values.size() == intervals->size());
+    CHECK_THAT(values[0], WithinAbs(10.0, 0.01));
+    CHECK_THAT(values[1], WithinAbs(50.0, 0.01));
+}
+
+TEST_CASE("buildProviderFromRecipe - rejects non-identity interval row_pipeline_json",
+          "[TensorColumnBuilders][Phase3]") {
+    DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
+    auto analog = createLinearAnalog(100);
+    dm.setData<AnalogTimeSeries>("analog", analog, TimeKey("time"));
+    auto intervals = createIntervalSeries({{10, 20}, {50, 60}});
+
+    ColumnRecipe const recipe{
+            .column_name = "mean_signal",
+            .source_key = "analog",
+            .pipeline_json = kMeanValuePipelineJson,
+            .row_pipeline_json = kNonIdentityRowPipelineJson,
+    };
+
+    CHECK_THROWS_AS(
+            buildProviderFromRecipe(dm, recipe, {}, intervals),
+            std::runtime_error);
+}
+
+TEST_CASE("buildProviderFromRecipe - derived row windows gather event counts",
+          "[TensorColumnBuilders][Phase4]") {
+    DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
+    auto events = createEventSeries({9, 11, 12, 29, 31, 90});
+    dm.setData<DigitalEventSeries>("events", events, TimeKey("time"));
+    auto intervals = createIntervalSeries({{10, 20}, {30, 40}});
+
+    ColumnRecipe const recipe{
+            .column_name = "onset_event_count",
+            .source_key = "events",
+            .pipeline_json = R"({"steps": [], "range_reduction": {"reduction_name": "EventCount"}})",
+            .row_pipeline_json = kStartWindowRowPipelineJson,
+    };
+
+    auto provider = buildProviderFromRecipe(dm, recipe, {}, intervals);
+    auto const values = provider();
+
+    REQUIRE(values.size() == intervals->size());
+    CHECK_THAT(values[0], WithinAbs(3.0, 0.01));
+    CHECK_THAT(values[1], WithinAbs(2.0, 0.01));
+}
+
+TEST_CASE("buildProviderFromRecipe - timestamp rows ignore empty row_pipeline_json",
+          "[TensorColumnBuilders][Phase3]") {
+    DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
+    auto analog = createLinearAnalog(100);
+    dm.setData<AnalogTimeSeries>("analog", analog, TimeKey("time"));
+    auto row_times = makeRowTimes({0, 10, 20, 50, 99});
+
+    ColumnRecipe const recipe{
+            .column_name = "sampled_signal",
+            .source_key = "analog",
+            .pipeline_json = "",
+            .row_pipeline_json = "",
+    };
+
+    auto provider = buildProviderFromRecipe(dm, recipe, row_times, nullptr);
+    auto const values = provider();
+
+    REQUIRE(values.size() == row_times.size());
+    CHECK_THAT(values[0], WithinAbs(0.0, 0.01));
+    CHECK_THAT(values[1], WithinAbs(10.0, 0.01));
+    CHECK_THAT(values[2], WithinAbs(20.0, 0.01));
+    CHECK_THAT(values[3], WithinAbs(50.0, 0.01));
+    CHECK_THAT(values[4], WithinAbs(99.0, 0.01));
 }
 
 // =============================================================================
@@ -245,6 +516,7 @@ TEST_CASE("buildIntervalPropertyProvider - null intervals throws", "[TensorColum
 TEST_CASE("buildIntervalPipelineProvider - Analog MeanValue", "[TensorColumnBuilders]") {
     // Linear analog: values = 0..99 at times 0..99
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     auto analog = createLinearAnalog(100);
     dm.setData<AnalogTimeSeries>("analog", analog, TimeKey("time"));
 
@@ -252,7 +524,7 @@ TEST_CASE("buildIntervalPipelineProvider - Analog MeanValue", "[TensorColumnBuil
     auto intervals = createIntervalSeries({{10, 20}, {50, 60}});
 
     // Pipeline with MeanValue reduction
-    auto pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     pipeline.setRangeReductionErased("MeanValue", std::any{});
 
     auto provider = buildIntervalPipelineProvider(dm, "analog", intervals, std::move(pipeline));
@@ -269,12 +541,13 @@ TEST_CASE("buildIntervalPipelineProvider - Analog MeanValue", "[TensorColumnBuil
 
 TEST_CASE("buildIntervalPipelineProvider - Analog SumValue", "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     auto analog = createLinearAnalog(100);
     dm.setData<AnalogTimeSeries>("analog", analog, TimeKey("time"));
 
     auto intervals = createIntervalSeries({{0, 4}});
 
-    auto pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     pipeline.setRangeReductionErased("SumValue", std::any{});
 
     auto provider = buildIntervalPipelineProvider(dm, "analog", intervals, std::move(pipeline));
@@ -287,12 +560,13 @@ TEST_CASE("buildIntervalPipelineProvider - Analog SumValue", "[TensorColumnBuild
 
 TEST_CASE("buildIntervalPipelineProvider - Analog MaxValue", "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     auto analog = createLinearAnalog(100);
     dm.setData<AnalogTimeSeries>("analog", analog, TimeKey("time"));
 
     auto intervals = createIntervalSeries({{10, 20}, {90, 99}});
 
-    auto pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     pipeline.setRangeReductionErased("MaxValue", std::any{});
 
     auto provider = buildIntervalPipelineProvider(dm, "analog", intervals, std::move(pipeline));
@@ -309,13 +583,14 @@ TEST_CASE("buildIntervalPipelineProvider - Analog MaxValue", "[TensorColumnBuild
 
 TEST_CASE("buildIntervalPipelineProvider - Event EventCount", "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     auto events = createEventSeries({5, 15, 25, 35, 45, 55});
     dm.setData<DigitalEventSeries>("events", events, TimeKey("time"));
 
     // Two intervals: [0,20] should contain 2 events (5,15); [30,50] should contain 2 events (35,45)
     auto intervals = createIntervalSeries({{0, 20}, {30, 50}});
 
-    auto pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     pipeline.setRangeReductionErased("EventCount", std::any{});
 
     auto provider = buildIntervalPipelineProvider(dm, "events", intervals, std::move(pipeline));
@@ -329,13 +604,14 @@ TEST_CASE("buildIntervalPipelineProvider - Event EventCount", "[TensorColumnBuil
 TEST_CASE("buildIntervalPipelineProvider - Event empty interval returns zero count",
           "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     auto events = createEventSeries({5, 15, 25});
     dm.setData<DigitalEventSeries>("events", events, TimeKey("time"));
 
     // Interval [100, 200] has no events
     auto intervals = createIntervalSeries({{100, 200}});
 
-    auto pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     pipeline.setRangeReductionErased("EventCount", std::any{});
 
     auto provider = buildIntervalPipelineProvider(dm, "events", intervals, std::move(pipeline));
@@ -351,40 +627,43 @@ TEST_CASE("buildIntervalPipelineProvider - Event empty interval returns zero cou
 
 TEST_CASE("buildIntervalPipelineProvider - null intervals throws", "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     auto analog = createLinearAnalog(10);
     dm.setData<AnalogTimeSeries>("analog", analog, TimeKey("time"));
 
-    auto pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     pipeline.setRangeReductionErased("MeanValue", std::any{});
 
     CHECK_THROWS_AS(
-        buildIntervalPipelineProvider(dm, "analog", nullptr, std::move(pipeline)),
-        std::runtime_error);
+            buildIntervalPipelineProvider(dm, "analog", nullptr, std::move(pipeline)),
+            std::runtime_error);
 }
 
 TEST_CASE("buildIntervalPipelineProvider - missing reduction throws", "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     auto analog = createLinearAnalog(10);
     dm.setData<AnalogTimeSeries>("analog", analog, TimeKey("time"));
     auto intervals = createIntervalSeries({{0, 5}});
 
-    auto pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     // No range reduction set
 
     CHECK_THROWS_AS(
-        buildIntervalPipelineProvider(dm, "analog", intervals, std::move(pipeline)),
-        std::runtime_error);
+            buildIntervalPipelineProvider(dm, "analog", intervals, std::move(pipeline)),
+            std::runtime_error);
 }
 
 TEST_CASE("buildIntervalPipelineProvider - PointData with incompatible reduction throws at runtime",
           "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     // PointData source with a MeanValue reduction — builds OK but fails at runtime
     // because MeanValue operates on TimeValuePoint, not Point2D<float>
     dm.setData<PointData>("points", TimeKey("time"));
     auto intervals = createIntervalSeries({{0, 10}});
 
-    auto pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     pipeline.setRangeReductionErased("MeanValue", std::any{});
 
     // Build succeeds (pipelineProducesFloat passes — MeanValue declares float output)
@@ -400,6 +679,7 @@ TEST_CASE("buildIntervalPipelineProvider - PointData with incompatible reduction
 
 TEST_CASE("buildInvalidationWiringFn - wires observers correctly", "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     auto analog = createLinearAnalog(10);
     dm.setData<AnalogTimeSeries>("src1", analog, TimeKey("time"));
     dm.setData<AnalogTimeSeries>("src2", createLinearAnalog(10), TimeKey("time"));
@@ -440,6 +720,7 @@ TEST_CASE("buildInvalidationWiringFn - wires observers correctly", "[TensorColum
 
 TEST_CASE("buildInvalidationWiringFn - empty source key skipped", "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     auto analog = createLinearAnalog(10);
     dm.setData<AnalogTimeSeries>("src1", analog, TimeKey("time"));
 
@@ -472,6 +753,7 @@ TEST_CASE("buildInvalidationWiringFn - empty source key skipped", "[TensorColumn
 
 TEST_CASE("Integration - build lazy tensor from interval reductions", "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
 
     // Source: linear analog 0..99
     dm.setData<AnalogTimeSeries>("signal", createLinearAnalog(100), TimeKey("time"));
@@ -480,20 +762,20 @@ TEST_CASE("Integration - build lazy tensor from interval reductions", "[TensorCo
     auto intervals = createIntervalSeries({{0, 9}, {10, 19}, {20, 29}});
 
     // Build mean column
-    auto mean_pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto mean_pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     mean_pipeline.setRangeReductionErased("MeanValue", std::any{});
     auto mean_provider = buildIntervalPipelineProvider(
-        dm, "signal", intervals, std::move(mean_pipeline));
+            dm, "signal", intervals, std::move(mean_pipeline));
 
     // Build max column
-    auto max_pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto max_pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     max_pipeline.setRangeReductionErased("MaxValue", std::any{});
     auto max_provider = buildIntervalPipelineProvider(
-        dm, "signal", intervals, std::move(max_pipeline));
+            dm, "signal", intervals, std::move(max_pipeline));
 
     // Build duration column
     auto duration_provider = buildIntervalPropertyProvider(
-        intervals, IntervalProperty::Duration);
+            intervals, IntervalProperty::Duration);
 
     // Assemble tensor
     std::vector<ColumnSource> columns;
@@ -526,13 +808,14 @@ TEST_CASE("Integration - build lazy tensor from interval reductions", "[TensorCo
 
     // Verify duration column
     auto durations = tensor.getColumn(2);
-    CHECK_THAT(durations[0], WithinAbs(9.0, 0.01));  // 9 - 0
-    CHECK_THAT(durations[1], WithinAbs(9.0, 0.01));   // 19 - 10
-    CHECK_THAT(durations[2], WithinAbs(9.0, 0.01));   // 29 - 20
+    CHECK_THAT(durations[0], WithinAbs(9.0, 0.01));// 9 - 0
+    CHECK_THAT(durations[1], WithinAbs(9.0, 0.01));// 19 - 10
+    CHECK_THAT(durations[2], WithinAbs(9.0, 0.01));// 29 - 20
 }
 
 TEST_CASE("Integration - build lazy tensor from timestamp rows", "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     dm.setData<AnalogTimeSeries>("signal", createLinearAnalog(100), TimeKey("time"));
 
     auto row_times = makeRowTimes({0, 25, 50, 75, 99});
@@ -558,15 +841,16 @@ TEST_CASE("Integration - build lazy tensor from timestamp rows", "[TensorColumnB
 
 TEST_CASE("Integration - multiple columns added via appendColumn", "[TensorColumnBuilders]") {
     DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
     dm.setData<AnalogTimeSeries>("signal", createLinearAnalog(50), TimeKey("time"));
 
     auto intervals = createIntervalSeries({{0, 9}, {10, 19}});
 
     // Start with just one column
-    auto mean_pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto mean_pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     mean_pipeline.setRangeReductionErased("MeanValue", std::any{});
     auto mean_provider = buildIntervalPipelineProvider(
-        dm, "signal", intervals, std::move(mean_pipeline));
+            dm, "signal", intervals, std::move(mean_pipeline));
 
     std::vector<ColumnSource> columns;
     columns.push_back(ColumnSource{"mean", std::move(mean_provider), {}});
@@ -599,6 +883,7 @@ TEST_CASE("buildIntervalPipelineProvider - cross-TimeFrame analog mean",
 
     // Interval TimeFrame: 10 Hz → times [0, 100, 200, ...]
     std::vector<int> interval_times;
+    interval_times.reserve(20);
     for (int i = 0; i < 20; ++i) {
         interval_times.push_back(i * 100);
     }
@@ -607,6 +892,7 @@ TEST_CASE("buildIntervalPipelineProvider - cross-TimeFrame analog mean",
 
     // Source TimeFrame: 100 Hz → times [0, 10, 20, ...]
     std::vector<int> source_times;
+    source_times.reserve(200);
     for (int i = 0; i < 200; ++i) {
         source_times.push_back(i * 10);
     }
@@ -623,7 +909,7 @@ TEST_CASE("buildIntervalPipelineProvider - cross-TimeFrame analog mean",
     intervals->setTimeFrame(interval_tf);
     dm.setData<DigitalIntervalSeries>("intervals", intervals, TimeKey("interval_clock"));
 
-    auto pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     pipeline.setRangeReductionErased("MeanValue", std::any{});
 
     auto provider = buildIntervalPipelineProvider(
@@ -643,6 +929,7 @@ TEST_CASE("buildIntervalPipelineProvider - cross-TimeFrame event count",
     DataManager dm;
 
     std::vector<int> interval_times;
+    interval_times.reserve(20);
     for (int i = 0; i < 20; ++i) {
         interval_times.push_back(i * 100);
     }
@@ -650,6 +937,7 @@ TEST_CASE("buildIntervalPipelineProvider - cross-TimeFrame event count",
     dm.setTime(TimeKey("interval_clock"), interval_tf);
 
     std::vector<int> source_times;
+    source_times.reserve(200);
     for (int i = 0; i < 200; ++i) {
         source_times.push_back(i * 10);
     }
@@ -668,7 +956,7 @@ TEST_CASE("buildIntervalPipelineProvider - cross-TimeFrame event count",
     intervals->setTimeFrame(interval_tf);
     dm.setData<DigitalIntervalSeries>("intervals", intervals, TimeKey("interval_clock"));
 
-    auto pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     pipeline.setRangeReductionErased("EventCount", std::any{});
 
     auto provider = buildIntervalPipelineProvider(
@@ -697,7 +985,7 @@ TEST_CASE("buildIntervalPipelineProvider - same TimeFrame produces same results"
     intervals->setTimeFrame(shared_tf);
     dm.setData<DigitalIntervalSeries>("intervals", intervals, TimeKey("default"));
 
-    auto pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     pipeline.setRangeReductionErased("MeanValue", std::any{});
 
     auto provider = buildIntervalPipelineProvider(
@@ -715,6 +1003,7 @@ TEST_CASE("Integration - cross-TimeFrame lazy tensor assembly",
 
     // Setup two different time bases
     std::vector<int> interval_times;
+    interval_times.reserve(20);
     for (int i = 0; i < 20; ++i) {
         interval_times.push_back(i * 100);
     }
@@ -722,6 +1011,7 @@ TEST_CASE("Integration - cross-TimeFrame lazy tensor assembly",
     dm.setTime(TimeKey("interval_clock"), interval_tf);
 
     std::vector<int> source_times;
+    source_times.reserve(200);
     for (int i = 0; i < 200; ++i) {
         source_times.push_back(i * 10);
     }
@@ -739,12 +1029,12 @@ TEST_CASE("Integration - cross-TimeFrame lazy tensor assembly",
     dm.setData<DigitalIntervalSeries>("intervals", intervals, TimeKey("interval_clock"));
 
     // Build two columns: mean and max, both with cross-TimeFrame
-    auto mean_pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto mean_pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     mean_pipeline.setRangeReductionErased("MeanValue", std::any{});
     auto mean_provider = buildIntervalPipelineProvider(
             dm, "signal", intervals, std::move(mean_pipeline));
 
-    auto max_pipeline = WhiskerToolbox::Transforms::V2::TransformPipeline();
+    auto max_pipeline = Neuralyzer::Transforms::V2::TransformPipeline();
     max_pipeline.setRangeReductionErased("MaxValue", std::any{});
     auto max_provider = buildIntervalPipelineProvider(
             dm, "signal", intervals, std::move(max_pipeline));
@@ -770,10 +1060,10 @@ TEST_CASE("Integration - cross-TimeFrame lazy tensor assembly",
     // Row 0: interval [0,4] at 10Hz → [0ms,400ms] → source [0..40]
     CHECK_THAT(means[0], WithinAbs(20.0, 1.0));
     CHECK_THAT(maxes[0], WithinAbs(40.0, 1.0));
-    CHECK_THAT(durations[0], WithinAbs(4.0, 0.01));  // duration in interval-TF indices
+    CHECK_THAT(durations[0], WithinAbs(400.0, 0.01));// duration in interval CLOCK ticks
 
     // Row 1: interval [10,14] at 10Hz → [1000ms,1400ms] → source [100..140]
     CHECK_THAT(means[1], WithinAbs(120.0, 1.0));
     CHECK_THAT(maxes[1], WithinAbs(140.0, 1.0));
-    CHECK_THAT(durations[1], WithinAbs(4.0, 0.01));
+    CHECK_THAT(durations[1], WithinAbs(400.0, 0.01));
 }

@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_REGISTERED_TEMPORAL_TRANSFORMS_HPP
-#define WHISKERTOOLBOX_V2_REGISTERED_TEMPORAL_TRANSFORMS_HPP
+#ifndef NEURALYZER_V2_REGISTERED_TEMPORAL_TRANSFORMS_HPP
+#define NEURALYZER_V2_REGISTERED_TEMPORAL_TRANSFORMS_HPP
 
 /**
  * @file RegisteredTemporalTransforms.hpp
@@ -16,14 +16,14 @@
  * ## Trial-aligned usage
  *
  * For per-trial alignment, use `NormalizeTimeParamsV2` with
- * `param_bindings` and `PipelineValueStore` from `GatherResult::buildTrialStore()`,
+ * `param_bindings` and `PipelineValueStore` from `buildGatherRowStore()`,
  * or `bindValueProjectionV2()` for value projections.
  *
  * @see NormalizeTime.hpp for transform implementation
  * @see PipelineValueStore.hpp
  */
 
-namespace WhiskerToolbox::Transforms::V2::Temporal {
+namespace Neuralyzer::Transforms::V2::Temporal {
 
 /**
  * @brief Register all temporal transforms with ElementRegistry
@@ -37,6 +37,6 @@ namespace WhiskerToolbox::Transforms::V2::Temporal {
  */
 void registerTemporalTransforms();
 
-}// namespace WhiskerToolbox::Transforms::V2::Temporal
+}// namespace Neuralyzer::Transforms::V2::Temporal
 
-#endif// WHISKERTOOLBOX_V2_REGISTERED_TEMPORAL_TRANSFORMS_HPP
+#endif// NEURALYZER_V2_REGISTERED_TEMPORAL_TRANSFORMS_HPP

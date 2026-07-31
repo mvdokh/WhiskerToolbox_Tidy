@@ -4,13 +4,18 @@
 #include "DigitalIntervalStorageBase.hpp"
 #include "DigitalIntervalStorageCache.hpp"
 
-#include "Entity/EntityTypes.hpp"       // EntityId with hash specialization
-#include "TimeFrame/interval_data.hpp"  // Interval struct
+#include "Entity/EntityTypes.hpp"     // EntityId with hash specialization
+#include "TimeFrame/ClockTicks.hpp"
+#include "TimeFrame/TimeFrame.hpp"
+#include "TimeFrame/interval_data.hpp"// Interval struct
 
-#include <algorithm>        // std::ranges::lower_bound, std::ranges::upper_bound, std::min, std::max
-#include <optional>         // std::optional
-#include <ranges>           // std::ranges::random_access_range, std::ranges::views::iota
-#include <unordered_map>    // std::unordered_map
+#include <algorithm>    // std::ranges::lower_bound, std::ranges::upper_bound, std::min, std::max
+#include <cassert>      // assert
+#include <memory>       // std::shared_ptr
+#include <optional>     // std::optional
+#include <ranges>       // std::ranges::random_access_range, std::ranges::views::iota
+#include <type_traits>  // std::same_as, std::remove_cvref_t
+#include <unordered_map>// std::unordered_map
 
 // =============================================================================
 // Lazy Storage (View-based Computation on Demand)
@@ -24,8 +29,17 @@
  * intermediate results.
  * 
  * The view must yield objects with .interval and .entity_id members
- * (or convertible to Interval/EntityId pair).
- * 
+ * (ClockTicksIntervalWithId, IntervalWithId, or convertible pair/tuple).
+ *
+ * ## Range-query limitation
+ *
+ * @ref getOverlappingRangeImpl() always uses an O(n) linear scan. Unlike
+ * @ref OwningDigitalIntervalStorage and @ref ViewDigitalIntervalStorage, lazy storage
+ * does not expose `assumeDisjointIntervals()` and therefore does not use the O(log n)
+ * binary-search fast path, even when the underlying view yields disjoint intervals.
+ * This is intentional for transform intermediates (`IntervalLayout::Overlapping`) where
+ * overlaps are possible; a disjoint fast path may be added later if needed.
+ *
  * @tparam ViewType Type of the random-access range view
  */
 template<typename ViewType>
@@ -36,10 +50,15 @@ public:
      * 
      * @param view Random-access range view yielding interval-like objects
      * @param num_elements Number of elements in the view
+     * @param time_frame Time frame for converting ClockTicks elements to storage indices
      */
-    explicit LazyDigitalIntervalStorage(ViewType view, size_t num_elements)
+    explicit LazyDigitalIntervalStorage(
+            ViewType view,
+            size_t num_elements,
+            std::shared_ptr<TimeFrame> time_frame = nullptr)
         : _view(std::move(view)),
-          _num_elements(num_elements) {
+          _num_elements(num_elements),
+          _time_frame(std::move(time_frame)) {
         static_assert(std::ranges::random_access_range<ViewType>,
                       "LazyDigitalIntervalStorage requires random access range");
         _buildLocalIndices();
@@ -51,10 +70,18 @@ public:
 
     [[nodiscard]] size_t sizeImpl() const { return _num_elements; }
 
-    [[nodiscard]] Interval const & getIntervalImpl(size_t idx) const {
+    [[nodiscard]] TimeFrameInterval const & getIntervalImpl(size_t idx) const {
         auto const & element = _view[idx];
         if constexpr (requires { element.interval; }) {
-            _cached_interval = element.interval;
+            using IntervalStartType =
+                    std::remove_cvref_t<decltype(element.interval.start)>;
+            if constexpr (std::same_as<IntervalStartType, ClockTicks>) {
+                assert(_time_frame != nullptr &&
+                       "LazyDigitalIntervalStorage requires TimeFrame for ClockTicks elements");
+                _cached_interval = toTimeFrameInterval(element.interval, *_time_frame);
+            } else {
+                _cached_interval = element.interval;
+            }
         } else if constexpr (requires { element.first; }) {
             _cached_interval = element.first;
         } else {
@@ -74,10 +101,10 @@ public:
         }
     }
 
-    [[nodiscard]] std::optional<size_t> findByIntervalImpl(Interval const & interval) const {
+    [[nodiscard]] std::optional<size_t> findByIntervalImpl(TimeFrameInterval const & interval) const {
         // Linear search
         for (size_t i = 0; i < _num_elements; ++i) {
-            Interval const & iv = getIntervalImpl(i);
+            TimeFrameInterval const & iv = getIntervalImpl(i);
             if (iv.start == interval.start && iv.end == interval.end) {
                 return i;
             }
@@ -90,9 +117,9 @@ public:
         return it != _entity_id_to_index.end() ? std::optional{it->second} : std::nullopt;
     }
 
-    [[nodiscard]] bool hasIntervalAtTimeImpl(int64_t time) const {
+    [[nodiscard]] bool hasIntervalAtTimeImpl(TimeFrameIndex time) const {
         for (size_t i = 0; i < _num_elements; ++i) {
-            Interval const & interval = getIntervalImpl(i);
+            TimeFrameInterval const & interval = getIntervalImpl(i);
             if (interval.start <= time && time <= interval.end) {
                 return true;
             }
@@ -100,38 +127,41 @@ public:
         return false;
     }
 
-    [[nodiscard]] std::pair<size_t, size_t> getOverlappingRangeImpl(int64_t start, int64_t end) const {
+    /**
+     * @brief Get index range of intervals overlapping [start, end].
+     *
+     * **Always O(n) linear scan** over computed elements. Correct for overlapping
+     * intervals. Does not use the disjoint binary-search optimization available on
+     * @ref OwningDigitalIntervalStorage::getOverlappingRangeImpl() and
+     * @ref ViewDigitalIntervalStorage::getOverlappingRangeImpl().
+     *
+     * @note Lazy storage has no `assumeDisjointIntervals()` hook; disjoint transform
+     *       views still pay linear cost for this query.
+     *
+     * @see OwningDigitalIntervalStorage::getOverlappingRangeImpl()
+     * @see ViewDigitalIntervalStorage::getOverlappingRangeImpl()
+     */
+    [[nodiscard]] std::pair<size_t, size_t> getOverlappingRangeImpl(TimeFrameIndex start, TimeFrameIndex end) const {
         if (_num_elements == 0 || start > end) {
             return {0, 0};
         }
 
-        // Lazy storage also maintains sorted disjoint intervals, so we can use binary search.
-        // Use std::views::iota to create an index range for binary searching.
-        auto indices = std::views::iota(size_t{0}, _num_elements);
+        // Linear scan: lazy storage backs transform intermediates that may overlap.
+        size_t start_idx = _num_elements;
+        size_t end_idx = 0;
 
-        // Find first index where interval ends at or after start
-        auto it_start = std::ranges::lower_bound(indices, start, {},
-                                                 [this](size_t idx) { return getIntervalImpl(idx).end; });
-
-        // Find first index where interval starts strictly after end
-        auto it_end = std::ranges::upper_bound(indices, end, {},
-                                               [this](size_t idx) { return getIntervalImpl(idx).start; });
-
-        size_t start_idx = *it_start;
-        size_t end_idx = *it_end;
-
-        // Handle edge cases where iterators are at end
-        if (it_start == indices.end()) {
-            return {0, 0};
-        }
-        if (it_end == indices.end()) {
-            end_idx = _num_elements;
+        for (size_t i = 0; i < _num_elements; ++i) {
+            TimeFrameInterval const & interval = getIntervalImpl(i);
+            if (interval.start <= end && interval.end >= start) {
+                start_idx = std::min(start_idx, i);
+                end_idx = std::max(end_idx, i + 1);
+            }
         }
 
-        return {start_idx, end_idx};
+        return start_idx <= end_idx ? std::pair{start_idx, end_idx} : std::pair<size_t, size_t>{0, 0};
     }
 
-    [[nodiscard]] std::pair<size_t, size_t> getContainedRangeImpl(int64_t start, int64_t end) const {
+    [[nodiscard]] std::pair<size_t, size_t> getContainedRangeImpl(TimeFrameIndex start, TimeFrameIndex end) const {
         if (_num_elements == 0 || start > end) {
             return {0, 0};
         }
@@ -141,7 +171,7 @@ public:
         size_t end_idx = 0;
 
         for (size_t i = 0; i < _num_elements; ++i) {
-            Interval const & interval = getIntervalImpl(i);
+            TimeFrameInterval const & interval = getIntervalImpl(i);
             if (interval.start >= start && interval.end <= end) {
                 start_idx = std::min(start_idx, i);
                 end_idx = std::max(end_idx, i + 1);
@@ -186,8 +216,10 @@ private:
 
     ViewType _view;
     size_t _num_elements;
+    std::shared_ptr<TimeFrame> _time_frame;
     std::unordered_map<EntityId, size_t> _entity_id_to_index;
-    mutable Interval _cached_interval;// For returning reference from lazy access
+    mutable TimeFrameInterval _cached_interval{TimeFrameIndex{0}, TimeFrameIndex{0}};
+
 };
 
 #endif// LAZY_DIGITAL_INTERVAL_STORAGE_HPP

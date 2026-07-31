@@ -19,6 +19,7 @@
 // Data type IO includes
 #include "IO/formats/CSV/points/Point_Data_CSV.hpp"// For load_multiple_PointData_from_dlc
 // Tensor numpy loading now handled through the IO registry (DataManagerNumpy library)
+#include "utils/JsonDataLoadExpansion.hpp"
 #include "utils/TableView/TableRegistry.hpp"
 
 #include "IO/formats/Binary/common/binary_loaders.hpp"              // For Time data type loading
@@ -69,13 +70,13 @@ void recordLoadedFileSource(
         return;
     }
 
-    WhiskerToolbox::Entity::Lineage::FileOrigin origin{
+    Neuralyzer::Entity::Lineage::FileOrigin origin{
             .m_path = file_path,
             .m_format = item.value("format", std::string{}),
             .m_data_type = item.value("data_type", std::string{}),
             .m_source_config_json = item.dump()};
 
-    WhiskerToolbox::Entity::Lineage::LineageRecorder::recordFileSource(
+    Neuralyzer::Entity::Lineage::LineageRecorder::recordFileSource(
             *dm->getLineageRegistry(), data_key, std::move(origin));
 }
 
@@ -391,7 +392,7 @@ DataManager::DataManager() {
     _entity_group_manager = std::make_unique<EntityGroupManager>();
 
     // Initialize LineageRegistry
-    _lineage_registry = std::make_unique<WhiskerToolbox::Entity::Lineage::LineageRegistry>();
+    _lineage_registry = std::make_unique<Neuralyzer::Entity::Lineage::LineageRegistry>();
 
     // Register all available loaders
     static bool loaders_registered = false;
@@ -971,8 +972,12 @@ std::vector<DataInfo> load_data_from_json_config(DataManager * dm, json const & 
                 }
             }
         }
+        json data_array = j["data"];
+        if (j.contains("loops")) {
+            data_array = expandDataArrayLoops(data_array, j["loops"]);
+        }
         // Always run substitution: inline variables take priority, env vars are the fallback
-        auto data_str = j["data"].dump();
+        auto data_str = data_array.dump();
         data_str = substituteVariablesInJsonString(data_str, variables);
         resolved = json::parse(data_str);
         working_ptr = &resolved;

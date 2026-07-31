@@ -8,10 +8,11 @@
 #include "CorePlotting/LineBatch/LineBatchBuilder.hpp"
 #include "CorePlotting/LineBatch/LineBatchData.hpp"
 
+#include "../../fixtures/GatherAlignmentFixtures.hpp"
 #include "AnalogTimeSeries/Analog_Time_Series.hpp"
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
-#include "Lines/Line_Data.hpp"
 #include "GatherResult/GatherResult.hpp"
+#include "Lines/Line_Data.hpp"
 #include "TimeFrame/TimeFrame.hpp"
 
 #include <cstdint>
@@ -26,44 +27,46 @@ using namespace CorePlotting;
 
 namespace {
 
+using Neuralyzer::Test::GatherFixtures::createIdentityTimeFrameForMax;
+using Neuralyzer::Test::GatherFixtures::createIntervalSeries;
+
 /// Create a LineData with known lines for testing.
-auto makeLineData()
-{
+auto makeLineData() {
     auto ld = std::make_shared<LineData>();
 
     // Line A: triangle (3 points → 2 segments), at time 0
-    std::vector<Point2D<float>> line_a = {{0.0f, 0.0f}, {1.0f, 1.0f}, {2.0f, 0.0f}};
+    std::vector<Point2D<float>> const line_a = {{0.0f, 0.0f}, {1.0f, 1.0f}, {2.0f, 0.0f}};
     ld->addAtTime(TimeFrameIndex(0), line_a, NotifyObservers::No);
 
     // Line B: single segment (2 points → 1 segment), at time 1
-    std::vector<Point2D<float>> line_b = {{3.0f, 3.0f}, {4.0f, 4.0f}};
+    std::vector<Point2D<float>> const line_b = {{3.0f, 3.0f}, {4.0f, 4.0f}};
     ld->addAtTime(TimeFrameIndex(1), line_b, NotifyObservers::No);
 
     return ld;
 }
 
 /// Create a simple AnalogTimeSeries over [start, start+count).
-auto makeAnalog(std::int64_t start, std::size_t count)
-{
+auto makeAnalog(std::int64_t start, std::size_t count) {
     std::vector<float> data;
     std::vector<TimeFrameIndex> times;
     data.reserve(count);
     times.reserve(count);
     for (std::size_t i = 0; i < count; ++i) {
         data.push_back(static_cast<float>(i) * 0.1f);
-        times.push_back(TimeFrameIndex(start + static_cast<std::int64_t>(i)));
+        times.emplace_back(start + static_cast<std::int64_t>(i));
     }
-    return std::make_shared<AnalogTimeSeries>(std::move(data), std::move(times));
+    auto series = std::make_shared<AnalogTimeSeries>(std::move(data), std::move(times));
+    series->setTimeFrame(createIdentityTimeFrameForMax(start + static_cast<std::int64_t>(count)));
+    return series;
 }
 
-} // namespace
+}// namespace
 
 // ═══════════════════════════════════════════════════════════════════════
 // buildLineBatchFromLineData
 // ═══════════════════════════════════════════════════════════════════════
 
-TEST_CASE("buildLineBatchFromLineData — basic topology", "[CorePlotting][LineBatch]")
-{
+TEST_CASE("buildLineBatchFromLineData — basic topology", "[CorePlotting][LineBatch]") {
     auto ld = makeLineData();
     auto batch = buildLineBatchFromLineData(*ld, 800.0f, 600.0f);
 
@@ -123,21 +126,19 @@ TEST_CASE("buildLineBatchFromLineData — basic topology", "[CorePlotting][LineB
     }
 }
 
-TEST_CASE("buildLineBatchFromLineData — empty LineData", "[CorePlotting][LineBatch]")
-{
-    LineData empty_ld;
+TEST_CASE("buildLineBatchFromLineData — empty LineData", "[CorePlotting][LineBatch]") {
+    LineData const empty_ld;
     auto batch = buildLineBatchFromLineData(empty_ld, 1.0f, 1.0f);
 
     REQUIRE(batch.empty());
     REQUIRE(batch.numSegments() == 0);
 }
 
-TEST_CASE("buildLineBatchFromLineData — single-point lines are skipped", "[CorePlotting][LineBatch]")
-{
+TEST_CASE("buildLineBatchFromLineData — single-point lines are skipped", "[CorePlotting][LineBatch]") {
     auto ld = std::make_shared<LineData>();
 
     // One-point line → should be skipped (can't form a segment)
-    std::vector<Point2D<float>> single_pt = {{5.0f, 5.0f}};
+    std::vector<Point2D<float>> const single_pt = {{5.0f, 5.0f}};
     ld->addAtTime(TimeFrameIndex(0), single_pt, NotifyObservers::No);
 
     auto batch = buildLineBatchFromLineData(*ld, 1.0f, 1.0f);
@@ -148,20 +149,18 @@ TEST_CASE("buildLineBatchFromLineData — single-point lines are skipped", "[Cor
 // buildLineBatchFromGatherResult
 // ═══════════════════════════════════════════════════════════════════════
 
-TEST_CASE("buildLineBatchFromGatherResult — basic topology", "[CorePlotting][LineBatch]")
-{
+TEST_CASE("buildLineBatchFromGatherResult — basic topology", "[CorePlotting][LineBatch]") {
     // Source analog: 100 samples at times [0..99]
     auto analog = makeAnalog(0, 100);
 
     // Two trials: [10,20) and [50,60)
-    auto intervals = std::make_shared<DigitalIntervalSeries>(
-        std::vector<Interval>{{10, 20}, {50, 60}});
+    auto intervals = createIntervalSeries({{10, 20}, {50, 60}});
 
     auto gathered = gather(analog, intervals);
     REQUIRE(gathered.size() == 2);
 
     // Alignment times at interval starts
-    std::vector<std::int64_t> align = {10, 50};
+    std::vector<ClockTicks> const align = {ClockTicks(10), ClockTicks(50)};// TODO: fix this
 
     auto batch = buildLineBatchFromGatherResult(gathered, align);
 
@@ -184,8 +183,8 @@ TEST_CASE("buildLineBatchFromGatherResult — basic topology", "[CorePlotting][L
     SECTION("x-coordinates are relative to alignment time") {
         // First segment of trial 0: time 10 with align 10 → x=0
         // and time 11 with align 10 → x=1
-        CHECK(batch.segments[0] == 0.0f); // x1 = 10 - 10
-        CHECK(batch.segments[2] == 1.0f); // x2 = 11 - 10
+        CHECK(batch.segments[0] == 0.0f);// x1 = 10 - 10
+        CHECK(batch.segments[2] == 1.0f);// x2 = 11 - 10
     }
 
     SECTION("all lines visible, none selected") {
@@ -198,16 +197,30 @@ TEST_CASE("buildLineBatchFromGatherResult — basic topology", "[CorePlotting][L
     }
 }
 
-TEST_CASE("buildLineBatchFromGatherResult — empty gather", "[CorePlotting][LineBatch]")
-{
+TEST_CASE("buildLineBatchFromGatherResult — uses GatherResult alignment metadata", "[CorePlotting][LineBatch]") {
+    auto analog = makeAnalog(0, 100);
+    auto intervals = createIntervalSeries({{10, 20}, {50, 60}});
+
+    auto gathered = gather(analog, intervals);
+    REQUIRE(gathered.size() == 2);
+
+    auto batch = buildLineBatchFromGatherResult(gathered);
+
+    REQUIRE(batch.numLines() == 2);
+    CHECK(batch.lines[0].trial_index == 0);
+    CHECK(batch.lines[1].trial_index == 1);
+    CHECK(batch.segments[0] == 0.0f);
+    CHECK(batch.segments[2] == 1.0f);
+}
+
+TEST_CASE("buildLineBatchFromGatherResult — empty gather", "[CorePlotting][LineBatch]") {
     // Source with only 5 samples, no intervals overlap
     auto analog = makeAnalog(0, 5);
-    auto intervals = std::make_shared<DigitalIntervalSeries>(
-        std::vector<Interval>{{100, 200}});
+    auto intervals = createIntervalSeries({{100, 200}});
 
     auto gathered = gather(analog, intervals);
 
-    std::vector<std::int64_t> align = {100};
+    std::vector<ClockTicks> const align = {ClockTicks(100)};// TODO: fix this
     auto batch = buildLineBatchFromGatherResult(gathered, align);
 
     // The gathered trial may exist but have < 2 samples → line skipped

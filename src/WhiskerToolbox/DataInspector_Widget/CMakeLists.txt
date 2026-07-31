@@ -90,8 +90,6 @@ set(DATA_INSPECTOR_WIDGET_SOURCES
         TensorData/TensorDataView.cpp
         TensorData/TensorDesigner.hpp
         TensorData/TensorDesigner.cpp
-        TensorData/TensorColumnViewCreator.hpp
-        TensorData/TensorColumnViewCreator.cpp
         TensorData/ColumnConfigDialog.hpp
         TensorData/ColumnConfigDialog.cpp
 
@@ -131,6 +129,7 @@ target_link_libraries(DataInspector_Widget PRIVATE DataExport_Widget)
 target_link_libraries(DataInspector_Widget PRIVATE DataManagerIO)
 target_link_libraries(DataInspector_Widget PRIVATE MediaExport)
 target_link_libraries(DataInspector_Widget PRIVATE Collapsible_Widget)
+target_link_libraries(DataInspector_Widget PRIVATE TensorDesign)
 target_link_libraries(DataInspector_Widget PRIVATE TransformsV2)
 target_link_libraries(DataInspector_Widget PRIVATE TransformsV2_Widget)
 

@@ -26,7 +26,6 @@
 #include "CorePlotting/Mappers/RasterMapper.hpp"
 #include "CorePlotting/SceneGraph/RenderablePrimitives.hpp"
 #include "CorePlotting/SceneGraph/SceneBuilder.hpp"
-#include "CorePlotting/CoordinateTransform/TimeRange.hpp"
 #include "CorePlotting/CoordinateTransform/ViewState.hpp"
 #include "CorePlotting/CoordinateTransform/TimeAxisCoordinates.hpp"
 #include "CorePlotting/Interaction/SceneHitTester.hpp"
@@ -118,7 +117,7 @@ std::unique_ptr<QuadTree<EntityId>> buildCombinedEventIndex(
     
     for (auto const& [series, layout] : series_layouts) {
         for (auto const& event : series->view()) {
-            float x = static_cast<float>(time_frame.getTimeAtIndex(event.event_time));
+            float x = static_cast<float>(event.event_time.getValue());
             float y = layout->y_transform.offset;
             tree->insert(x, y, event.entity_id);
         }
@@ -140,7 +139,7 @@ std::unique_ptr<QuadTree<EntityId>> buildStackedEventIndex(
     float y = layout.y_transform.offset;
     
     for (auto const& event : series.view()) {
-        float x = static_cast<float>(time_frame.getTimeAtIndex(event.event_time));
+        float x = static_cast<float>(event.event_time.getValue());
         tree->insert(x, y, event.entity_id);
     }
     
@@ -159,8 +158,8 @@ RenderableScene createIntervalScene(
     RenderableRectangleBatch batch;
     
     for (auto const& interval : intervals.view()) {
-        float x_start = static_cast<float>(time_frame.getTimeAtIndex(TimeFrameIndex{interval.interval.start}));
-        float x_end = static_cast<float>(time_frame.getTimeAtIndex(TimeFrameIndex{interval.interval.end}));
+        float x_start = static_cast<float>(interval.interval.start.getValue());
+        float x_end = static_cast<float>(interval.interval.end.getValue());
         float width = x_end - x_start;
         // y_transform: offset=center, gain=half_height
         float height = layout.y_transform.gain * 2.0f;
@@ -484,7 +483,7 @@ TEST_CASE("Scenario 4: Screen → World → Hit → Verify coordinates",
     
     SECTION("TimeAxisParams converts screen X to time correctly") {
         // Setup: 800px wide canvas, time range [0, 1000]
-        TimeAxisParams params(0, 1000, 800);
+        TimeAxisParams params(ClockTicks(0), ClockTicks(1000), 800);
         
         // Middle of canvas (x=400) should map to time=500
         float time = canvasXToTime(400.0f, params);
@@ -500,7 +499,7 @@ TEST_CASE("Scenario 4: Screen → World → Hit → Verify coordinates",
     }
     
     SECTION("Time to canvas X round-trip") {
-        TimeAxisParams params(0, 1000, 800);
+        TimeAxisParams params(ClockTicks(0), ClockTicks(1000), 800);
         
         // Convert time 500 to canvas X
         float canvas_x = timeToCanvasX(500.0f, params);

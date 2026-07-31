@@ -12,7 +12,7 @@
 #include <limits>
 #include <vector>
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 std::shared_ptr<DigitalEventSeries> analogIntervalPeak(
         DigitalIntervalSeries const & intervals,
@@ -41,23 +41,27 @@ std::shared_ptr<DigitalEventSeries> analogIntervalPeak(
     auto interval_timeframe = intervals.getTimeFrame();
 
     // Build search ranges based on search mode
-    std::vector<std::pair<int64_t, int64_t>> search_ranges;
+    std::vector<std::pair<TimeFrameIndex, TimeFrameIndex>> search_ranges;
 
     if (params.search_mode == AnalogIntervalPeakParams::SearchMode::within_intervals) {
         // Search within each interval: [start, end]
+        assert(interval_timeframe != nullptr && "analogIntervalPeak requires interval time frame");
         for (auto const & interval: interval_data) {
-            search_ranges.emplace_back(interval.value().start, interval.value().end);
+            auto const tf_interval = toTimeFrameInterval(interval.value(), *interval_timeframe);
+            search_ranges.emplace_back(tf_interval.start, tf_interval.end);
         }
     } else {
         // Search between interval starts: [start_i, start_{i+1})
+        assert(interval_timeframe != nullptr && "analogIntervalPeak requires interval time frame");
         for (size_t i = 0; i < intervals.size() - 1; ++i) {
-            search_ranges.emplace_back(interval_data[i].value().start,
-                                       interval_data[i + 1].value().start - 1);
+            auto const start_i = toTimeFrameInterval(interval_data[i].value(), *interval_timeframe).start;
+            auto const start_next = toTimeFrameInterval(interval_data[i + 1].value(), *interval_timeframe).start;
+            search_ranges.emplace_back(start_i, start_next - TimeFrameIndex{1});
         }
         // For the last interval, search from its start to its end
         if (!interval_data.empty()) {
-            auto const & last_interval = interval_data.back();
-            search_ranges.emplace_back(last_interval.value().start, last_interval.value().end);
+            auto const last_interval = toTimeFrameInterval(interval_data.back().value(), *interval_timeframe);
+            search_ranges.emplace_back(last_interval.start, last_interval.end);
         }
     }
 
@@ -121,7 +125,7 @@ std::shared_ptr<DigitalEventSeries> analogIntervalPeak(
         }
         TimeFrameIndex const peak_time_index = **time_iter;
 
-        // Add event at the peak timestamp (in interval series coordinate system)
+        // Peak indices are stored in the analog series coordinate system.
         peak_events.push_back(peak_time_index);
 
         // Report progress
@@ -131,8 +135,19 @@ std::shared_ptr<DigitalEventSeries> analogIntervalPeak(
         }
     }
 
-    // Create the event series
+    // Attach a TimeFrame so view() can resolve stored indices to ClockTicks.
+    //
+    // Peak events are stored as analog TimeFrameIndex values. ElementRegistry
+    // binary propagation would copy input1's (interval) TimeFrame, which is wrong
+    // when the analog and interval series use different time bases. Prefer the
+    // analog TimeFrame; fall back to the interval TimeFrame only when analog has none.
+    // DataManager::setData still owns the long-term TimeFrame assignment in production.
     auto event_series = std::make_shared<DigitalEventSeries>(peak_events);
+    if (auto analog_timeframe = analog.getTimeFrame()) {
+        event_series->setTimeFrame(analog_timeframe);
+    } else if (interval_timeframe) {
+        event_series->setTimeFrame(interval_timeframe);
+    }
 
     if (ctx.progress) {
         ctx.progress(100);
@@ -141,4 +156,4 @@ std::shared_ptr<DigitalEventSeries> analogIntervalPeak(
     return event_series;
 }
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2

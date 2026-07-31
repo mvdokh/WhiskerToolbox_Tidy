@@ -5,6 +5,7 @@
 #include "Core/DataViewerStateData.hpp"
 #include "CorePlotting/CoordinateTransform/ViewStateData.hpp"
 #include "Feature_Tree_Model.hpp"
+#include "Ordering/ChannelPositionMetadata.hpp"
 #include "Ordering/SpikeToAnalogPairingLoader.hpp"
 #include "Ordering/SwindaleSpikeSorterLoader.hpp"
 #include "Rendering/OpenGLWidget.hpp"
@@ -12,6 +13,7 @@
 #include "SubWidgets/AnalogTimeSeries/AnalogViewer_Widget.hpp"
 #include "SubWidgets/DigitalEvent/EventViewer_Widget.hpp"
 #include "SubWidgets/DigitalInterval/IntervalViewer_Widget.hpp"
+#include "UI/SpikeSorterKeyNumberingDialog.hpp"
 #include "UI/SpikeToAnalogConfigDialog.hpp"
 
 #include "Plots/Common/MultiLaneVerticalAxisWidget/Core/MultiLaneVerticalAxisState.hpp"
@@ -830,7 +832,7 @@ void DataViewer_Widget::_updateLaneDescriptors() {
 void DataViewer_Widget::_updateCoordinateDisplay(float time_coordinate, float canvas_y, QString const & series_info) {
     // Convert time coordinate to actual time using the time frame
     int const time_index = static_cast<int>(std::round(time_coordinate));
-    int const actual_time = _time_frame->getTimeAtIndex(TimeFrameIndex(time_index));
+    ClockTicks const actual_time = _time_frame->getTimeAtIndex(TimeFrameIndex(time_index));
 
     // Get canvas size for debugging
     auto [canvas_width, canvas_height] = ui->openGLWidget->getCanvasSize();
@@ -840,7 +842,7 @@ void DataViewer_Widget::_updateCoordinateDisplay(float time_coordinate, float ca
     QString coordinate_text;
     if (series_info.isEmpty()) {
         coordinate_text = QString("Time: %1  Index: %2  Y: %3  Canvas: %4x%5")
-                                  .arg(actual_time, 10)    // Right-aligned, width 10
+                                  .arg(actual_time.getValue(), 10)    // Right-aligned, width 10
                                   .arg(time_index, 10)     // Right-aligned, width 10
                                   .arg(canvas_y, 8, 'f', 1)// Right-aligned, width 8, 1 decimal
                                   .arg(canvas_width, 5)    // Right-aligned, width 5
@@ -848,7 +850,7 @@ void DataViewer_Widget::_updateCoordinateDisplay(float time_coordinate, float ca
     } else {
         // For series info, still use fixed-width for numeric values but allow series info to vary
         coordinate_text = QString("Time: %1  Index: %2  %3  Canvas: %4x%5")
-                                  .arg(actual_time, 10)
+                                  .arg(actual_time.getValue(), 10)
                                   .arg(time_index, 10)
                                   .arg(series_info, -30)// Left-aligned, min width 30
                                   .arg(canvas_width, 5)
@@ -1248,8 +1250,21 @@ void DataViewer_Widget::_loadSpikeSorterConfigurationForGroup(QString const & gr
     auto positions = _parseSpikeSorterConfig(data.toStdString());
     if (positions.empty()) return;
 
+    std::vector<std::string> const group_keys = _findGroupAnalogKeys(group_name.toStdString());
+    bool const auto_detected_one_based = detectKeyOneBased(group_keys, group_name.toStdString());
+
+    SpikeSorterKeyNumberingDialog dialog(group_name, auto_detected_one_based, this);
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    bool const key_one_based = dialog.keyOneBased(auto_detected_one_based);
+
     // Load configuration into OpenGLWidget - layout will be recomputed on next render
-    ui->openGLWidget->loadSpikeSorterConfiguration(group_name.toStdString(), positions);
+    ui->openGLWidget->loadSpikeSorterConfiguration(
+            group_name.toStdString(),
+            positions,
+            key_one_based);
     ui->openGLWidget->updateCanvas();
 }
 
@@ -1374,8 +1389,14 @@ void DataViewer_Widget::_loadSpikeSorterConfigurationFromText(QString const & gr
         return;
     }
 
+    std::vector<std::string> const group_keys = _findGroupAnalogKeys(group_name.toStdString());
+    bool const key_one_based = detectKeyOneBased(group_keys, group_name.toStdString());
+
     // Load configuration into OpenGLWidget - layout will be recomputed on next render
-    ui->openGLWidget->loadSpikeSorterConfiguration(group_name.toStdString(), positions);
+    ui->openGLWidget->loadSpikeSorterConfiguration(
+            group_name.toStdString(),
+            positions,
+            key_one_based);
     ui->openGLWidget->updateCanvas();
 }
 

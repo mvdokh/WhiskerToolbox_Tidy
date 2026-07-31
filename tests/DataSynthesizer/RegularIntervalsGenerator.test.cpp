@@ -10,7 +10,7 @@
 #include <memory>
 #include <string>
 
-using namespace WhiskerToolbox::DataSynthesizer;
+using namespace Neuralyzer::DataSynthesizer;
 
 static std::shared_ptr<DigitalIntervalSeries> runRegularIntervals(std::string const & json) {
     auto result = GeneratorRegistry::instance().generate("RegularIntervals", json);
@@ -30,12 +30,12 @@ TEST_CASE("RegularIntervals intervals have correct timing", "[RegularIntervals]"
     REQUIRE(dis->size() == 3);
 
     auto v = dis->view();
-    REQUIRE(v[0].value().start == 0);
-    REQUIRE(v[0].value().end == 29);
-    REQUIRE(v[1].value().start == 100);
-    REQUIRE(v[1].value().end == 129);
-    REQUIRE(v[2].value().start == 200);
-    REQUIRE(v[2].value().end == 229);
+    REQUIRE(v[0].value().start == ClockTicks(0));
+    REQUIRE(v[0].value().end == ClockTicks(29));
+    REQUIRE(v[1].value().start == ClockTicks(100));
+    REQUIRE(v[1].value().end == ClockTicks(129));
+    REQUIRE(v[2].value().start == ClockTicks(200));
+    REQUIRE(v[2].value().end == ClockTicks(229));
 }
 
 TEST_CASE("RegularIntervals respects start_offset", "[RegularIntervals]") {
@@ -45,10 +45,10 @@ TEST_CASE("RegularIntervals respects start_offset", "[RegularIntervals]") {
     REQUIRE(dis->size() == 4);
 
     auto v = dis->view();
-    REQUIRE(v[0].value().start == 10);
-    REQUIRE(v[0].value().end == 29);
-    REQUIRE(v[1].value().start == 60);
-    REQUIRE(v[1].value().end == 79);
+    REQUIRE(v[0].value().start == ClockTicks(10));
+    REQUIRE(v[0].value().end == ClockTicks(29));
+    REQUIRE(v[1].value().start == ClockTicks(60));
+    REQUIRE(v[1].value().end == ClockTicks(79));
 }
 
 TEST_CASE("RegularIntervals last interval is clamped to num_samples", "[RegularIntervals]") {
@@ -58,7 +58,7 @@ TEST_CASE("RegularIntervals last interval is clamped to num_samples", "[RegularI
     REQUIRE(dis->size() == 2);
 
     auto v = dis->view();
-    REQUIRE(v[1].value().end == 149);
+    REQUIRE(v[1].value().end == ClockTicks(149));
 }
 
 TEST_CASE("RegularIntervals rejects invalid parameters", "[RegularIntervals]") {

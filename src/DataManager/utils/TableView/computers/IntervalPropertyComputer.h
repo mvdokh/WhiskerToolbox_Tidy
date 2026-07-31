@@ -19,9 +19,9 @@ class DigitalIntervalSeries;
  * @brief Enumeration of operations that can be performed on interval properties.
  */
 enum class IntervalProperty : std::uint8_t {
-    Start,  ///< Returns the start time/index of the interval
-    End,    ///< Returns the end time/index of the interval
-    Duration///< Returns the duration (end - start) of the interval
+    Start,   ///< Returns the interval start in absolute clock ticks
+    End,     ///< Returns the interval end in absolute clock ticks
+    Duration ///< Returns the duration in clock ticks (end - start)
 };
 
 /**
@@ -86,13 +86,13 @@ public:
 
             switch (m_property) {
                 case IntervalProperty::Start:
-                    results.push_back(static_cast<T>(this_interval.interval.start));
+                    results.push_back(static_cast<T>(this_interval.interval.start.getValue()));
                     break;
                 case IntervalProperty::End:
-                    results.push_back(static_cast<T>(this_interval.interval.end));
+                    results.push_back(static_cast<T>(this_interval.interval.end.getValue()));
                     break;
                 case IntervalProperty::Duration:
-                    results.push_back(static_cast<T>(this_interval.interval.end - this_interval.interval.start));
+                    results.push_back(static_cast<T>(this_interval.interval.end.getValue() - this_interval.interval.start.getValue()));
                     break;
                 default:
                     throw std::runtime_error("Unknown IntervalProperty");

@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_PIPELINE_LOADER_HPP
-#define WHISKERTOOLBOX_V2_PIPELINE_LOADER_HPP
+#ifndef NEURALYZER_V2_PIPELINE_LOADER_HPP
+#define NEURALYZER_V2_PIPELINE_LOADER_HPP
 
 #include "core/TransformPipeline.hpp"// TransformPipeline
 #include "detail/PipelineStep.hpp"   // PipelineStep
@@ -14,11 +14,11 @@
 #include <string>
 #include <vector>
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 class ElementRegistry;
 }
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 // ============================================================================
 // Pipeline JSON Schema using reflect-cpp
@@ -416,6 +416,6 @@ rfl::Result<rfl::Nothing> savePipelineToFile(std::string const & filepath,
  */
 rfl::Result<PipelineDescriptor> loadPipelineDescriptorFromJsonFile(std::string const & filepath);
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
-#endif// WHISKERTOOLBOX_V2_PIPELINE_LOADER_HPP
+#endif// NEURALYZER_V2_PIPELINE_LOADER_HPP

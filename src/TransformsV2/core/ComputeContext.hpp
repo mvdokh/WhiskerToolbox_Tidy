@@ -1,10 +1,10 @@
-#ifndef WHISKERTOOLBOX_V2_COMPUTE_CONTEXT_HPP
-#define WHISKERTOOLBOX_V2_COMPUTE_CONTEXT_HPP
+#ifndef NEURALYZER_V2_COMPUTE_CONTEXT_HPP
+#define NEURALYZER_V2_COMPUTE_CONTEXT_HPP
 
 #include <functional>
 #include <string>
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 /**
  * @brief Context for transform execution
@@ -41,6 +41,6 @@ struct ComputeContext {
     }
 };
 
-} // namespace WhiskerToolbox::Transforms::V2
+} // namespace Neuralyzer::Transforms::V2
 
-#endif// WHISKERTOOLBOX_V2_COMPUTE_CONTEXT_HPP
+#endif// NEURALYZER_V2_COMPUTE_CONTEXT_HPP

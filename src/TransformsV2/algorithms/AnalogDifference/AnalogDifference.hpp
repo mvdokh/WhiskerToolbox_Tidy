@@ -7,8 +7,8 @@
  * frame gaps). Supports configurable window lag and edge policies.
  */
 
-#ifndef WHISKERTOOLBOX_V2_ANALOG_DIFFERENCE_HPP
-#define WHISKERTOOLBOX_V2_ANALOG_DIFFERENCE_HPP
+#ifndef NEURALYZER_V2_ANALOG_DIFFERENCE_HPP
+#define NEURALYZER_V2_ANALOG_DIFFERENCE_HPP
 
 #include <rfl.hpp>
 #include <rfl/json.hpp>
@@ -16,11 +16,11 @@
 #include <memory>
 
 class AnalogTimeSeries;
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 /**
  * @brief Difference method applied to each sample
@@ -76,6 +76,6 @@ struct AnalogDifferenceParams {
         AnalogDifferenceParams const & params,
         ComputeContext const & ctx) -> std::shared_ptr<AnalogTimeSeries>;
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
-#endif// WHISKERTOOLBOX_V2_ANALOG_DIFFERENCE_HPP
+#endif// NEURALYZER_V2_ANALOG_DIFFERENCE_HPP

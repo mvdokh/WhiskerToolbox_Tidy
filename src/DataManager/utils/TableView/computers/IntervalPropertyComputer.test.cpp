@@ -249,11 +249,6 @@ private:
     std::shared_ptr<DataManagerExtension> m_data_manager_extension;// Lazy-initialized
 };
 
-// Helper function to create a DigitalIntervalSeries from a vector of Intervals
-auto createDigitalIntervalSeries(std::vector<Interval> const & intervals) -> std::shared_ptr<DigitalIntervalSeries> {
-    return std::make_shared<DigitalIntervalSeries>(intervals);
-}
-
 TEST_CASE("DM - TV - IntervalPropertyComputer Basic Functionality", "[IntervalPropertyComputer]") {
 
     SECTION("Start property extraction with matching intervals") {
@@ -262,14 +257,14 @@ TEST_CASE("DM - TV - IntervalPropertyComputer Basic Functionality", "[IntervalPr
         auto timeFrame = std::make_shared<TimeFrame>(timeValues);
 
         // Create source intervals (non-overlapping, properly ordered)
-        std::vector<Interval> sourceIntervals = {
-            {0, 2},   // Start = 0
-            {4, 6},   // Start = 4  
-            {8, 10},  // Start = 8
-            {12, 14}  // Start = 12
+        std::vector<TimeFrameInterval> sourceIntervals = {
+            {TimeFrameIndex(0), TimeFrameIndex(2)},   // Start = 0
+            {TimeFrameIndex(4), TimeFrameIndex(6)},   // Start = 4  
+            {TimeFrameIndex(8), TimeFrameIndex(10)},  // Start = 8
+            {TimeFrameIndex(12), TimeFrameIndex(14)}  // Start = 12
         };
 
-        auto intervalSource = createDigitalIntervalSeries(sourceIntervals);
+        auto intervalSource = std::make_shared<DigitalIntervalSeries>(sourceIntervals);
         intervalSource->setTimeFrame(timeFrame);
 
         // Create row intervals that match the source intervals exactly
@@ -304,13 +299,13 @@ TEST_CASE("DM - TV - IntervalPropertyComputer Basic Functionality", "[IntervalPr
         auto timeFrame = std::make_shared<TimeFrame>(timeValues);
 
         // Create source intervals (non-overlapping, properly ordered)
-        std::vector<Interval> sourceIntervals = {
-            {0, 2},   // End = 2
-            {4, 6},   // End = 6
-            {8, 10},  // End = 10
-            {12, 14}  // End = 14
+        std::vector<TimeFrameInterval> sourceIntervals = {
+            {TimeFrameIndex(0), TimeFrameIndex(2)},   // End = 2
+            {TimeFrameIndex(4), TimeFrameIndex(6)},   // End = 6
+            {TimeFrameIndex(8), TimeFrameIndex(10)},  // End = 10
+            {TimeFrameIndex(12), TimeFrameIndex(14)}  // End = 14
         };
-        auto intervalSource = createDigitalIntervalSeries(sourceIntervals);
+        auto intervalSource = std::make_shared<DigitalIntervalSeries>(sourceIntervals);
         intervalSource->setTimeFrame(timeFrame);
 
         // Create row intervals that match the source intervals exactly
@@ -345,13 +340,13 @@ TEST_CASE("DM - TV - IntervalPropertyComputer Basic Functionality", "[IntervalPr
         auto timeFrame = std::make_shared<TimeFrame>(timeValues);
 
         // Create source intervals (non-overlapping, properly ordered)
-        std::vector<Interval> sourceIntervals = {
-            {0, 2},   // Duration = 2-0 = 2
-            {4, 7},   // Duration = 7-4 = 3
-            {8, 10},  // Duration = 10-8 = 2
-            {12, 15}  // Duration = 15-12 = 3
+        std::vector<TimeFrameInterval> sourceIntervals = {
+            {TimeFrameIndex(0), TimeFrameIndex(2)},   // Duration = 2-0 = 2
+            {TimeFrameIndex(4), TimeFrameIndex(7)},   // Duration = 7-4 = 3
+            {TimeFrameIndex(8), TimeFrameIndex(10)},  // Duration = 10-8 = 2
+            {TimeFrameIndex(12), TimeFrameIndex(15)}  // Duration = 15-12 = 3
         };
-        auto intervalSource = createDigitalIntervalSeries(sourceIntervals);
+        auto intervalSource = std::make_shared<DigitalIntervalSeries>(sourceIntervals);
         intervalSource->setTimeFrame(timeFrame);
 
         // Create row intervals that match the source intervals exactly
@@ -386,8 +381,8 @@ TEST_CASE("DM - TV - IntervalPropertyComputer Basic Functionality", "[IntervalPr
         auto timeFrame = std::make_shared<TimeFrame>(timeValues);
 
         // Create source intervals that match the row intervals
-        std::vector<Interval> sourceIntervals = {{2, 4}}; // Start=2, End=4, Duration=2
-        auto intervalSource = createDigitalIntervalSeries(sourceIntervals);
+        std::vector<TimeFrameInterval> sourceIntervals = {TimeFrameInterval(TimeFrameIndex(2), TimeFrameIndex(4))}; // Start=2, End=4, Duration=2
+        auto intervalSource = std::make_shared<DigitalIntervalSeries>(sourceIntervals);
         intervalSource->setTimeFrame(timeFrame);
 
         // Create single row interval that matches the source interval
@@ -428,11 +423,11 @@ TEST_CASE("DM - TV - IntervalPropertyComputer Basic Functionality", "[IntervalPr
         auto timeFrame = std::make_shared<TimeFrame>(timeValues);
 
         // Create source intervals with zero-duration intervals
-        std::vector<Interval> sourceIntervals = {
-            {1, 1},  // Duration = 0
-            {3, 3}   // Duration = 0
+        std::vector<TimeFrameInterval> sourceIntervals = {
+            {TimeFrameIndex(1), TimeFrameIndex(1)},  // Duration = 0
+            {TimeFrameIndex(3), TimeFrameIndex(3)}   // Duration = 0
         };
-        auto intervalSource = createDigitalIntervalSeries(sourceIntervals);
+        auto intervalSource = std::make_shared<DigitalIntervalSeries>(sourceIntervals);
         intervalSource->setTimeFrame(timeFrame);
 
         // Create row intervals that match the source intervals exactly
@@ -463,8 +458,8 @@ TEST_CASE("DM - TV - IntervalPropertyComputer Error Handling", "[IntervalPropert
         auto timeFrame = std::make_shared<TimeFrame>(timeValues);
 
         // Create source intervals
-        std::vector<Interval> sourceIntervals = {{1, 3}};
-        auto intervalSource = createDigitalIntervalSeries(sourceIntervals);
+        std::vector<TimeFrameInterval> sourceIntervals = {TimeFrameInterval(TimeFrameIndex(1), TimeFrameIndex(3))};
+        auto intervalSource = std::make_shared<DigitalIntervalSeries>(sourceIntervals);
         intervalSource->setTimeFrame(timeFrame);
 
         // Create execution plan with indices instead of intervals
@@ -486,11 +481,11 @@ TEST_CASE("DM - TV - IntervalPropertyComputer Error Handling", "[IntervalPropert
         auto timeFrame = std::make_shared<TimeFrame>(timeValues);
 
         // Create source intervals
-        std::vector<Interval> sourceIntervals = {
-            {1, 3},
-            {5, 7}
+        std::vector<TimeFrameInterval> sourceIntervals = {
+            {TimeFrameIndex(1), TimeFrameIndex(3)},
+            {TimeFrameIndex(5), TimeFrameIndex(7)}
         };
-        auto intervalSource = createDigitalIntervalSeries(sourceIntervals);
+        auto intervalSource = std::make_shared<DigitalIntervalSeries>(sourceIntervals);
         intervalSource->setTimeFrame(timeFrame);
 
         // Create row intervals that don't match source intervals
@@ -516,14 +511,14 @@ TEST_CASE("DM - TV - IntervalPropertyComputer Error Handling", "[IntervalPropert
         auto timeFrame = std::make_shared<TimeFrame>(timeValues);
 
         // Create source intervals (5 intervals)
-        std::vector<Interval> sourceIntervals = {
-            {1, 2},  // Interval 1
-            {3, 4},  // Interval 2
-            {5, 6},  // Interval 3
-            {7, 8},  // Interval 4
-            {9, 10}  // Interval 5
+        std::vector<TimeFrameInterval> sourceIntervals = {
+            {TimeFrameIndex(1), TimeFrameIndex(2)},  // Interval 1
+            {TimeFrameIndex(3), TimeFrameIndex(4)},  // Interval 2
+            {TimeFrameIndex(5), TimeFrameIndex(6)},  // Interval 3
+            {TimeFrameIndex(7), TimeFrameIndex(8)},  // Interval 4
+            {TimeFrameIndex(9), TimeFrameIndex(10)}  // Interval 5
         };
-        auto intervalSource = createDigitalIntervalSeries(sourceIntervals);
+        auto intervalSource = std::make_shared<DigitalIntervalSeries>(sourceIntervals);
         intervalSource->setTimeFrame(timeFrame);
 
         // Create row intervals that are a subset of source intervals (intervals 2 and 4)
@@ -556,14 +551,14 @@ TEST_CASE("DM - TV - IntervalPropertyComputer Template Types", "[IntervalPropert
         std::vector<int> timeValues = {0, 5, 10, 15, 20, 25};
         auto timeFrame = std::make_shared<TimeFrame>(timeValues);
 
-        // Create source intervals
-        std::vector<Interval> sourceIntervals = {{1, 4}}; // Duration = 3
-        auto intervalSource = createDigitalIntervalSeries(sourceIntervals);
+        // Interval [1,4] spans clock ticks [5, 20] on this timeframe
+        std::vector<TimeFrameInterval> sourceIntervals = {TimeFrameInterval(TimeFrameIndex(1), TimeFrameIndex(4))};
+        auto intervalSource = std::make_shared<DigitalIntervalSeries>(sourceIntervals);
         intervalSource->setTimeFrame(timeFrame);
 
         // Create row intervals that match the source intervals exactly
         std::vector<TimeFrameInterval> rowIntervals = {
-                TimeFrameInterval(TimeFrameIndex(1), TimeFrameIndex(4))// Start=1, End=4, Duration=3
+                TimeFrameInterval(TimeFrameIndex(1), TimeFrameIndex(4))
         };
 
         ExecutionPlan plan(rowIntervals, timeFrame);
@@ -574,7 +569,7 @@ TEST_CASE("DM - TV - IntervalPropertyComputer Template Types", "[IntervalPropert
                                                       "TestIntervals");
         auto [intResults, entity_ids] = intComputer.compute(plan);
         REQUIRE(intResults.size() == 1);
-        REQUIRE(intResults[0] == 3);
+        REQUIRE(intResults[0] == 15);
 
         // Test with float
         IntervalPropertyComputer<float> floatComputer(intervalSource,
@@ -582,7 +577,7 @@ TEST_CASE("DM - TV - IntervalPropertyComputer Template Types", "[IntervalPropert
                                                       "TestIntervals");
         auto [floatResults, floatEntity_ids] = floatComputer.compute(plan);
         REQUIRE(floatResults.size() == 1);
-        REQUIRE(floatResults[0] == Catch::Approx(3.0f));
+        REQUIRE(floatResults[0] == Catch::Approx(15.0f));
 
         // Test with double
         IntervalPropertyComputer<double> doubleComputer(intervalSource,
@@ -590,7 +585,7 @@ TEST_CASE("DM - TV - IntervalPropertyComputer Template Types", "[IntervalPropert
                                                         "TestIntervals");
         auto [doubleResults, doubleEntity_ids] = doubleComputer.compute(plan);
         REQUIRE(doubleResults.size() == 1);
-        REQUIRE(doubleResults[0] == Catch::Approx(3.0));
+        REQUIRE(doubleResults[0] == Catch::Approx(15.0));
     }
 }
 
@@ -601,8 +596,8 @@ TEST_CASE("DM - TV - IntervalPropertyComputer Dependency Tracking", "[IntervalPr
         std::vector<int> timeValues = {0, 1, 2};
         auto timeFrame = std::make_shared<TimeFrame>(timeValues);
 
-        std::vector<Interval> sourceIntervals = {{0, 1}};
-        auto intervalSource = createDigitalIntervalSeries(sourceIntervals);
+        std::vector<TimeFrameInterval> sourceIntervals = {TimeFrameInterval(TimeFrameIndex(0), TimeFrameIndex(1))};
+        auto intervalSource = std::make_shared<DigitalIntervalSeries>(sourceIntervals);
         intervalSource->setTimeFrame(timeFrame);
 
         // Create computer
@@ -634,7 +629,7 @@ TEST_CASE_METHOD(IntervalPropertyTestFixture, "DM - TV - IntervalPropertyCompute
         // Convert to TimeFrameIntervals for row selector
         std::vector<TimeFrameInterval> row_intervals;
         for (auto const & interval: behavior_intervals) {
-            row_intervals.emplace_back(TimeFrameIndex(interval.start), TimeFrameIndex(interval.end));
+            row_intervals.push_back(toTimeFrameInterval(interval, *behavior_time_frame));
         }
 
         REQUIRE(row_intervals.size() == 5);
@@ -721,7 +716,7 @@ TEST_CASE_METHOD(IntervalPropertyTestFixture, "DM - TV - IntervalPropertyCompute
         // Convert to TimeFrameIntervals for row selector
         std::vector<TimeFrameInterval> row_intervals;
         for (auto const & interval: neural_intervals) {
-            row_intervals.emplace_back(TimeFrameIndex(interval.start), TimeFrameIndex(interval.end));
+            row_intervals.push_back(toTimeFrameInterval(interval, *neural_time_frame));
         }
 
         REQUIRE(row_intervals.size() == 4);
@@ -791,7 +786,7 @@ TEST_CASE_METHOD(IntervalPropertyTestFixture, "DM - TV - IntervalPropertyCompute
         // Convert to TimeFrameIntervals for row selector
         std::vector<TimeFrameInterval> row_intervals;
         for (auto const & interval: behavior_intervals) {
-            row_intervals.emplace_back(TimeFrameIndex(interval.start), TimeFrameIndex(interval.end));
+            row_intervals.push_back(toTimeFrameInterval(interval, *behavior_time_frame));
         }
 
         REQUIRE(row_intervals.size() == 5);

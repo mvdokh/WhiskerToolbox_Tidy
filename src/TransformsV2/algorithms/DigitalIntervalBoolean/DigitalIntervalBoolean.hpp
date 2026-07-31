@@ -1,15 +1,15 @@
-#ifndef WHISKERTOOLBOX_V2_DIGITAL_INTERVAL_BOOLEAN_HPP
-#define WHISKERTOOLBOX_V2_DIGITAL_INTERVAL_BOOLEAN_HPP
+#ifndef NEURALYZER_V2_DIGITAL_INTERVAL_BOOLEAN_HPP
+#define NEURALYZER_V2_DIGITAL_INTERVAL_BOOLEAN_HPP
 
 #include <memory>
 
 class DigitalIntervalSeries;
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 /**
  * @brief Parameters for digital interval boolean operations
@@ -75,6 +75,6 @@ std::shared_ptr<DigitalIntervalSeries> digitalIntervalBoolean(
         DigitalIntervalBooleanParams const & params,
         ComputeContext const & ctx);
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-#endif// WHISKERTOOLBOX_V2_DIGITAL_INTERVAL_BOOLEAN_HPP
+#endif// NEURALYZER_V2_DIGITAL_INTERVAL_BOOLEAN_HPP

@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_ELEMENT_TRANSFORM_HPP
-#define WHISKERTOOLBOX_V2_ELEMENT_TRANSFORM_HPP
+#ifndef NEURALYZER_V2_ELEMENT_TRANSFORM_HPP
+#define NEURALYZER_V2_ELEMENT_TRANSFORM_HPP
 
 #include "core/ComputeContext.hpp"
 
@@ -9,7 +9,7 @@
 #include <tuple>        // std::tuple
 #include <type_traits>
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 // ============================================================================
 // Concepts for Element Transforms
@@ -421,6 +421,6 @@ private:
     std::tuple<Transforms...> transforms_;
 };
 
-} // namespace WhiskerToolbox::Transforms::V2
+} // namespace Neuralyzer::Transforms::V2
 
-#endif // WHISKERTOOLBOX_V2_ELEMENT_TRANSFORM_HPP
+#endif // NEURALYZER_V2_ELEMENT_TRANSFORM_HPP

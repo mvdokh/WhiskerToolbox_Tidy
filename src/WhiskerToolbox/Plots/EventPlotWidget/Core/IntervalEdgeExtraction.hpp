@@ -19,7 +19,7 @@
 
 #include <memory>
 
-namespace WhiskerToolbox::Plots {
+namespace Neuralyzer::Plots {
 
 /**
  * @brief Extract edge events from a DigitalIntervalSeries
@@ -49,17 +49,18 @@ namespace WhiskerToolbox::Plots {
     }
 
     // Extract the appropriate edge from each interval
-    for (auto const & item : intervals->view()) {
+    for (size_t i = 0; i < intervals->size(); ++i) {
+        auto const interval = intervals->getStoredInterval(i);
         if (edge == IntervalAlignmentType::Beginning) {
-            result->addEvent(TimeFrameIndex(item.interval.start));
+            result->addEvent(interval.start);
         } else {
-            result->addEvent(TimeFrameIndex(item.interval.end));
+            result->addEvent(interval.end);
         }
     }
 
     return result;
 }
 
-} // namespace WhiskerToolbox::Plots
+} // namespace Neuralyzer::Plots
 
 #endif // INTERVAL_EDGE_EXTRACTION_HPP

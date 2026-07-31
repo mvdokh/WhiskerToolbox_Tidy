@@ -11,6 +11,7 @@
 
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
 #include "IO/formats/CSV/digitaltimeseries/Digital_Interval_Series_CSV.hpp"
+#include "TimeFrame/interval_data.hpp"
 
 #include <algorithm>
 #include <filesystem>
@@ -18,6 +19,20 @@
 #include <vector>
 
 namespace {
+
+void expectStoredIntervalsEqual(
+        DigitalIntervalSeries const & original,
+        DigitalIntervalSeries const & loaded) {
+    ASSERT_EQ(loaded.size(), original.size());
+    for (size_t i = 0; i < original.size(); ++i) {
+        auto const original_interval = original.getStoredInterval(i);
+        auto const loaded_interval = loaded.getStoredInterval(i);
+        EXPECT_EQ(loaded_interval.start, original_interval.start)
+                << "Interval start mismatch at index " << i;
+        EXPECT_EQ(loaded_interval.end, original_interval.end)
+                << "Interval end mismatch at index " << i;
+    }
+}
 
 /**
  * @brief Round-trip fuzz test: generate DigitalIntervalSeries, save as CSV, load back, compare.
@@ -34,7 +49,7 @@ void FuzzCsvIntervalRoundTrip(
     }
 
     // Build non-overlapping intervals from fuzzed inputs
-    std::vector<Interval> intervals;
+    std::vector<TimeFrameInterval> intervals;
     auto const count = std::min(start_times.size(), durations.size());
 
     // Sort starts and ensure non-overlapping by using cumulative offsets
@@ -50,7 +65,7 @@ void FuzzCsvIntervalRoundTrip(
         int64_t const dur = std::max(static_cast<int64_t>(std::abs(durations[i])), int64_t{1});
         int64_t const end = start + dur;
 
-        intervals.emplace_back(Interval{start, end});
+        intervals.emplace_back(TimeFrameInterval{TimeFrameIndex(start), TimeFrameIndex(end)});
         next_valid_start = end + 2;// gap of at least 2 to avoid adjacency issues
     }
 
@@ -90,19 +105,7 @@ void FuzzCsvIntervalRoundTrip(
 
     auto const loaded_data = std::make_shared<DigitalIntervalSeries>(loaded_intervals);
 
-    // Compare: same interval count
-    ASSERT_EQ(loaded_data->size(), interval_data->size());
-
-    // Compare: same start/end times (integer-based, should match exactly)
-    auto orig_view = interval_data->view();
-    auto loaded_view = loaded_data->view();
-
-    for (size_t i = 0; i < interval_data->size(); ++i) {
-        EXPECT_EQ(loaded_view[i].value().start, orig_view[i].value().start)
-                << "Interval start mismatch at index " << i;
-        EXPECT_EQ(loaded_view[i].value().end, orig_view[i].value().end)
-                << "Interval end mismatch at index " << i;
-    }
+    expectStoredIntervalsEqual(*interval_data, *loaded_data);
 
     // Cleanup
     std::filesystem::remove_all(temp_dir);
@@ -134,7 +137,7 @@ void FuzzCsvIntervalRoundTripDelimiter(
     }
 
     // Build non-overlapping intervals
-    std::vector<Interval> intervals;
+    std::vector<TimeFrameInterval> intervals;
     auto const count = std::min(start_times.size(), durations.size());
 
     std::vector<int> sorted_starts(start_times.begin(),
@@ -149,7 +152,7 @@ void FuzzCsvIntervalRoundTripDelimiter(
         int64_t const dur = std::max(static_cast<int64_t>(std::abs(durations[i])), int64_t{1});
         int64_t const end = start + dur;
 
-        intervals.emplace_back(Interval{start, end});
+        intervals.emplace_back(TimeFrameInterval{TimeFrameIndex(start), TimeFrameIndex(end)});
         next_valid_start = end + 2;
     }
 
@@ -187,15 +190,7 @@ void FuzzCsvIntervalRoundTripDelimiter(
         ASSERT_EQ(loaded_intervals.size(), intervals.size());
 
         auto const loaded_data = std::make_shared<DigitalIntervalSeries>(loaded_intervals);
-        auto orig_view = interval_data->view();
-        auto loaded_view = loaded_data->view();
-
-        for (size_t i = 0; i < interval_data->size(); ++i) {
-            EXPECT_EQ(loaded_view[i].value().start, orig_view[i].value().start)
-                    << "Interval start mismatch at index " << i;
-            EXPECT_EQ(loaded_view[i].value().end, orig_view[i].value().end)
-                    << "Interval end mismatch at index " << i;
-        }
+        expectStoredIntervalsEqual(*interval_data, *loaded_data);
     }
 
     std::filesystem::remove_all(temp_dir);

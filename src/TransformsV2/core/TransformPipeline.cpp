@@ -7,9 +7,9 @@
 #include "Masks/Mask_Data.hpp"
 #include "Points/Point_Data.hpp"
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
-using TypeTraits::ElementFor_t;
+using Neuralyzer::TypeTraits::ElementFor_t;
 
 // ============================================================================
 // Batch Variant Helpers
@@ -118,7 +118,7 @@ DataTypeVariant executePipeline(DataTypeVariant const & input, TransformPipeline
                 single_step_pipeline.addStep(step);
                 current = std::visit([&](auto const & ptr) -> DataTypeVariant {
                     using T = typename std::remove_reference_t<decltype(*ptr)>;
-                    if constexpr (TypeTraits::HasDataTraits<T>) {
+                    if constexpr (Neuralyzer::TypeTraits::HasDataTraits<T>) {
                         return single_step_pipeline.execute<T>(*ptr);
                     } else {
                         throw std::runtime_error("Unsupported input container type in variant");
@@ -134,7 +134,7 @@ DataTypeVariant executePipeline(DataTypeVariant const & input, TransformPipeline
     return std::visit([&](auto const & ptr) -> DataTypeVariant {
         using T = typename std::remove_reference_t<decltype(*ptr)>;
         // Check if T is a valid input container (has DataTraits)
-        if constexpr (TypeTraits::HasDataTraits<T>) {
+        if constexpr (Neuralyzer::TypeTraits::HasDataTraits<T>) {
             return pipeline.execute<T>(*ptr);
         } else {
             throw std::runtime_error("Unsupported input container type in variant");
@@ -266,4 +266,4 @@ template DataTypeVariant TransformPipeline::execute<MaskData>(MaskData const &) 
 template DataTypeVariant TransformPipeline::execute<LineData>(LineData const &) const;
 template DataTypeVariant TransformPipeline::execute<PointData>(PointData const &) const;
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2

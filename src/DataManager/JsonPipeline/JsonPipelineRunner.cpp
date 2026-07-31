@@ -27,7 +27,7 @@
 #include <string>
 #include <utility>
 
-namespace WhiskerToolbox::DataManagerPipeline {
+namespace Neuralyzer::DataManagerPipeline {
 
 namespace {
 
@@ -60,6 +60,13 @@ namespace {
             throw std::invalid_argument("'variables' must be an object when present");
         }
         normalized["variables"] = config["variables"];
+    }
+
+    if (config.contains("loops")) {
+        if (!config["loops"].is_object()) {
+            throw std::invalid_argument("'loops' must be an object when present");
+        }
+        normalized["loops"] = config["loops"];
     }
 
     nlohmann::json data = nlohmann::json::array();
@@ -139,7 +146,7 @@ namespace {
  * @post Deleting the returned shared pointer does not delete the DataManager.
  */
 [[nodiscard]] std::shared_ptr<DataManager> makeNonOwningDataManagerPtr(DataManager & data_manager) {
-    return std::shared_ptr<DataManager>(&data_manager, [](DataManager *) {});
+    return {&data_manager, [](DataManager *) {}};
 }
 
 /**
@@ -388,4 +395,4 @@ JsonPipelineResult runJsonPipelineFile(
     }
 }
 
-}// namespace WhiskerToolbox::DataManagerPipeline
+}// namespace Neuralyzer::DataManagerPipeline

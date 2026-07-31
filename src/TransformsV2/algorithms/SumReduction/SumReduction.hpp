@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_SUM_REDUCTION_TRANSFORM_HPP
-#define WHISKERTOOLBOX_V2_SUM_REDUCTION_TRANSFORM_HPP
+#ifndef NEURALYZER_V2_SUM_REDUCTION_TRANSFORM_HPP
+#define NEURALYZER_V2_SUM_REDUCTION_TRANSFORM_HPP
 
 #include <rfl.hpp>
 #include <rfl/json.hpp>
@@ -8,11 +8,11 @@
 #include <span>
 #include <vector>
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 /**
  * @brief Parameters for sum reduction
@@ -71,6 +71,6 @@ std::vector<float> sumReductionWithContext(
         SumReductionParams const & params,
         ComputeContext const & ctx);
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
-#endif// WHISKERTOOLBOX_V2_SUM_REDUCTION_TRANSFORM_HPP
+#endif// NEURALYZER_V2_SUM_REDUCTION_TRANSFORM_HPP

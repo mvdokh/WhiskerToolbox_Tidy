@@ -6,8 +6,8 @@
  * the generator function and metadata. Generators self-register at static init
  * time using the Registration.hpp RAII helper.
  */
-#ifndef WHISKERTOOLBOX_GENERATOR_REGISTRY_HPP
-#define WHISKERTOOLBOX_GENERATOR_REGISTRY_HPP
+#ifndef NEURALYZER_GENERATOR_REGISTRY_HPP
+#define NEURALYZER_GENERATOR_REGISTRY_HPP
 
 #include "GeneratorTypes.hpp"
 
@@ -16,7 +16,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace WhiskerToolbox::DataSynthesizer {
+namespace Neuralyzer::DataSynthesizer {
 
 /**
  * @brief Singleton registry for data generators.
@@ -120,6 +120,6 @@ private:
     std::unordered_map<std::string, std::vector<std::string>> output_type_index_;
 };
 
-}// namespace WhiskerToolbox::DataSynthesizer
+}// namespace Neuralyzer::DataSynthesizer
 
-#endif// WHISKERTOOLBOX_GENERATOR_REGISTRY_HPP
+#endif// NEURALYZER_GENERATOR_REGISTRY_HPP

@@ -3,8 +3,8 @@
 #include "AnalogTimeSeries/Analog_Time_Series.hpp"
 #include "DigitalTimeSeries/Digital_Event_Series.hpp"
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
-#include "TimeFrame/interval_data.hpp"
 #include "TimeFrame/TimeFrame.hpp"
+#include "TimeFrame/interval_data.hpp"
 #include "transforms/utils/variant_type_check.hpp"
 
 #include <algorithm>
@@ -50,23 +50,28 @@ std::shared_ptr<DigitalEventSeries> find_interval_peaks(
 
     // Build search ranges based on search mode
     // Note: intervals are in their own TimeFrameIndex coordinate system
-    std::vector<std::pair<int64_t, int64_t>> search_ranges;
-    
+    std::vector<std::pair<TimeFrameIndex, TimeFrameIndex>> search_ranges;
+
     if (intervalPeakParams.search_mode == IntervalPeakParams::SearchMode::WITHIN_INTERVALS) {
         // Search within each interval: [start, end]
-        for (auto const & interval_with_id : intervals_view) {
+        for (auto const & interval_with_id: intervals_view) {
             auto const & interval = interval_with_id.value();
-            search_ranges.emplace_back(interval.start, interval.end);
+            TimeFrameIndex const start = interval_timeframe->getIndexAtTime(interval.start);
+            TimeFrameIndex const end = interval_timeframe->getIndexAtTime(interval.end);
+            search_ranges.emplace_back(start, end);
         }
     } else {
         // Search between interval starts: [start_i, start_{i+1})
         for (size_t i = 0; i < num_intervals - 1; ++i) {
-            search_ranges.emplace_back(intervals_view[i].value().start, 
-                                      intervals_view[i + 1].value().start - 1);
+            TimeFrameIndex const start = interval_timeframe->getIndexAtTime(intervals_view[i].value().start);
+            TimeFrameIndex const end = interval_timeframe->getIndexAtTime(intervals_view[i + 1].value().start) - TimeFrameIndex{1};
+            search_ranges.emplace_back(start, end);
         }
         // For the last interval, search from its start to its end
         auto const last_interval = intervals_view[num_intervals - 1].value();
-        search_ranges.emplace_back(last_interval.start, last_interval.end);
+        TimeFrameIndex const start = interval_timeframe->getIndexAtTime(last_interval.start);
+        TimeFrameIndex const end = interval_timeframe->getIndexAtTime(last_interval.end);
+        search_ranges.emplace_back(start, end);
     }
 
     if (progressCallback) progressCallback(10);
@@ -92,9 +97,9 @@ std::shared_ptr<DigitalEventSeries> find_interval_peaks(
 
         // Get data and corresponding time indices in this range
         // If interval_timeframe is set, pass it for automatic conversion
-        auto time_value_pair = interval_timeframe 
-            ? analog_time_series->getTimeValueSpanInTimeFrameIndexRange(start_index, end_index, interval_timeframe.get())
-            : analog_time_series->getTimeValueSpanInTimeFrameIndexRange(start_index, end_index);
+        auto time_value_pair = interval_timeframe
+                                       ? analog_time_series->getTimeValueSpanInTimeFrameIndexRange(start_index, end_index, interval_timeframe.get())
+                                       : analog_time_series->getTimeValueSpanInTimeFrameIndexRange(start_index, end_index);
 
         auto const & data_span = time_value_pair.values;
         if (data_span.empty()) {
@@ -122,7 +127,7 @@ std::shared_ptr<DigitalEventSeries> find_interval_peaks(
         }
         TimeFrameIndex const peak_time_index = **time_iter;
 
-        // Add event at the peak timestamp (in interval series coordinate system)
+        // Peak indices are stored in the analog series coordinate system.
         peak_events.push_back(peak_time_index);
 
         // Report progress
@@ -132,8 +137,18 @@ std::shared_ptr<DigitalEventSeries> find_interval_peaks(
         }
     }
 
-    // Create the event series
+    // Attach a TimeFrame so view() can resolve stored indices to ClockTicks.
+    //
+    // Peak events are stored as analog TimeFrameIndex values. Prefer the analog
+    // TimeFrame because stored indices live in that coordinate system; use the
+    // interval TimeFrame only when analog has none. DataManager::setData owns
+    // long-term TimeFrame assignment when the result is committed to a session.
     auto event_series = std::make_shared<DigitalEventSeries>(peak_events);
+    if (auto analog_timeframe = analog_time_series->getTimeFrame()) {
+        event_series->setTimeFrame(analog_timeframe);
+    } else if (interval_timeframe) {
+        event_series->setTimeFrame(interval_timeframe);
+    }
 
     if (progressCallback) progressCallback(100);
 

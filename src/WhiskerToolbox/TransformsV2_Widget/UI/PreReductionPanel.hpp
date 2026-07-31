@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_PRE_REDUCTION_PANEL_HPP
-#define WHISKERTOOLBOX_PRE_REDUCTION_PANEL_HPP
+#ifndef NEURALYZER_V2_PRE_REDUCTION_PANEL_HPP
+#define NEURALYZER_V2_PRE_REDUCTION_PANEL_HPP
 
 /**
  * @file PreReductionPanel.hpp
@@ -21,9 +21,9 @@ class QListWidget;
 class QPushButton;
 class QVBoxLayout;
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 struct PreReductionStepDescriptor;
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
 /**
  * @brief Represents a single pre-reduction step in the UI
@@ -84,7 +84,7 @@ public:
      * @return true if all entries were loaded successfully
      */
     bool loadFromDescriptors(
-            std::vector<WhiskerToolbox::Transforms::V2::Examples::PreReductionStepDescriptor> const & descriptors);
+            std::vector<Neuralyzer::Transforms::V2::Examples::PreReductionStepDescriptor> const & descriptors);
 
 signals:
     /**
@@ -109,4 +109,4 @@ private:
     std::type_index _input_element_type{typeid(void)};
 };
 
-#endif// WHISKERTOOLBOX_PRE_REDUCTION_PANEL_HPP
+#endif// NEURALYZER_V2_PRE_REDUCTION_PANEL_HPP

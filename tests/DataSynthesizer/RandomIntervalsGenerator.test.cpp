@@ -10,7 +10,7 @@
 #include <memory>
 #include <string>
 
-using namespace WhiskerToolbox::DataSynthesizer;
+using namespace Neuralyzer::DataSynthesizer;
 
 static std::shared_ptr<DigitalIntervalSeries> runRandomIntervals(std::string const & json) {
     auto result = GeneratorRegistry::instance().generate("RandomIntervals", json);
@@ -24,8 +24,8 @@ TEST_CASE("RandomIntervals produces intervals within range", "[RandomIntervals]"
     REQUIRE(dis->size() > 0);
 
     for (auto interval: dis->view()) {
-        REQUIRE(interval.value().start >= 0);
-        REQUIRE(interval.value().end < 10000);
+        REQUIRE(interval.value().start >= ClockTicks(0));
+        REQUIRE(interval.value().end < ClockTicks(10000));
         REQUIRE(interval.value().start <= interval.value().end);
     }
 }
@@ -36,9 +36,9 @@ TEST_CASE("RandomIntervals intervals are sorted and non-overlapping", "[RandomIn
 
     int64_t prev_end = -1;
     for (auto interval: dis->view()) {
-        REQUIRE(interval.value().start > prev_end);
+        REQUIRE(interval.value().start > ClockTicks(prev_end));
         REQUIRE(interval.value().start <= interval.value().end);
-        prev_end = interval.value().end;
+        prev_end = interval.value().end.getValue();
     }
 }
 

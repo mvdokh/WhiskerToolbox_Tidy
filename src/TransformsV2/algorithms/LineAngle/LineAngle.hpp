@@ -1,13 +1,13 @@
-#ifndef WHISKERTOOLBOX_V2_LINE_ANGLE_TRANSFORM_HPP
-#define WHISKERTOOLBOX_V2_LINE_ANGLE_TRANSFORM_HPP
+#ifndef NEURALYZER_V2_LINE_ANGLE_TRANSFORM_HPP
+#define NEURALYZER_V2_LINE_ANGLE_TRANSFORM_HPP
 
 class Line2D;
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 /**
  * @brief Angle calculation method
@@ -81,6 +81,6 @@ float calculateLineAngleWithContext(
         LineAngleParams const & params,
         ComputeContext const & ctx);
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
-#endif// WHISKERTOOLBOX_V2_LINE_ANGLE_TRANSFORM_HPP
+#endif// NEURALYZER_V2_LINE_ANGLE_TRANSFORM_HPP

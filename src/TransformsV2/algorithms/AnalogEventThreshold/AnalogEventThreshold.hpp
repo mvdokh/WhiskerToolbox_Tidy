@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_ANALOG_EVENT_THRESHOLD_HPP
-#define WHISKERTOOLBOX_V2_ANALOG_EVENT_THRESHOLD_HPP
+#ifndef NEURALYZER_V2_ANALOG_EVENT_THRESHOLD_HPP
+#define NEURALYZER_V2_ANALOG_EVENT_THRESHOLD_HPP
 
 #include <rfl.hpp>
 #include <rfl/json.hpp>
@@ -9,11 +9,11 @@
 
 class AnalogTimeSeries;
 class DigitalEventSeries;
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 /**
  * @brief Parameters for analog event threshold detection
@@ -68,6 +68,6 @@ std::shared_ptr<DigitalEventSeries> analogEventThreshold(
         AnalogEventThresholdParams const & params,
         ComputeContext const & ctx);
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
-#endif// WHISKERTOOLBOX_V2_ANALOG_EVENT_THRESHOLD_HPP
+#endif// NEURALYZER_V2_ANALOG_EVENT_THRESHOLD_HPP

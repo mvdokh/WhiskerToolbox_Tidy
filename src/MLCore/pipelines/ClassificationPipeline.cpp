@@ -615,11 +615,11 @@ ClassificationPipelineResult runClassificationPipeline(
                 config.training_interval_key);
 
         if (cv_train_intervals && cv_train_intervals->size() > 1) {
-            // Collect all training intervals
-            std::vector<Interval> all_train_ivs;
+            // Collect all training intervals (index space for row-time comparison)
+            std::vector<TimeFrameInterval> all_train_ivs;
             all_train_ivs.reserve(cv_train_intervals->size());
-            for (auto const & iwid: cv_train_intervals->view()) {
-                all_train_ivs.push_back(iwid.interval);
+            for (std::size_t i = 0; i < cv_train_intervals->size(); ++i) {
+                all_train_ivs.push_back(cv_train_intervals->getStoredInterval(i));
             }
             std::sort(all_train_ivs.begin(), all_train_ivs.end());
 
@@ -693,7 +693,7 @@ ClassificationPipelineResult runClassificationPipeline(
                 fold_test_cols.reserve(cv_labeled_times.size());
 
                 for (std::size_t i = 0; i < cv_labeled_times.size(); ++i) {
-                    auto const t = cv_labeled_times[i].getValue();
+                    auto const t = cv_labeled_times[i];
                     bool const in_held_out =
                             (t >= held_out_iv.start && t <= held_out_iv.end);
 
@@ -1329,8 +1329,8 @@ ClassificationPipelineResult runClassificationPipeline(
 
                 // Helper: check if time t falls within any of the sorted intervals
                 auto const isInIntervals =
-                        [](std::int64_t t,
-                           std::vector<Interval> const & sorted_ivs) -> bool {
+                        [](TimeFrameIndex t,
+                           std::vector<TimeFrameInterval> const & sorted_ivs) -> bool {
                     for (auto const & iv: sorted_ivs) {
                         if (t >= iv.start && t <= iv.end) {
                             return true;
@@ -1343,28 +1343,28 @@ ClassificationPipelineResult runClassificationPipeline(
                 };
 
                 // Build sorted training intervals (for partitioning)
-                std::vector<Interval> sorted_train_ivs;
+                std::vector<TimeFrameInterval> sorted_train_ivs;
                 if (!config.training_interval_key.empty()) {
                     auto training_intervals = dm.getData<DigitalIntervalSeries>(
                             config.training_interval_key);
                     if (training_intervals && training_intervals->size() > 0) {
                         sorted_train_ivs.reserve(training_intervals->size());
-                        for (auto const & iwid: training_intervals->view()) {
-                            sorted_train_ivs.push_back(iwid.interval);
+                        for (std::size_t i = 0; i < training_intervals->size(); ++i) {
+                            sorted_train_ivs.push_back(training_intervals->getStoredInterval(i));
                         }
                         std::sort(sorted_train_ivs.begin(), sorted_train_ivs.end());
                     }
                 }
 
                 // Build sorted validation intervals (for partitioning)
-                std::vector<Interval> sorted_val_ivs;
+                std::vector<TimeFrameInterval> sorted_val_ivs;
                 if (!config.validation_interval_key.empty()) {
                     auto validation_intervals = dm.getData<DigitalIntervalSeries>(
                             config.validation_interval_key);
                     if (validation_intervals && validation_intervals->size() > 0) {
                         sorted_val_ivs.reserve(validation_intervals->size());
-                        for (auto const & iwid: validation_intervals->view()) {
-                            sorted_val_ivs.push_back(iwid.interval);
+                        for (std::size_t i = 0; i < validation_intervals->size(); ++i) {
+                            sorted_val_ivs.push_back(validation_intervals->getStoredInterval(i));
                         }
                         std::sort(sorted_val_ivs.begin(), sorted_val_ivs.end());
                     }
@@ -1378,7 +1378,7 @@ ClassificationPipelineResult runClassificationPipeline(
                     val_indices.reserve(predict_row_times.size());
 
                     for (std::size_t i = 0; i < predict_row_times.size(); ++i) {
-                        auto const t = predict_row_times[i].getValue();
+                        auto const t = predict_row_times[i];
                         if (isInIntervals(t, sorted_train_ivs)) {
                             train_indices.push_back(static_cast<arma::uword>(i));
                         } else if (!sorted_val_ivs.empty() &&

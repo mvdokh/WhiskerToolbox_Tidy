@@ -5,17 +5,18 @@
 
 #include "TensorTSNE.hpp"
 
+#include "CoreMath/non_finite_rows.hpp"
 #include "MLCore/models/MLModelParameters.hpp"
 #include "MLCore/models/unsupervised/TSNEOperation.hpp"
 #include "Tensors/TensorData.hpp"
 #include "TransformsV2/utils/DimReductionOutputBuilder.hpp"
-#include "TransformsV2/utils/NaNFilter.hpp"
+#include "TransformsV2/utils/NaNPolicy.hpp"
 #include "core/ComputeContext.hpp"
 
 #include <string>
 #include <vector>
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 auto tensorTSNE(
         TensorData const & input,
@@ -61,7 +62,7 @@ auto tensorTSNE(
 
     arma::mat obs_matrix = arma::conv_to<arma::mat>::from(fmat);
 
-    NaNFilterResult filter_result;
+    NonFiniteRowFilterResult filter_result;
     if (has_nan) {
         filter_result = filterNonFiniteRows(obs_matrix);
         ctx.logMessage("TensorTSNE: Filtered " + std::to_string(filter_result.rows_dropped) +
@@ -123,4 +124,4 @@ auto tensorTSNE(
     return output;
 }
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples

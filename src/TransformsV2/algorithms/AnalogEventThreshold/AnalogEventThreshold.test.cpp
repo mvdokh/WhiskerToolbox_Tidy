@@ -16,8 +16,8 @@
 #include "fixtures/vectors/analog/analog_event_threshold_test_helpers.hpp"
 #include "fixtures/vectors/analog/analog_event_threshold_vectors.hpp"
 
-using namespace WhiskerToolbox::Transforms::V2;
-using namespace WhiskerToolbox::Transforms::V2::Examples;
+using namespace Neuralyzer::Transforms::V2;
+using namespace Neuralyzer::Transforms::V2::Examples;
 
 namespace {
 
@@ -261,7 +261,9 @@ namespace {
 void populateDataManagerWithThresholdVectors(DataManager & dm) {
     for (auto const & tc: algorithmCases()) {
         std::string const time_key = std::string(tc.dm_key) + "_time";
-        dm.setData(std::string(tc.dm_key), buildAnalogTimeSeries(tc), TimeKey(time_key));
+        auto ats = buildAnalogTimeSeries(tc);
+        dm.setTime(TimeKey(time_key), ats->getTimeFrame());
+        dm.setData(std::string(tc.dm_key), ats, TimeKey(time_key));
     }
 }
 

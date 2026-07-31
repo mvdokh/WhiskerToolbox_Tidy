@@ -29,6 +29,9 @@ set(TRANSFORM_V2_SOURCES
 
         extension/gatherResult/GatherPipelineExecutor.hpp
         extension/gatherResult/GatherPipelineExecutor.cpp
+        extension/gatherResult/RowGatherGeometry.hpp
+        extension/gatherResult/RowGatherGeometry.cpp
+        extension/gatherResult/GatherResultRowContext.hpp
         extension/ElementTransform.hpp
         extension/ParameterBinding.hpp
         extension/ParameterBinding.cpp
@@ -57,6 +60,12 @@ set(TRANSFORM_V2_SOURCES
         algorithms/AnalogHilbertPhase/AnalogHilbertPhase.cpp
         algorithms/DigitalIntervalBoolean/DigitalIntervalBoolean.hpp
         algorithms/DigitalIntervalBoolean/DigitalIntervalBoolean.cpp
+        algorithms/EventToInterval/EventToInterval.hpp
+        algorithms/EventToInterval/EventToInterval.cpp
+        algorithms/IntervalToEvent/IntervalToEvent.hpp
+        algorithms/IntervalToEvent/IntervalToEvent.cpp
+        algorithms/PruneOverlappingIntervals/PruneOverlappingIntervals.hpp
+        algorithms/PruneOverlappingIntervals/PruneOverlappingIntervals.cpp
         algorithms/IntervalReduction/IntervalReduction.hpp
         algorithms/IntervalReduction/IntervalReduction.cpp
         algorithms/LineAngle/LineAngle.hpp
@@ -109,8 +118,7 @@ set(TRANSFORM_V2_SOURCES
         algorithms/TensorWhitening/TensorWhitening.cpp
         algorithms/TensorToAnalog/TensorToAnalog.hpp
         algorithms/TensorToAnalog/TensorToAnalog.cpp
-        utils/NaNFilter.hpp
-        utils/NaNFilter.cpp
+        utils/NaNPolicy.hpp
         utils/DimReductionOutputBuilder.hpp
         utils/DimReductionOutputBuilder.cpp
         algorithms/RangeReductions/EventRangeReductions.hpp

@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_INTERVAL_REDUCTION_HPP
-#define WHISKERTOOLBOX_V2_INTERVAL_REDUCTION_HPP
+#ifndef NEURALYZER_V2_INTERVAL_REDUCTION_HPP
+#define NEURALYZER_V2_INTERVAL_REDUCTION_HPP
 
 /**
  * @file IntervalReduction.hpp
@@ -42,11 +42,11 @@ class DigitalEventSeries;
 class DigitalIntervalSeries;
 class TensorData;
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 /**
  * @brief Parameters for interval reduction transforms
@@ -157,6 +157,6 @@ std::shared_ptr<TensorData> intervalOverlapReduction(
         IntervalReductionParams const & params,
         ComputeContext const & ctx);
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-#endif// WHISKERTOOLBOX_V2_INTERVAL_REDUCTION_HPP
+#endif// NEURALYZER_V2_INTERVAL_REDUCTION_HPP

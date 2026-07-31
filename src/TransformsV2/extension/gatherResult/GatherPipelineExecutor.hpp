@@ -19,7 +19,7 @@
  * // Build a ColumnProviderFn for an interval-row tensor column:
  * auto var = dm.getDataVariant(source_key);
  * return [var, intervals, pipe]() -> std::vector<float> {
- *     return WhiskerToolbox::Gather::gatherAndExecutePipeline(*var, intervals, pipe);
+ *     return Neuralyzer::Gather::gatherAndExecutePipeline(*var, intervals, pipe);
  * };
  * ```
  *
@@ -36,18 +36,18 @@
  * @see TransformPipeline::execute() for pipeline execution
  */
 
-#include "DataManager/DataManagerTypes.hpp" // DataTypeVariant
+#include "DataManager/DataManagerTypes.hpp"// DataTypeVariant
 
 #include <memory>
 #include <vector>
 
 class DigitalIntervalSeries;
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 class TransformPipeline;
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-namespace WhiskerToolbox::Gather {
+namespace Neuralyzer::Gather {
 
 /**
  * @brief Extract a single float from a DataTypeVariant pipeline output.
@@ -79,9 +79,9 @@ namespace WhiskerToolbox::Gather {
  *   2. Executes @p pipeline on that gathered view (T → DataTypeVariant).
  *   3. Calls extractSingleFloat() on the result.
  *
- * If the source data and @p intervals use different TimeFrames, the interval
- * boundaries are converted to the source's coordinate system before gathering
- * (same logic as TensorColumnBuilders::prepareIntervalsForGather).
+ * If the source data and @p intervals use different TimeFrames, GatherResult
+ * converts interval boundaries to the source coordinate system when each view
+ * is created.
  *
  * Dispatch is fully type-erased: the function visits the DataTypeVariant and
  * uses GatherResult<T>::create() + pipeline.execute<T>() for each concrete
@@ -99,9 +99,9 @@ namespace WhiskerToolbox::Gather {
  */
 [[nodiscard]] std::vector<float> gatherAndExecutePipeline(
         DataTypeVariant const & source,
-        std::shared_ptr<DigitalIntervalSeries> intervals,
-        WhiskerToolbox::Transforms::V2::TransformPipeline const & pipeline);
+        std::shared_ptr<DigitalIntervalSeries const> intervals,
+        Neuralyzer::Transforms::V2::TransformPipeline const & pipeline);
 
-}// namespace WhiskerToolbox::Gather
+}// namespace Neuralyzer::Gather
 
 #endif// GATHER_PIPELINE_EXECUTOR_HPP

@@ -7,6 +7,7 @@
 
 #include "DigitalTimeSeries/Digital_Event_Series.hpp"
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
+#include "TimeFrame/interval_data.hpp"
 
 namespace commands {
 
@@ -15,9 +16,10 @@ std::unordered_set<EntityId> getEntityIdsInRange(
         TimeFrameIndex start,
         TimeFrameIndex end) {
     std::unordered_set<EntityId> result;
-    for (auto const & event: data.view()) {
-        if (event.time() >= start && event.time() <= end) {
-            result.insert(event.id());
+    for (std::size_t i = 0; i < data.size(); ++i) {
+        TimeFrameIndex const event_time = data.getStoredEvent(i);
+        if (event_time >= start && event_time <= end) {
+            result.insert(data.getStoredEntityId(i));
         }
     }
     return result;
@@ -28,11 +30,17 @@ std::unordered_set<EntityId> getEntityIdsInRange(
         TimeFrameIndex start,
         TimeFrameIndex end) {
     std::unordered_set<EntityId> result;
-    int64_t const start_val = start.getValue();
-    int64_t const end_val = end.getValue();
+    auto const time_frame = data.getTimeFrame();
+    if (!time_frame) {
+        return result;
+    }
+
+    ClockTicksInterval const query{
+            time_frame->getTimeAtIndex(start),
+            time_frame->getTimeAtIndex(end)};
+
     for (auto const & elem: data.view()) {
-        // Overlap check: interval.start <= end && interval.end >= start
-        if (elem.interval.start <= end_val && elem.interval.end >= start_val) {
+        if (is_overlapping(elem.interval, query)) {
             result.insert(elem.id());
         }
     }

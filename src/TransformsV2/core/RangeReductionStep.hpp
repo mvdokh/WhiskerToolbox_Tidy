@@ -1,11 +1,11 @@
-#ifndef WHISKERTOOLBOX_V2_RANGE_REDUCTION_STEP_HPP
-#define WHISKERTOOLBOX_V2_RANGE_REDUCTION_STEP_HPP
+#ifndef NEURALYZER_V2_RANGE_REDUCTION_STEP_HPP
+#define NEURALYZER_V2_RANGE_REDUCTION_STEP_HPP
 
 #include <any>
 #include <string>
 #include <typeindex>
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 /**
  * @brief Descriptor for a terminal range reduction in a pipeline
@@ -38,6 +38,6 @@ struct RangeReductionStep {
           params_type(typeid(Params)) {}
 };
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-#endif // WHISKERTOOLBOX_V2_RANGE_REDUCTION_STEP_HPP
+#endif // NEURALYZER_V2_RANGE_REDUCTION_STEP_HPP

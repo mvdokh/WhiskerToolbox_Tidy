@@ -1,15 +1,15 @@
-#ifndef WHISKERTOOLBOX_V2_MASK_CENTROID_TRANSFORM_HPP
-#define WHISKERTOOLBOX_V2_MASK_CENTROID_TRANSFORM_HPP
+#ifndef NEURALYZER_V2_MASK_CENTROID_TRANSFORM_HPP
+#define NEURALYZER_V2_MASK_CENTROID_TRANSFORM_HPP
 
 class Mask2D;
 template<typename T>
 struct Point2D;
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 /**
  * @brief Parameters for mask centroid calculation
@@ -74,6 +74,6 @@ Point2D<float> calculateMaskCentroidWithContext(
         MaskCentroidParams const & params,
         ComputeContext const & ctx);
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
-#endif//WHISKERTOOLBOX_V2_MASK_CENTROID_TRANSFORM_HPP
+#endif//NEURALYZER_V2_MASK_CENTROID_TRANSFORM_HPP

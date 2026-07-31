@@ -71,35 +71,29 @@
  * @see AnalogTimeSeries::createView() for analog series views
  */
 
-#include "IntervalAdapters.hpp"
-
-#include "ViewAdaptorTypes.hpp"
-
 #include "AnalogTimeSeries/Analog_Time_Series.hpp"
 #include "DigitalTimeSeries/Digital_Event_Series.hpp"
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
 #include "TimeFrame/StrongTimeTypes.hpp"
 #include "TimeFrame/TimeFrame.hpp"
 #include "TimeFrame/interval_data.hpp"
-#include "TransformsV2/PipelineValueStore/PipelineValueStore.hpp"
-#include "TransformsV2/extension/ValueProjectionTypes.hpp"
 
 #include <algorithm>
-#include <cmath>
+#include <cassert>
 #include <concepts>
 #include <functional>
 #include <iterator>
 #include <memory>
-#include <numeric>
 #include <ranges>
-#include <type_traits>
+#include <stdexcept>
+#include <utility>
 #include <vector>
 
 // =============================================================================
 // Concepts for View Creation
 // =============================================================================
 
-namespace WhiskerToolbox::Gather {
+namespace Neuralyzer::Gather {
 
 /**
  * @brief Concept for types that support zero-copy view creation
@@ -145,7 +139,7 @@ concept CopyableTimeRangeDataType = requires(
 /**
  * @brief Concept for types that define an element_type alias
  *
- * Data containers that expose their element type (e.g., EventWithId for DigitalEventSeries)
+ * Data containers that expose their element type (e.g., ClockTicksWithId for DigitalEventSeries)
  * satisfy this concept. This enables type-safe pipeline binding.
  */
 template<typename T>
@@ -154,29 +148,10 @@ concept HasElementType = requires {
 };
 
 /**
- * @brief Concept for types that provide TimeFrame access
- *
- * Interval source adapters (like EventExpanderAdapter, IntervalWithAlignmentAdapter)
- * can provide their underlying TimeFrame for cross-timeframe alignment.
- */
-template<typename T>
-concept HasTimeFrameAccess = requires(T const & t) {
-    { t.getTimeFrame() } -> std::same_as<std::shared_ptr<TimeFrame>>;
-};
-
-/**
- * @brief Concept for data types that have a TimeFrame
- */
-template<typename T>
-concept HasTimeFrame = requires(T const & t) {
-    { t.getTimeFrame() } -> std::same_as<std::shared_ptr<TimeFrame>>;
-};
-
-/**
  * @brief Helper to get element type from a data container
  *
  * Provides compile-time mapping from container types to their element types.
- * - DigitalEventSeries → EventWithId
+ * - DigitalEventSeries → ClockTicksWithId
  * - AnalogTimeSeries → AnalogTimeSeries::TimeValuePoint
  * - Types with element_type alias → T::element_type
  */
@@ -186,10 +161,10 @@ struct element_type_of {
     using type = typename T::element_type;
 };
 
-// Specialization: DigitalEventSeries uses EventWithId
+// Specialization: DigitalEventSeries uses ClockTicksWithId
 template<>
 struct element_type_of<DigitalEventSeries> {
-    using type = EventWithId;
+    using type = ClockTicksWithId;
 };
 
 // Specialization: AnalogTimeSeries uses TimeValuePoint
@@ -198,16 +173,65 @@ struct element_type_of<AnalogTimeSeries> {
     using type = AnalogTimeSeries::TimeValuePoint;
 };
 
-// Specialization: DigitalIntervalSeries uses IntervalWithId
+// Specialization: DigitalIntervalSeries uses ClockTicksIntervalWithId
 template<>
 struct element_type_of<DigitalIntervalSeries> {
-    using type = IntervalWithId;
+    using type = ClockTicksIntervalWithId;
 };
 
 template<typename T>
 using element_type_of_t = typename element_type_of<T>::type;
 
-}// namespace WhiskerToolbox::Gather
+/**
+ * @brief Convert an interval from one TimeFrame coordinate system to another.
+ *
+ * @param interval TimeFrameInterval expressed in @p from_time_frame indices
+ * @param from_time_frame TimeFrame that owns @p interval coordinates
+ * @param to_time_frame TimeFrame used by the source data being queried
+ * @return TimeFrameInterval expressed in @p to_time_frame indices
+ *
+ * @pre @p from_time_frame and @p to_time_frame are valid TimeFrame references.
+ * @post Returned bounds are expressed in @p to_time_frame coordinates.
+ */
+[[nodiscard]] inline TimeFrameInterval convertIntervalToTimeFrame(
+        TimeFrameInterval const & interval,
+        TimeFrame const & from_time_frame,
+        TimeFrame const & to_time_frame) {
+    auto [converted_start, converted_end] = convertTimeFrameRange(
+            TimeFrameIndex(interval.start),
+            TimeFrameIndex(interval.end),
+            from_time_frame,
+            to_time_frame);
+    return TimeFrameInterval{converted_start, converted_end};
+}
+
+/**
+ * @brief Convert prepared gather-window bounds to source-data query bounds.
+ *
+ * @param interval Window bounds in the interval series TimeFrame
+ * @param interval_time_frame Non-null TimeFrame from the interval/window series
+ * @param source_time_frame Non-null TimeFrame from the source data
+ * @return Query interval in source-data TimeFrame coordinates
+ *
+ * @pre Prepared gather windows and source data must both carry non-null TimeFrames.
+ * @post Returned bounds are expressed in the source data TimeFrame.
+ */
+[[nodiscard]] inline TimeFrameInterval convertPreparedWindowToSourceInterval(
+        TimeFrameInterval const & interval,
+        std::shared_ptr<TimeFrame> const & interval_time_frame,
+        std::shared_ptr<TimeFrame> const & source_time_frame) {
+    assert(interval_time_frame && "convertPreparedWindowToSourceInterval: interval TimeFrame must not be null");
+    assert(source_time_frame && "convertPreparedWindowToSourceInterval: source TimeFrame must not be null");
+
+    if (!interval_time_frame || !source_time_frame) {
+        throw std::invalid_argument(
+                "convertPreparedWindowToSourceInterval: prepared windows and source data must have TimeFrames");
+    }
+
+    return convertIntervalToTimeFrame(interval, *interval_time_frame, *source_time_frame);
+}
+
+}// namespace Neuralyzer::Gather
 
 // =============================================================================
 // GatherResult Template
@@ -229,8 +253,8 @@ public:
     using const_iterator = typename std::vector<value_type>::const_iterator;
     using size_type = typename std::vector<value_type>::size_type;
 
-    /// Element type yielded by view iteration (e.g., EventWithId for DigitalEventSeries)
-    using element_type = WhiskerToolbox::Gather::element_type_of_t<T>;
+    /// Element type yielded by view iteration (e.g., ClockTicksWithId for DigitalEventSeries)
+    using element_type = Neuralyzer::Gather::element_type_of_t<T>;
 
     // ========== Constructors ==========
 
@@ -254,25 +278,15 @@ public:
      * @note Requires T to satisfy ViewableDataType concept
      */
     template<typename U = T>
-        requires WhiskerToolbox::Gather::ViewableDataType<U>
+        requires Neuralyzer::Gather::ViewableDataType<U>
     static GatherResult create(
             std::shared_ptr<U> source,
-            std::shared_ptr<DigitalIntervalSeries> intervals) {
-        GatherResult result;
-        result._source = source;
-        result._views.reserve(intervals->size());
-        result._intervals.reserve(intervals->size());
-
-        for (auto const & interval: intervals->view()) {
-            result._intervals.push_back(interval.interval);
-            auto view = U::createView(
-                    source,
-                    TimeFrameIndex(interval.interval.start),
-                    TimeFrameIndex(interval.interval.end));
-            result._views.push_back(std::move(view));
-        }
-
-        return result;
+            std::shared_ptr<DigitalIntervalSeries const> windows,
+            std::shared_ptr<DigitalEventSeries const> alignment_points = nullptr) {
+        return _createFromPreparedWindows<U>(
+                std::move(source),
+                std::move(windows),
+                std::move(alignment_points));
     }
 
     /**
@@ -286,26 +300,16 @@ public:
      * @return GatherResult containing views for each interval
      */
     template<typename U = T>
-        requires WhiskerToolbox::Gather::ViewableDataTypeInt64<U> &&
-                 (!WhiskerToolbox::Gather::ViewableDataType<U>)
+        requires Neuralyzer::Gather::ViewableDataTypeInt64<U> &&
+                 (!Neuralyzer::Gather::ViewableDataType<U>)
     static GatherResult create(
             std::shared_ptr<U> source,
-            std::shared_ptr<DigitalIntervalSeries> intervals) {
-        GatherResult result;
-        result._source = source;
-        result._views.reserve(intervals->size());
-        result._intervals.reserve(intervals->size());
-
-        for (auto const & interval: intervals->view()) {
-            result._intervals.push_back(interval.interval);
-            auto view = U::createView(
-                    source,
-                    interval.interval.start,
-                    interval.interval.end);
-            result._views.push_back(std::move(view));
-        }
-
-        return result;
+            std::shared_ptr<DigitalIntervalSeries const> windows,
+            std::shared_ptr<DigitalEventSeries const> alignment_points = nullptr) {
+        return _createFromPreparedWindows<U>(
+                std::move(source),
+                std::move(windows),
+                std::move(alignment_points));
     }
 
     /**
@@ -319,279 +323,77 @@ public:
      * @return GatherResult containing copies for each interval
      */
     template<typename U = T>
-        requires WhiskerToolbox::Gather::CopyableTimeRangeDataType<U> &&
-                 (!WhiskerToolbox::Gather::ViewableDataType<U>) &&
-                 (!WhiskerToolbox::Gather::ViewableDataTypeInt64<U>)
+        requires Neuralyzer::Gather::CopyableTimeRangeDataType<U> &&
+                 (!Neuralyzer::Gather::ViewableDataType<U>) &&
+                 (!Neuralyzer::Gather::ViewableDataTypeInt64<U>)
     static GatherResult create(
             std::shared_ptr<U> source,
-            std::shared_ptr<DigitalIntervalSeries> intervals) {
-        GatherResult result;
-        result._source = source;
-        result._views.reserve(intervals->size());
-        result._intervals.reserve(intervals->size());
-
-        for (auto const & interval: intervals->view()) {
-            result._intervals.push_back(interval.interval);
-            auto copy = std::make_shared<U>(source->createTimeRangeCopy(
-                    TimeFrameIndex(interval.interval.start),
-                    TimeFrameIndex(interval.interval.end)));
-            // Inherit TimeFrame and ImageSize from source
-            copy->setTimeFrame(source->getTimeFrame());
-            copy->setImageSize(source->getImageSize());
-            result._views.push_back(std::move(copy));
-        }
-
-        return result;
+            std::shared_ptr<DigitalIntervalSeries const> windows,
+            std::shared_ptr<DigitalEventSeries const> alignment_points = nullptr) {
+        return _createFromPreparedWindows<U>(
+                std::move(source),
+                std::move(windows),
+                std::move(alignment_points));
     }
 
-    // ========== Factory Methods for Interval Adapters ==========
-
     /**
-     * @brief Create GatherResult from source and an IntervalSource adapter
+     * @brief Create a GatherResult from already-created row DataObjects.
      *
-     * This overload accepts any type satisfying the IntervalSource concept,
-     * including EventExpanderAdapter and IntervalWithAlignmentAdapter.
+     * @param rows Row-aligned DataObjects in display order
+     * @param windows Optional row-window metadata with the same row count
+     * @param alignment_points Optional row-aligned alignment events with the same row count
+     * @return GatherResult that owns row pointers and optional metadata
      *
-     * The adapter provides AlignedInterval elements which contain:
-     * - start/end: interval bounds for view creation
-     * - alignment_time: custom alignment point for projections
-     *
-     * If the adapter and source data have different TimeFrames, times are 
-     * automatically converted from the adapter's TimeFrame to the source's
-     * TimeFrame using convert_time_index(). This enables cross-rate alignment
-     * (e.g., 500Hz behavioral events aligning 30kHz spike data).
-     *
-     * @tparam IntervalSourceT Type satisfying IntervalSource concept
-     * @param source Source data to create views from
-     * @param interval_source Adapter providing intervals with alignment info
-     * @return GatherResult containing views for each interval
-     *
-     * @example
-     * @code
-     * // Cross-timeframe alignment: events at 500Hz, spikes at 30kHz
-     * auto events = dm->getData<DigitalEventSeries>("behavior_events");  // 500Hz
-     * auto spikes = dm->getData<DigitalEventSeries>("neural_spikes");    // 30kHz
-     * auto adapter = expandEvents(events, 15, 15);  // ±15 indices in 500Hz
-     * // GatherResult automatically converts to 30kHz indices
-     * auto result = GatherResult<DigitalEventSeries>::create(spikes, adapter);
-     * @endcode
+     * @pre Every row pointer must be non-null.
+     * @pre If supplied, @p windows and @p alignment_points must match @p rows size.
+     * @post The returned result has no direct-gather source provenance.
      */
-    template<typename U = T, typename IntervalSourceT>
-        requires WhiskerToolbox::Gather::ViewableDataType<U> &&
-                 WhiskerToolbox::Gather::IntervalSource<IntervalSourceT>
-    static GatherResult create(
-            std::shared_ptr<U> source,
-            IntervalSourceT const & interval_source) {
+    [[nodiscard]] static GatherResult fromRows(
+            std::vector<value_type> rows,
+            std::shared_ptr<DigitalIntervalSeries const> windows = nullptr,
+            std::shared_ptr<DigitalEventSeries const> alignment_points = nullptr) {
+        _validateRowInputs(rows, windows, alignment_points);
+
         GatherResult result;
-        result._source = source;
-        result._views.reserve(interval_source.size());
-        result._intervals.reserve(interval_source.size());
-        result._alignment_times.reserve(interval_source.size());
-
-        // Resolve TimeFrames for absolute-time conversion
-        auto source_tf = source ? source->getTimeFrame() : nullptr;
-        std::shared_ptr<TimeFrame> adapter_tf = nullptr;
-        if constexpr (WhiskerToolbox::Gather::HasTimeFrameAccess<IntervalSourceT>) {
-            adapter_tf = interval_source.getTimeFrame();
-        }
-
-        for (auto const & aligned_interval: interval_source) {
-            int64_t view_start, view_end, alignment_abs_time;
-
-            if (adapter_tf) {
-                // Adapter yields indices in its own TimeFrame; convert to
-                // absolute time, then to source-TF indices for view creation.
-                alignment_abs_time = adapter_tf->getTimeAtIndex(
-                        TimeFrameIndex(aligned_interval.alignment_time));
-                int64_t start_abs = adapter_tf->getTimeAtIndex(
-                        TimeFrameIndex(aligned_interval.start));
-                int64_t end_abs = adapter_tf->getTimeAtIndex(
-                        TimeFrameIndex(aligned_interval.end));
-
-                if (source_tf) {
-                    view_start = source_tf->getIndexAtTime(
-                                                  static_cast<float>(start_abs))
-                                         .getValue();
-                    view_end = source_tf->getIndexAtTime(
-                                                static_cast<float>(end_abs))
-                                       .getValue();
-                } else {
-                    view_start = start_abs;
-                    view_end = end_abs;
-                }
-            } else if (source_tf) {
-                // No adapter TF: adapter values are already in absolute time.
-                // Convert directly to source-TF indices.
-                alignment_abs_time = aligned_interval.alignment_time;
-                view_start = source_tf->getIndexAtTime(
-                                              static_cast<float>(aligned_interval.start))
-                                     .getValue();
-                view_end = source_tf->getIndexAtTime(
-                                            static_cast<float>(aligned_interval.end))
-                                   .getValue();
-            } else {
-                // No TimeFrame at all: raw indices are the only option
-                alignment_abs_time = aligned_interval.alignment_time;
-                view_start = aligned_interval.start;
-                view_end = aligned_interval.end;
-            }
-
-            result._intervals.push_back(Interval{view_start, view_end});
-            result._alignment_times.push_back(alignment_abs_time);
-
-            auto view = U::createView(
-                    source,
-                    TimeFrameIndex(view_start),
-                    TimeFrameIndex(view_end));
-            result._views.push_back(std::move(view));
-        }
-
+        result._views = std::move(rows);
+        result._windows = std::move(windows);
+        result._alignment_points = std::move(alignment_points);
+        result._query_intervals = _queryIntervalsFromWindows(result._windows);
         return result;
     }
 
     /**
-     * @brief Create GatherResult from source and IntervalSource (int64_t version)
+     * @brief Create transformed rows while preserving metadata from another GatherResult.
+     *
+     * @tparam ParentT Parent row DataObject type
+     * @param parent GatherResult that supplies row metadata and ordering
+     * @param rows Row DataObjects aligned to the visible order of @p parent
+     * @return GatherResult with @p rows and parent row metadata
+     *
+     * @pre Every row pointer must be non-null.
+     * @pre @p rows must have the same row count as @p parent.
+     * @post The returned result has no direct-gather source provenance.
      */
-    template<typename U = T, typename IntervalSourceT>
-        requires WhiskerToolbox::Gather::ViewableDataTypeInt64<U> &&
-                 (!WhiskerToolbox::Gather::ViewableDataType<U>) &&
-                 WhiskerToolbox::Gather::IntervalSource<IntervalSourceT>
-    static GatherResult create(
-            std::shared_ptr<U> source,
-            IntervalSourceT const & interval_source) {
+    template<typename ParentT>
+    [[nodiscard]] static GatherResult fromRowsLike(
+            GatherResult<ParentT> const & parent,
+            std::vector<value_type> rows) {
+        if (rows.size() != parent.size()) {
+            throw std::invalid_argument("GatherResult::fromRowsLike: row count must match parent result size");
+        }
+        _validateRowInputs(rows, parent.windows(), parent.alignmentPoints());
+
         GatherResult result;
-        result._source = source;
-        result._views.reserve(interval_source.size());
-        result._intervals.reserve(interval_source.size());
-        result._alignment_times.reserve(interval_source.size());
-
-        // Resolve TimeFrames for absolute-time conversion
-        auto source_tf = source ? source->getTimeFrame() : nullptr;
-        std::shared_ptr<TimeFrame> adapter_tf = nullptr;
-        if constexpr (WhiskerToolbox::Gather::HasTimeFrameAccess<IntervalSourceT>) {
-            adapter_tf = interval_source.getTimeFrame();
-        }
-
-        for (auto const & aligned_interval: interval_source) {
-            int64_t view_start, view_end, alignment_abs_time;
-
-            if (adapter_tf) {
-                alignment_abs_time = adapter_tf->getTimeAtIndex(
-                        TimeFrameIndex(aligned_interval.alignment_time));
-                int64_t start_abs = adapter_tf->getTimeAtIndex(
-                        TimeFrameIndex(aligned_interval.start));
-                int64_t end_abs = adapter_tf->getTimeAtIndex(
-                        TimeFrameIndex(aligned_interval.end));
-
-                if (source_tf) {
-                    view_start = source_tf->getIndexAtTime(
-                                                  static_cast<float>(start_abs))
-                                         .getValue();
-                    view_end = source_tf->getIndexAtTime(
-                                                static_cast<float>(end_abs))
-                                       .getValue();
-                } else {
-                    view_start = start_abs;
-                    view_end = end_abs;
-                }
-            } else if (source_tf) {
-                alignment_abs_time = aligned_interval.alignment_time;
-                view_start = source_tf->getIndexAtTime(
-                                              static_cast<float>(aligned_interval.start))
-                                     .getValue();
-                view_end = source_tf->getIndexAtTime(
-                                            static_cast<float>(aligned_interval.end))
-                                   .getValue();
-            } else {
-                alignment_abs_time = aligned_interval.alignment_time;
-                view_start = aligned_interval.start;
-                view_end = aligned_interval.end;
+        result._views = std::move(rows);
+        result._windows = parent.windows();
+        result._alignment_points = parent.alignmentPoints();
+        result._query_intervals = parent.intervals();
+        if (parent.isReordered()) {
+            result._reorder_indices.reserve(parent.size());
+            for (size_type i = 0; i < parent.size(); ++i) {
+                result._reorder_indices.push_back(parent.originalIndex(i));
             }
-
-            result._intervals.push_back(Interval{view_start, view_end});
-            result._alignment_times.push_back(alignment_abs_time);
-
-            auto view = U::createView(
-                    source,
-                    view_start,
-                    view_end);
-            result._views.push_back(std::move(view));
         }
-
-        return result;
-    }
-
-    /**
-     * @brief Create GatherResult from source and IntervalSource (copy version)
-     */
-    template<typename U = T, typename IntervalSourceT>
-        requires WhiskerToolbox::Gather::CopyableTimeRangeDataType<U> &&
-                 (!WhiskerToolbox::Gather::ViewableDataType<U>) &&
-                 (!WhiskerToolbox::Gather::ViewableDataTypeInt64<U>) &&
-                 WhiskerToolbox::Gather::IntervalSource<IntervalSourceT>
-    static GatherResult create(
-            std::shared_ptr<U> source,
-            IntervalSourceT const & interval_source) {
-        GatherResult result;
-        result._source = source;
-        result._views.reserve(interval_source.size());
-        result._intervals.reserve(interval_source.size());
-        result._alignment_times.reserve(interval_source.size());
-
-        // Resolve TimeFrames for absolute-time conversion
-        auto source_tf = source ? source->getTimeFrame() : nullptr;
-        std::shared_ptr<TimeFrame> adapter_tf = nullptr;
-        if constexpr (WhiskerToolbox::Gather::HasTimeFrameAccess<IntervalSourceT>) {
-            adapter_tf = interval_source.getTimeFrame();
-        }
-
-        for (auto const & aligned_interval: interval_source) {
-            int64_t view_start, view_end, alignment_abs_time;
-
-            if (adapter_tf) {
-                alignment_abs_time = adapter_tf->getTimeAtIndex(
-                        TimeFrameIndex(aligned_interval.alignment_time));
-                int64_t start_abs = adapter_tf->getTimeAtIndex(
-                        TimeFrameIndex(aligned_interval.start));
-                int64_t end_abs = adapter_tf->getTimeAtIndex(
-                        TimeFrameIndex(aligned_interval.end));
-
-                if (source_tf) {
-                    view_start = source_tf->getIndexAtTime(
-                                                  static_cast<float>(start_abs))
-                                         .getValue();
-                    view_end = source_tf->getIndexAtTime(
-                                                static_cast<float>(end_abs))
-                                       .getValue();
-                } else {
-                    view_start = start_abs;
-                    view_end = end_abs;
-                }
-            } else if (source_tf) {
-                alignment_abs_time = aligned_interval.alignment_time;
-                view_start = source_tf->getIndexAtTime(
-                                              static_cast<float>(aligned_interval.start))
-                                     .getValue();
-                view_end = source_tf->getIndexAtTime(
-                                            static_cast<float>(aligned_interval.end))
-                                   .getValue();
-            } else {
-                alignment_abs_time = aligned_interval.alignment_time;
-                view_start = aligned_interval.start;
-                view_end = aligned_interval.end;
-            }
-
-            result._intervals.push_back(Interval{view_start, view_end});
-            result._alignment_times.push_back(alignment_abs_time);
-
-            auto copy = std::make_shared<U>(source->createTimeRangeCopy(
-                    TimeFrameIndex(view_start),
-                    TimeFrameIndex(view_end)));
-            copy->setTimeFrame(source->getTimeFrame());
-            copy->setImageSize(source->getImageSize());
-            result._views.push_back(std::move(copy));
-        }
-
         return result;
     }
 
@@ -664,7 +466,27 @@ public:
     /**
      * @brief Get the alignment intervals used to create views
      */
-    [[nodiscard]] std::vector<Interval> const & intervals() const { return _intervals; }
+    [[nodiscard]] std::vector<TimeFrameInterval> const & intervals() const { return _query_intervals; }
+
+    /**
+     * @brief Get the prepared gather-window series used to define rows.
+     *
+     * @return Shared pointer to the original prepared windows, or nullptr for
+     *         empty/default and legacy adapter-only results.
+     *
+     * @post Return value is shared with the GatherResult and is never modified by it.
+     */
+    [[nodiscard]] std::shared_ptr<DigitalIntervalSeries const> windows() const noexcept { return _windows; }
+
+    /**
+     * @brief Get the companion alignment-point event series.
+     *
+     * @return Shared pointer to row-aligned alignment events, or nullptr when
+     *         the gather has no companion alignment metadata.
+     *
+     * @post If non-null, the series has the same row count as `windows()`.
+     */
+    [[nodiscard]] std::shared_ptr<DigitalEventSeries const> alignmentPoints() const noexcept { return _alignment_points; }
 
     /**
      * @brief Get the interval at a specific index (O(1) access)
@@ -673,11 +495,11 @@ public:
      * @return The Interval at index i
      * @throws std::out_of_range if i >= size()
      */
-    [[nodiscard]] Interval intervalAt(size_type i) const {
-        if (i >= _intervals.size()) {
+    [[nodiscard]] TimeFrameInterval intervalAt(size_type i) const {
+        if (i >= _query_intervals.size()) {
             throw std::out_of_range("GatherResult::intervalAt: index out of range");
         }
-        return _intervals[i];
+        return _query_intervals[i];
     }
 
     /**
@@ -687,27 +509,35 @@ public:
      * specified trial. This is the value that should be subtracted from
      * event times to get trial-relative times.
      *
-     * For GatherResults created with:
-     * - IntervalWithAlignmentAdapter: Returns start, end, or center based on alignment setting
-     * - EventExpanderAdapter: Returns the event time (center of the expanded window)
-     * - Basic gather(): Returns interval.start as fallback
+     * Prepared-window gathers with companion alignment points return the
+     * companion event time. Gathers without companion alignment metadata return
+     * the source-query interval start as a fallback.
      *
      * @param i Index of the trial
-     * @return Alignment time for trial i
+     * @return Alignment time for trial i as ClockTicks
      * @throws std::out_of_range if i >= size()
      */
-    [[nodiscard]] int64_t alignmentTimeAt(size_type i) const {
-        if (i >= _intervals.size()) {
+    [[nodiscard]] ClockTicks alignmentTimeAt(size_type i) const {
+        if (i >= size()) {
             throw std::out_of_range("GatherResult::alignmentTimeAt: index out of range");
         }
         // Handle potential reordering from sortBy()/reorder()
         size_type orig_idx = !_reorder_indices.empty() ? _reorder_indices[i] : i;
 
-        // Use alignment_times if available, otherwise fall back to interval start
-        if (!_alignment_times.empty() && orig_idx < _alignment_times.size()) {
-            return _alignment_times[orig_idx];
+        if (_alignment_points) {
+            return _alignmentTimeFromCompanionEvent(orig_idx);
         }
-        return _intervals[orig_idx].start;
+
+        if (orig_idx >= _query_intervals.size()) {
+            throw std::out_of_range("GatherResult::alignmentTimeAt: no alignment metadata for row");
+        }
+
+        // Use the time frame from the query interval
+        auto const time_frame = _source->getTimeFrame();
+        if (!time_frame) {
+            throw std::runtime_error("GatherResult::alignmentTimeAt: query interval time frame must be non-null");
+        }
+        return time_frame->getTimeAtIndex(_query_intervals[orig_idx].start);
     }
 
     // ========== Convenience Methods ==========
@@ -754,14 +584,15 @@ public:
      * @example
      * @code
      * auto results = raster.transformWithInterval(
-     *     [](auto const& trial, Interval const& interval) {
-     *         return std::make_pair(trial->size(), interval.end - interval.start);
+     *     [](auto const& trial, TimeFrameInterval const& interval) {
+     *         return std::make_pair(trial->size(),
+     *                                interval.end.getValue() - interval.start.getValue());
      *     });
      * @endcode
      */
     template<typename F>
     [[nodiscard]] auto transformWithInterval(F && func) const {
-        using ResultType = std::invoke_result_t<F, value_type const &, Interval const &>;
+        using ResultType = std::invoke_result_t<F, value_type const &, TimeFrameInterval const &>;
         std::vector<ResultType> results;
         results.reserve(_views.size());
 
@@ -769,7 +600,7 @@ public:
             results.push_back(std::invoke(
                     std::forward<F>(func),
                     _views[idx],
-                    _intervals[idx]));
+                    intervalAt(idx)));
         }
         return results;
     }
@@ -780,12 +611,15 @@ public:
      * If views are backed by view storage, this creates a new GatherResult
      * where each element has owning storage (copies the data).
      *
-     * @return New GatherResult with materialized views
+     * @return New GatherResult with materialized views and preserved trial metadata
      */
     [[nodiscard]] GatherResult materialize() const {
         GatherResult result;
         result._source = _source;
-        result._intervals = _intervals;
+        result._windows = _windows;
+        result._alignment_points = _alignment_points;
+        result._query_intervals = _query_intervals;
+        result._reorder_indices = _reorder_indices;
         result._views.reserve(_views.size());
 
         for (auto const & view: _views) {
@@ -798,220 +632,6 @@ public:
         }
 
         return result;
-    }
-
-    // ========== Pipeline Integration Methods ==========
-
-    /**
-     * @brief Build value store for a specific trial (V2 pattern)
-     *
-     * Creates a PipelineValueStore populated with standard trial values that can
-     * be bound to transform parameters. This enables generic parameter binding
-     * without specialized context structs.
-     *
-     * ## Store Keys
-     *
-     * - "alignment_time": int64_t - Trial start time (used as t=0 reference)
-     * - "trial_index": int64_t - Original trial index (0-based)
-     * - "trial_duration": int64_t - Duration (end - start)
-     * - "end_time": int64_t - Trial end time
-     *
-     * ## Usage with Pipeline Bindings
-     *
-     * @code
-     * // Pipeline with bindings
-     * // {"transform": "NormalizeTimeV2", "bindings": {"alignment_time": "alignment_time"}}
-     * auto factory = bindValueProjectionV2<EventWithId, float>(pipeline);
-     *
-     * for (size_t i = 0; i < result.size(); ++i) {
-     *     auto store = result.buildTrialStore(i);
-     *     auto projection = factory(store);
-     *     // Use projection on trial events...
-     * }
-     * @endcode
-     *
-     * @param trial_idx Index of the trial (0-based, respects reordering)
-     * @return PipelineValueStore populated with trial values
-     * @throws std::out_of_range if trial_idx >= size()
-     *
-     * @see PipelineValueStore for store documentation
-     * @see project() for applying store-based projections to all trials
-     */
-    [[nodiscard]] WhiskerToolbox::Transforms::V2::PipelineValueStore buildTrialStore(size_type trial_idx) const {
-        if (trial_idx >= size()) {
-            throw std::out_of_range("GatherResult::buildTrialStore: index out of range");
-        }
-
-        auto interval = intervalAtReordered(trial_idx);
-        size_type orig_idx = originalIndex(trial_idx);
-
-        // Use stored alignment time if available, otherwise default to interval start
-        int64_t alignment_time = !_alignment_times.empty()
-                                         ? _alignment_times[orig_idx]
-                                         : static_cast<int64_t>(interval.start);
-
-        WhiskerToolbox::Transforms::V2::PipelineValueStore store;
-        store.set("alignment_time", alignment_time);
-        store.set("trial_index", static_cast<int64_t>(orig_idx));
-        store.set("trial_duration", interval.end - interval.start);
-        store.set("end_time", static_cast<int64_t>(interval.end));
-
-        return store;
-    }
-
-    /**
-     * @brief Project values across all trials using value store bindings
-     *
-     * Creates per-trial value projections using a pipeline that normalizes or
-     * transforms element properties (e.g., time normalization). The projection
-     * factory receives a value store populated with trial values and applies
-     * parameter bindings to produce per-trial projections.
-     *
-     * @tparam Value The projected value type (e.g., float for normalized time)
-     * @param factory Store-based projection factory from bindValueProjectionV2()
-     * @return Vector of projection functions, one per trial
-     *
-     * @example
-     * @code
-     * // Pipeline with param bindings
-     * auto factory = bindValueProjectionV2<EventWithId, float>(pipeline);
-     * auto projections = result.project(factory);
-     *
-     * for (size_t i = 0; i < result.size(); ++i) {
-     *     auto const& projection = projections[i];
-     *     for (auto const& event : result[i]->view()) {
-     *         float norm_time = projection(event);
-     *         EntityId id = event.id();
-     *         draw_point(norm_time, i, id);
-     *     }
-     * }
-     * @endcode
-     *
-     * @see buildTrialStore() for store population
-     * @see bindValueProjectionV2() for creating factories
-     */
-    template<typename Value>
-    [[nodiscard]] auto project(
-            WhiskerToolbox::Transforms::V2::ValueProjectionFactoryV2<element_type, Value> const & factory) const {
-        using ProjectionFn = WhiskerToolbox::Transforms::V2::ValueProjectionFn<element_type, Value>;
-        std::vector<ProjectionFn> projections;
-        projections.reserve(size());
-
-        for (size_type i = 0; i < size(); ++i) {
-            auto store = buildTrialStore(i);
-            projections.push_back(factory(store));
-        }
-
-        return projections;
-    }
-
-    /**
-     * @brief Apply reduction across all trials using value store bindings
-     *
-     * Executes a range reduction on each trial's view, producing a scalar per trial.
-     * The reducer factory is called once per trial with the trial's value store,
-     * enabling context-aware reductions (e.g., counting events after alignment).
-     *
-     * @tparam Scalar Result type of reduction (e.g., int for count, float for latency)
-     * @param reducer_factory Store-based reducer factory
-     * @return Vector of reduction results, one per trial
-     *
-     * @example
-     * @code
-     * auto factory = [](PipelineValueStore const& store) -> ReducerFn<EventWithId, float> {
-     *     int64_t alignment = store.getInt("alignment_time").value();
-     *     return [alignment](std::span<EventWithId const> events) -> float {
-     *         if (events.empty()) return NaN;
-     *         return static_cast<float>(events[0].time().getValue() - alignment);
-     *     };
-     * };
-     * auto latencies = result.reduce(factory);
-     * @endcode
-     *
-     * @note This requires T to have a view() method that returns a range
-     * @see buildTrialStore() for store population
-     */
-    template<typename Scalar>
-    [[nodiscard]] std::vector<Scalar> reduce(
-            WhiskerToolbox::Gather::ReducerFactoryV2<element_type, Scalar> const & reducer_factory) const {
-        std::vector<Scalar> results;
-        results.reserve(size());
-
-        for (size_type i = 0; i < size(); ++i) {
-            auto store = buildTrialStore(i);
-            auto reducer = reducer_factory(store);
-
-            // Materialize view into vector for reducer (takes span)
-            auto view = _views[i]->view();
-            std::vector<element_type> elements(view.begin(), view.end());
-
-            results.push_back(reducer(std::span<element_type const>{elements}));
-        }
-
-        return results;
-    }
-
-    /**
-     * @brief Get sort indices by reduction result
-     *
-     * Computes a reduction for each trial and returns the indices that would
-     * sort the trials by their reduction values. Useful for sorting trials
-     * by first-spike latency, event count, or other metrics.
-     *
-     * @tparam Scalar Reduction result type (must be comparable)
-     * @param reducer_factory Store-based reducer factory
-     * @param ascending Sort order (true = smallest first, false = largest first)
-     * @return Vector of indices that would sort trials by reduction result
-     *
-     * @example
-     * @code
-     * // Sort trials by first-spike latency (ascending)
-     * auto factory = [](PipelineValueStore const& store) { ... };
-     * auto sort_order = result.sortIndicesBy(factory, true);
-     *
-     * // Draw trials in sorted order
-     * for (size_t row = 0; row < sort_order.size(); ++row) {
-     *     size_t trial_idx = sort_order[row];
-     *     // Draw trial trial_idx at row position...
-     * }
-     * @endcode
-     *
-     * @see reduce() for the underlying reduction
-     * @see reorder() for creating a reordered GatherResult
-     */
-    template<typename Scalar>
-    [[nodiscard]] std::vector<size_type> sortIndicesBy(
-            WhiskerToolbox::Gather::ReducerFactoryV2<element_type, Scalar> const & reducer_factory,
-            bool ascending = true) const {
-
-        auto values = reduce(reducer_factory);
-
-        std::vector<size_type> indices(size());
-        std::iota(indices.begin(), indices.end(), size_type{0});
-
-        if (ascending) {
-            std::stable_sort(indices.begin(), indices.end(),
-                             [&values](size_type a, size_type b) {
-                                 // Handle NaN: NaN values sort to end
-                                 if constexpr (std::is_floating_point_v<Scalar>) {
-                                     if (std::isnan(values[a])) return false;
-                                     if (std::isnan(values[b])) return true;
-                                 }
-                                 return values[a] < values[b];
-                             });
-        } else {
-            std::stable_sort(indices.begin(), indices.end(),
-                             [&values](size_type a, size_type b) {
-                                 // Handle NaN: NaN values sort to end
-                                 if constexpr (std::is_floating_point_v<Scalar>) {
-                                     if (std::isnan(values[a])) return false;
-                                     if (std::isnan(values[b])) return true;
-                                 }
-                                 return values[a] > values[b];
-                             });
-        }
-
-        return indices;
     }
 
     /**
@@ -1028,7 +648,7 @@ public:
      *
      * @example
      * @code
-     * auto sort_order = result.sortIndicesBy(reducer_factory, true);
+     * auto sort_order = computeSortOrder(result);
      * auto sorted_result = result.reorder(sort_order);
      *
      * // sorted_result[0] is now the trial with smallest reduction value
@@ -1043,8 +663,9 @@ public:
         GatherResult result;
         result._source = _source;
         // Note: We keep the original intervals - reordering is logical only
-        result._intervals = _intervals;
-        result._alignment_times = _alignment_times;
+        result._windows = _windows;
+        result._alignment_points = _alignment_points;
+        result._query_intervals = _query_intervals;
         result._views.reserve(size());
         result._reorder_indices = indices;// Store the reorder mapping
 
@@ -1094,70 +715,203 @@ public:
      * @param reordered_idx Index in the (possibly reordered) result
      * @return The Interval for the original trial at this position
      */
-    [[nodiscard]] Interval intervalAtReordered(size_type reordered_idx) const {
+    [[nodiscard]] TimeFrameInterval intervalAtReordered(size_type reordered_idx) const {
         return intervalAt(originalIndex(reordered_idx));
     }
 
 private:
     /**
-     * @brief Get a time conversion function for cross-TimeFrame alignment
+     * @brief Validate row-synthesis inputs and optional row metadata.
      *
-     * Checks if source and interval_source have different TimeFrames.
-     * If so, returns a function that converts times from the adapter's
-     * TimeFrame to the source's TimeFrame. Otherwise returns identity.
-     *
-     * @param source The source data (spikes, analog signals, etc.)
-     * @param interval_source The adapter providing alignment intervals
-     * @return A function int64_t -> int64_t for time conversion
+     * @pre Every row pointer must be non-null.
+     * @pre Optional metadata series must have the same row count as @p rows.
+     * @post Throws `std::invalid_argument` if any runtime precondition is violated.
      */
-    template<typename U, typename IntervalSourceT>
-        requires WhiskerToolbox::Gather::HasTimeFrame<U>
-    static std::function<int64_t(int64_t)> getTimeConverter(
-            std::shared_ptr<U> const & source,
-            IntervalSourceT const & interval_source) {
+    static void _validateRowInputs(
+            std::vector<value_type> const & rows,
+            std::shared_ptr<DigitalIntervalSeries const> const & windows,
+            std::shared_ptr<DigitalEventSeries const> const & alignment_points) {
+        auto const has_null_row = std::ranges::any_of(rows, [](auto const & row) {
+            return row == nullptr;
+        });
 
-        // Get TimeFrames
-        auto source_tf = source ? source->getTimeFrame() : nullptr;
+        assert(!has_null_row && "GatherResult::fromRows: rows must not contain null pointers");
+        assert((!windows || windows->size() == rows.size()) &&
+               "GatherResult::fromRows: window count must match row count");
+        assert((!alignment_points || alignment_points->size() == rows.size()) &&
+               "GatherResult::fromRows: alignment point count must match row count");
 
-        // Check if adapter has TimeFrame access
-        std::shared_ptr<TimeFrame> adapter_tf = nullptr;
-        if constexpr (WhiskerToolbox::Gather::HasTimeFrameAccess<IntervalSourceT>) {
-            adapter_tf = interval_source.getTimeFrame();
+        if (has_null_row) {
+            throw std::invalid_argument("GatherResult::fromRows: rows must not contain null pointers");
         }
-
-        // If both have TimeFrames and they're different, need conversion
-        if (source_tf && adapter_tf && source_tf.get() != adapter_tf.get()) {
-            // Return a converting function
-            return [source_tf, adapter_tf](int64_t time) -> int64_t {
-                // Convert from adapter's TimeFrame to source's TimeFrame
-                // adapter_tf: index -> absolute time via getTimeAtIndex
-                // source_tf: absolute time -> index via getIndexAtTime
-                auto absolute_time = static_cast<float>(
-                        adapter_tf->getTimeAtIndex(TimeFrameIndex(time)));
-                return source_tf->getIndexAtTime(absolute_time).getValue();
-            };
+        if (windows && windows->size() != rows.size()) {
+            throw std::invalid_argument("GatherResult::fromRows: window count must match row count");
         }
-
-        // No conversion needed - return identity
-        return [](int64_t time) -> int64_t { return time; };
+        if (alignment_points && alignment_points->size() != rows.size()) {
+            throw std::invalid_argument("GatherResult::fromRows: alignment point count must match row count");
+        }
     }
 
     /**
-     * @brief Fallback for sources without TimeFrame access - no conversion
+     * @brief Extract compatibility interval metadata from prepared windows.
+     *
+     * @pre @p windows may be null.
+     * @post Returns empty metadata when @p windows is null.
      */
-    template<typename U, typename IntervalSourceT>
-        requires(!WhiskerToolbox::Gather::HasTimeFrame<U>)
-    static std::function<int64_t(int64_t)> getTimeConverter(
-            std::shared_ptr<U> const & /*source*/,
-            IntervalSourceT const & /*interval_source*/) {
-        return [](int64_t time) -> int64_t { return time; };
+    [[nodiscard]] static std::vector<TimeFrameInterval> _queryIntervalsFromWindows(
+            std::shared_ptr<DigitalIntervalSeries const> const & windows) {
+        std::vector<TimeFrameInterval> intervals;
+        if (!windows) {
+            return intervals;
+        }
+
+        intervals.reserve(windows->size());
+        for (size_t i = 0; i < windows->size(); ++i) {
+            intervals.push_back(windows->getStoredInterval(i));
+        }
+        return intervals;
+    }
+
+    /**
+     * @brief Validate source, windows, and optional companion alignment points.
+     *
+     * @pre `windows` must be non-null. Direct gather creation also requires a non-null source.
+     * @post Throws `std::invalid_argument` if any runtime precondition is violated.
+     */
+    template<typename U>
+    static void _validatePreparedGatherInputs(
+            std::shared_ptr<U> const & source,
+            std::shared_ptr<DigitalIntervalSeries const> const & windows,
+            std::shared_ptr<DigitalEventSeries const> const & alignment_points) {
+        assert(source && "GatherResult::create: source must not be null");
+        assert(windows && "GatherResult::create: windows must not be null");
+        assert((!alignment_points || alignment_points->size() == windows->size()) &&
+               "GatherResult::create: alignment point count must match window count");
+
+        if (!source || !windows) {
+            throw std::invalid_argument("GatherResult::create: source and windows must not be null");
+        }
+        if (alignment_points && alignment_points->size() != windows->size()) {
+            throw std::invalid_argument(
+                    "GatherResult::create: alignment point count must match window count");
+        }
+        if (!source->getTimeFrame() || !windows->getTimeFrame()) {
+            throw std::invalid_argument(
+                    "convertPreparedWindowToSourceInterval: prepared windows and source data must have TimeFrames");
+        }
+    }
+
+    /**
+     * @brief Create one row DataObject with TimeFrameIndex view bounds.
+     *
+     * @pre `source` must be non-null and `query_interval` must be expressed in source coordinates.
+     * @post Returns a row object created by the DataObject view API.
+     */
+    template<typename U>
+        requires Neuralyzer::Gather::ViewableDataType<U>
+    static std::shared_ptr<U> _createRowForQueryInterval(
+            std::shared_ptr<U> const & source,
+            TimeFrameInterval const & query_interval) {
+        return U::createView(
+                source,
+                query_interval.start,
+                query_interval.end);
+    }
+
+    /**
+     * @brief Create one row DataObject with int64 view bounds.
+     *
+     * @pre `source` must be non-null and `query_interval` must be expressed in source coordinates.
+     * @post Returns a row object created by the DataObject view API.
+     */
+    template<typename U>
+        requires Neuralyzer::Gather::ViewableDataTypeInt64<U> &&
+                 (!Neuralyzer::Gather::ViewableDataType<U>)
+    static std::shared_ptr<U> _createRowForQueryInterval(
+            std::shared_ptr<U> const & source,
+            TimeFrameInterval const & query_interval) {
+        return U::createView(source, query_interval.start, query_interval.end);
+    }
+
+    /**
+     * @brief Create one row DataObject as an owning time-range copy.
+     *
+     * @pre `source` must be non-null and `query_interval` must be expressed in source coordinates.
+     * @post Returns a row object with source TimeFrame and image-size metadata.
+     */
+    template<typename U>
+        requires Neuralyzer::Gather::CopyableTimeRangeDataType<U> &&
+                 (!Neuralyzer::Gather::ViewableDataType<U>) &&
+                 (!Neuralyzer::Gather::ViewableDataTypeInt64<U>)
+    static std::shared_ptr<U> _createRowForQueryInterval(
+            std::shared_ptr<U> const & source,
+            TimeFrameInterval const & query_interval) {
+        auto copy = std::make_shared<U>(source->createTimeRangeCopy(
+                query_interval.start,
+                query_interval.end));
+        copy->setTimeFrame(source->getTimeFrame());
+        copy->setImageSize(source->getImageSize());
+        return copy;
+    }
+
+    /**
+     * @brief Create a GatherResult from prepared windows and optional alignment points.
+     *
+     * @pre `source` and `windows` must be non-null. If supplied, `alignment_points`
+     *      must have the same row count as `windows`.
+     * @post Rows are created from source-query intervals while prepared metadata is retained.
+     */
+    template<typename U>
+    static GatherResult _createFromPreparedWindows(
+            std::shared_ptr<U> source,
+            std::shared_ptr<DigitalIntervalSeries const> windows,
+            std::shared_ptr<DigitalEventSeries const> alignment_points) {
+        _validatePreparedGatherInputs(source, windows, alignment_points);
+
+        GatherResult result;
+        result._source = std::move(source);
+        result._windows = std::move(windows);
+        result._alignment_points = std::move(alignment_points);
+        result._views.reserve(result._windows->size());
+        result._query_intervals.reserve(result._windows->size());
+
+        auto const source_tf = result._source->getTimeFrame();
+        auto const window_tf = result._windows->getTimeFrame();
+
+        for (size_t i = 0; i < result._windows->size(); ++i) {
+            TimeFrameInterval const stored = result._windows->getStoredInterval(i);
+            auto const query_interval = Neuralyzer::Gather::convertPreparedWindowToSourceInterval(
+                    stored,
+                    window_tf,
+                    source_tf);
+            result._query_intervals.push_back(query_interval);
+            result._views.push_back(_createRowForQueryInterval<U>(result._source, query_interval));
+        }
+
+        return result;
+    }
+
+    /**
+     * @brief Resolve a companion alignment event for an original row index.
+     *
+     * @pre `_alignment_points` must be non-null and `original_idx` must be in range.
+     * @post Returned time is expressed in physical time units when the alignment series has a TimeFrame.
+     */
+    [[nodiscard]] ClockTicks _alignmentTimeFromCompanionEvent(size_type original_idx) const {
+        assert(_alignment_points && "GatherResult::alignmentTimeAt: alignment points must exist");
+        assert(original_idx < _alignment_points->size() &&
+               "GatherResult::alignmentTimeAt: row index must be in range");
+
+        auto const alignment_view = _alignment_points->view();
+        return alignment_view[original_idx].time();
     }
 
     std::shared_ptr<T> _source;
-    std::vector<Interval> _intervals;// Stored intervals (no merging)
+    std::shared_ptr<DigitalIntervalSeries const> _windows;
+    std::shared_ptr<DigitalEventSeries const> _alignment_points;
+    std::vector<TimeFrameInterval> _query_intervals;// Source-coordinate intervals used for row creation
     std::vector<value_type> _views;
     std::vector<size_type> _reorder_indices;// Maps reordered position → original index
-    std::vector<int64_t> _alignment_times;  // Per-trial alignment times (optional)
 };
 
 // =============================================================================
@@ -1193,45 +947,32 @@ private:
 template<typename T>
 [[nodiscard]] GatherResult<T> gather(
         std::shared_ptr<T> source,
-        std::shared_ptr<DigitalIntervalSeries> intervals) {
-    return GatherResult<T>::create(source, intervals);
+        std::shared_ptr<DigitalIntervalSeries const> windows) {
+    return GatherResult<T>::create(std::move(source), std::move(windows));
 }
 
-// =============================================================================
-// Free Functions: gather() with Interval Adapters
-// =============================================================================
-
 /**
- * @brief Create a GatherResult using an IntervalSource adapter
- *
- * Accepts any type satisfying the IntervalSource concept, including:
- * - EventExpanderAdapter: expands DigitalEventSeries to intervals
- * - IntervalWithAlignmentAdapter: uses custom alignment from DigitalIntervalSeries
+ * @brief Create a GatherResult from source data, prepared windows, and alignment points.
  *
  * @tparam T The source data type
- * @tparam IntervalSourceT Type satisfying IntervalSource concept
- * @param source Source data to create views from
- * @param interval_source Adapter providing intervals with alignment info
- * @return GatherResult containing one view/copy per interval
+ * @param source Source data to create rows from
+ * @param windows Prepared gather windows defining the row bounds
+ * @param alignment_points Optional row-aligned alignment events used for trial-relative metadata
+ * @return GatherResult containing one row per window
  *
- * @example
- * @code
- * // Expand events to intervals (each event ± 50 frames)
- * auto stimulus_events = dm->getData<DigitalEventSeries>("stimuli");
- * auto spikes = dm->getData<DigitalEventSeries>("spikes");
- * auto raster = gather(spikes, expandEvents(stimulus_events, 50, 50));
- *
- * // Use interval ends as alignment points
- * auto trials = dm->getData<DigitalIntervalSeries>("trials");
- * auto raster = gather(spikes, withAlignment(trials, AlignmentPoint::End));
- * @endcode
+ * @pre `source` and `windows` must be non-null.
+ * @pre If non-null, `alignment_points` must have the same row count as `windows`.
+ * @post Prepared windows and alignment points are retained as row metadata.
  */
-template<typename T, typename IntervalSourceT>
-    requires WhiskerToolbox::Gather::IntervalSource<IntervalSourceT>
+template<typename T>
 [[nodiscard]] GatherResult<T> gather(
         std::shared_ptr<T> source,
-        IntervalSourceT & interval_source) {
-    return GatherResult<T>::create(source, interval_source);
+        std::shared_ptr<DigitalIntervalSeries const> windows,
+        std::shared_ptr<DigitalEventSeries const> alignment_points) {
+    return GatherResult<T>::create(
+            std::move(source),
+            std::move(windows),
+            std::move(alignment_points));
 }
 
 #endif// GATHER_RESULT_HPP

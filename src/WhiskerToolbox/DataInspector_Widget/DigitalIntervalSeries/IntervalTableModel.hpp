@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_INTERVALTABLEMODEL_HPP
-#define WHISKERTOOLBOX_INTERVALTABLEMODEL_HPP
+#ifndef NEURALYZER_V2_INTERVALTABLEMODEL_HPP
+#define NEURALYZER_V2_INTERVALTABLEMODEL_HPP
 
 /**
  * @file IntervalTableModel.hpp
@@ -25,7 +25,7 @@ class GroupManager;
  * @brief Row data for the interval table model
  */
 struct IntervalTableRow {
-    Interval interval;
+    TimeFrameInterval interval;
     EntityId entity_id;
     QString group_name;
 };
@@ -77,7 +77,7 @@ public:
      * @param row Row index
      * @return Interval data
      */
-    [[nodiscard]] Interval getInterval(int row) const;
+    [[nodiscard]] TimeFrameInterval getInterval(int row) const;
 
 private:
     std::vector<IntervalTableRow> _display_data;
@@ -89,4 +89,4 @@ private:
     void _applyGroupFilter();
 };
 
-#endif//WHISKERTOOLBOX_INTERVALTABLEMODEL_HPP
+#endif//NEURALYZER_V2_INTERVALTABLEMODEL_HPP

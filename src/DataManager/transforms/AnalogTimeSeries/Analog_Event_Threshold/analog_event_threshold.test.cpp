@@ -161,9 +161,7 @@ TEST_CASE("Data Transform: Analog Event Threshold - Error and Edge Cases",
         params.lockoutTime = 0.0;
 
         auto result_events = event_threshold(ats.get(), params);
-        std::vector<TimeFrameIndex> expected_events_neg;
-        REQUIRE_THAT(result_events->view() | std::views::transform([](auto e) { return e.time(); }),
-                     Catch::Matchers::RangeEquals(expected_events_neg));
+        REQUIRE(result_events->size() == 0);
     }
 
     SECTION("Unknown threshold direction (should return empty and log error)") {
@@ -182,7 +180,9 @@ TEST_CASE("Data Transform: Analog Event Threshold - JSON pipeline", "[transforms
     DataManager dm;
     auto const* tc = findCaseByDmKey("positive_no_lockout");
     REQUIRE(tc != nullptr);
-    dm.setData(std::string(tc->dm_key), buildAnalogTimeSeries(*tc), TimeKey("positive_no_lockout_time"));
+    auto ats = buildAnalogTimeSeries(*tc);
+    dm.setTime(TimeKey("positive_no_lockout_time"), ats->getTimeFrame());
+    dm.setData(std::string(tc->dm_key), ats, TimeKey("positive_no_lockout_time"));
 
     const nlohmann::json json_config = {
             {"steps",
@@ -233,7 +233,9 @@ TEST_CASE("Data Transform: Analog Event Threshold - load_data_from_json_config",
     DataManager dm;
     auto const* tc = findCaseByDmKey("positive_no_lockout");
     REQUIRE(tc != nullptr);
-    dm.setData(std::string(tc->dm_key), buildAnalogTimeSeries(*tc), TimeKey("positive_no_lockout_time"));
+    auto ats = buildAnalogTimeSeries(*tc);
+    dm.setTime(TimeKey("positive_no_lockout_time"), ats->getTimeFrame());
+    dm.setData(std::string(tc->dm_key), ats, TimeKey("positive_no_lockout_time"));
 
     const char* json_config_tmpl =
             "[\n"

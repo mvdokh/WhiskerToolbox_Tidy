@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_INTERVAL_RANGE_REDUCTIONS_HPP
-#define WHISKERTOOLBOX_V2_INTERVAL_RANGE_REDUCTIONS_HPP
+#ifndef NEURALYZER_V2_INTERVAL_RANGE_REDUCTIONS_HPP
+#define NEURALYZER_V2_INTERVAL_RANGE_REDUCTIONS_HPP
 
 /**
  * @file IntervalRangeReductions.hpp
@@ -26,7 +26,7 @@
 #include <limits>
 #include <span>
 
-namespace WhiskerToolbox::Transforms::V2::RangeReductions {
+namespace Neuralyzer::Transforms::V2::RangeReductions {
 
 // ============================================================================
 // Interval Reduction Functions
@@ -58,7 +58,7 @@ template<typename Element>
     if (intervals.empty()) {
         return std::numeric_limits<float>::quiet_NaN();
     }
-    return static_cast<float>(intervals.front().value().start);
+    return static_cast<float>(intervals.front().value().start.getValue());
 }
 
 /**
@@ -74,7 +74,7 @@ template<typename Element>
     if (intervals.empty()) {
         return std::numeric_limits<float>::quiet_NaN();
     }
-    return static_cast<float>(intervals.front().value().end);
+    return static_cast<float>(intervals.front().value().end.getValue());
 }
 
 /**
@@ -95,6 +95,6 @@ template<typename Element>
     return static_cast<int>(intervals.front().id().id);
 }
 
-} // namespace WhiskerToolbox::Transforms::V2::RangeReductions
+} // namespace Neuralyzer::Transforms::V2::RangeReductions
 
-#endif // WHISKERTOOLBOX_V2_INTERVAL_RANGE_REDUCTIONS_HPP
+#endif // NEURALYZER_V2_INTERVAL_RANGE_REDUCTIONS_HPP

@@ -54,7 +54,7 @@
  * - Cross-data-type entity tracking
  * 
  * @see DigitalEventStorage.hpp for storage implementation details
- * @see EventWithId for the element type returned by iterators
+ * @see ClockTicksWithId for the element type returned by view()
  * @see TimeFrame for time base management
  * @see EntityRegistry for entity ID management
  */
@@ -66,6 +66,7 @@
 #include "TypeTraits/DataTypeTraits.hpp"
 #include "storage/DigitalEventStorage.hpp"
 
+#include <cassert>
 #include <compare>
 #include <memory>
 #include <ranges>
@@ -85,7 +86,8 @@ class EntityRegistry;
  * 
  * ## Primary Interface
  * 
- * - **view()**: Returns a lazy range of EventWithId objects for iteration
+ * - **view()**: Returns a lazy range of ClockTicksWithId objects for iteration
+ * - **getStoredEvent()**: Returns index-space event time at storage index (save/export)
  * - **viewInRange()**: Returns events in a time range (requires TimeFrame for conversion)
  * - **addEvent()/removeEvent()**: Modify events (owning storage only)
  * - **createView()/createFromView()**: Create view/lazy backed series
@@ -125,12 +127,12 @@ class EntityRegistry;
  * @note Events are always sorted by time. Duplicate times are rejected.
  * @note View and Lazy storage are read-only; mutations throw std::runtime_error.
  * 
- * @see EventWithId for element accessors (time(), id(), value())
+ * @see ClockTicksWithId for element accessors (time(), id(), value())
  * @see DigitalIntervalSeries for time interval data
  */
 class DigitalEventSeries : public ObserverData {
 public:
-    struct DataTraits : WhiskerToolbox::TypeTraits::DataTypeTraitsBase<DigitalEventSeries, EventWithId> {
+    struct DataTraits : Neuralyzer::TypeTraits::DataTypeTraitsBase<DigitalEventSeries, ClockTicksWithId> {
         static constexpr bool is_ragged = false;
         static constexpr bool is_temporal = true;
         static constexpr bool has_entity_ids = true;
@@ -155,25 +157,48 @@ public:
     // =============================================================
 
     /**
-     * @brief Get a std::ranges compatible view of the series.
-     * 
-     * Returns a random-access view that synthesizes EventWithId objects on demand.
-     * Uses cached pointers for fast-path iteration when storage is contiguous.
-     * Allows iterating over EventWithId objects directly.
+     * @brief Get a std::ranges compatible view of the series in absolute clock-tick time.
+     *
+     * Returns a random-access view that synthesizes ClockTicksWithId objects on demand.
+     *
+     * @pre series time frame must be set (@ref getTimeFrame() non-null)
+     * @see getStoredEvent for index-space access (save/export)
      */
     [[nodiscard]] auto view() const {
-        return std::views::iota(size_t{0}, size()) | std::views::transform([this](size_t idx) {
-                   // Fast path: use cached pointers if valid
+        assert(_time_frame != nullptr && "view() requires series time frame");
+        TimeFrame const * time_frame = _time_frame.get();
+        return std::views::iota(size_t{0}, size()) | std::views::transform([this, time_frame](size_t idx) {
                    if (_cached_storage.isValid()) {
-                       return EventWithId(
-                               _cached_storage.getEvent(idx),
+                       return ClockTicksWithId(
+                               time_frame->getTimeAtIndex(_cached_storage.getEvent(idx)),
                                _cached_storage.getEntityId(idx));
                    }
-                   // Slow path: virtual dispatch through wrapper
-                   return EventWithId(
-                           _storage.getEvent(idx),
+                   return ClockTicksWithId(
+                           time_frame->getTimeAtIndex(_storage.getEvent(idx)),
                            _storage.getEntityId(idx));
                });
+    }
+
+    /**
+     * @brief Get the stored event time at a flat storage index in TimeFrameIndex space.
+     *
+     * Use for save/export and other persistence paths that must write index coordinates.
+     *
+     * @param index Flat index in [0, size())
+     * @return TimeFrameIndex from internal storage
+     */
+    [[nodiscard]] TimeFrameIndex getStoredEvent(size_t index) const {
+        return _storage.getEvent(index);
+    }
+
+    /**
+     * @brief Get the stored EntityId at a flat storage index.
+     *
+     * @param index Flat index in [0, size())
+     * @return EntityId from internal storage
+     */
+    [[nodiscard]] EntityId getStoredEntityId(size_t index) const {
+        return _storage.getEntityId(index);
     }
 
     /**
@@ -271,43 +296,50 @@ public:
     // ========== Range Queries (Public - Require TimeFrame) ==========
 
     /**
-     * @brief Get events in a time range as a lazy view of EventWithId objects
-     * 
+     * @brief Get events in a time range as a lazy view of ClockTicksWithId objects
+     *
      * This is the primary range query interface. It requires a source TimeFrame
      * parameter to enable proper time conversion when the query time base differs
      * from the series' internal time base.
-     * 
+     *
+     * @pre series time frame must be set (@ref getTimeFrame() non-null)
+     *
      * @param start_index Start time index (inclusive)
      * @param stop_index Stop time index (inclusive)
      * @param source_time_frame The time frame that start_index/stop_index are expressed in
-     * @return Lazy view of EventWithId objects in the range
-     * 
-     * @note If source_time_frame matches the series' time frame, no conversion occurs
-     * @note If the series has no time frame set, indices are used directly
+     * @return Lazy view of ClockTicksWithId objects in the range
      */
     [[nodiscard]] auto viewInRange(TimeFrameIndex start_index,
                                    TimeFrameIndex stop_index,
                                    TimeFrame const & source_time_frame) const {
+        assert(_time_frame != nullptr && "viewInRange requires series time frame");
         auto [start_idx, end_idx] = _getTimeRangeIndices(start_index, stop_index, source_time_frame);
-        return std::views::iota(start_idx, end_idx) | std::views::transform([this](size_t idx) {
-                   return EventWithId(_storage.getEvent(idx), _storage.getEntityId(idx));
+        TimeFrame const * time_frame = _time_frame.get();
+        return std::views::iota(start_idx, end_idx) | std::views::transform([this, time_frame](size_t idx) {
+                   return ClockTicksWithId(
+                           time_frame->getTimeAtIndex(_storage.getEvent(idx)),
+                           _storage.getEntityId(idx));
                });
     }
 
     /**
-     * @brief Get just the TimeFrameIndex values in a range as a lazy view
-     * 
+     * @brief Get event times in a range as a lazy view of clock ticks.
+     *
+     * @pre series time frame must be set (@ref getTimeFrame() non-null)
+     *
      * @param start_index Start time index (inclusive)
      * @param stop_index Stop time index (inclusive)
      * @param source_time_frame The time frame that start_index/stop_index are expressed in
-     * @return Lazy view of TimeFrameIndex values in the range
+     * @return Lazy view of ClockTicks values in the range
      */
     [[nodiscard]] auto viewTimesInRange(TimeFrameIndex start_index,
                                         TimeFrameIndex stop_index,
                                         TimeFrame const & source_time_frame) const {
+        assert(_time_frame != nullptr && "viewTimesInRange requires series time frame");
         auto [start_idx, end_idx] = _getTimeRangeIndices(start_index, stop_index, source_time_frame);
-        return std::views::iota(start_idx, end_idx) | std::views::transform([this](size_t idx) {
-                   return _storage.getEvent(idx);
+        TimeFrame const * time_frame = _time_frame.get();
+        return std::views::iota(start_idx, end_idx) | std::views::transform([this, time_frame](size_t idx) {
+                   return time_frame->getTimeAtIndex(_storage.getEvent(idx));
                });
     }
 
@@ -379,7 +411,7 @@ public:
      * @return New series backed by view storage
      */
     static std::shared_ptr<DigitalEventSeries> createView(
-            const std::shared_ptr<DigitalEventSeries const>& source,
+            std::shared_ptr<DigitalEventSeries const> const & source,
             TimeFrameIndex start,
             TimeFrameIndex end);
 
@@ -391,7 +423,7 @@ public:
      * @return New series backed by view storage
      */
     static std::shared_ptr<DigitalEventSeries> createView(
-            const std::shared_ptr<DigitalEventSeries const>& source,
+            std::shared_ptr<DigitalEventSeries const> const & source,
             std::unordered_set<EntityId> const & entity_ids);
 
     /**

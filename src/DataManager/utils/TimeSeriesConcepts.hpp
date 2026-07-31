@@ -6,7 +6,7 @@
  * @brief C++20 concepts for unified time series element types
  * 
  * This header defines concepts that enable generic programming across all
- * time series data types in WhiskerToolbox. The concepts establish a common
+ * time series data types in Neuralyzer. The concepts establish a common
  * interface for element access while respecting the different characteristics
  * of each data type.
  * 
@@ -17,7 +17,8 @@
  * 
  * Types with EntityId support additionally satisfy `EntityElement`:
  * - `EventWithId` (DigitalEventSeries)
- * - `IntervalWithId` (DigitalIntervalSeries)
+ * - `IntervalWithId` (lazy-pipeline / index-space element type)
+ * - `ClockTicksIntervalWithId` (DigitalIntervalSeries view())
  * - `RaggedElement<TData>` (RaggedTimeSeries<TData>::RaggedElement)
  * 
  * Types without EntityId support:
@@ -50,11 +51,13 @@
  * @see RaggedAnalogTimeSeries::FlatElement
  * @see EventWithId
  * @see IntervalWithId
+ * @see ClockTicksIntervalWithId
  * @see RaggedTimeSeries<TData>::RaggedElement
  */
 
 #include "Entity/EntityTypes.hpp"
 #include "Observer/Observer_Data.hpp"
+#include "TimeFrame/ClockTicks.hpp"
 #include "TimeFrame/TimeFrameIndex.hpp"
 
 #include <concepts>
@@ -63,7 +66,7 @@
 #include <type_traits>
 #include <unordered_set>
 
-namespace WhiskerToolbox::Concepts {
+namespace Neuralyzer::Concepts {
 
 /**
  * @brief Concept for time series element types
@@ -129,6 +132,41 @@ concept ValueElement = TimeSeriesElement<T> && requires(T const & t) {
  */
 template<typename T, typename V>
 concept FullElement = EntityElement<T> && ValueElement<T, V>;
+
+/**
+ * @brief Concept for clock-tick time series element types
+ *
+ * @tparam T The element type to check
+ *
+ * Requirements:
+ * - `t.time()` must return a value convertible to `ClockTicks`
+ */
+template<typename T>
+concept ClockTimeSeriesElement = requires(T const & t) {
+    { t.time() } -> std::convertible_to<ClockTicks>;
+};
+
+/**
+ * @brief Concept for entity-bearing clock-tick time series element types
+ */
+template<typename T>
+concept ClockEntityElement = ClockTimeSeriesElement<T> && requires(T const & t) {
+    { t.id() } -> std::convertible_to<EntityId>;
+};
+
+/**
+ * @brief Concept for value-bearing clock-tick time series element types
+ */
+template<typename T, typename V>
+concept ClockValueElement = ClockTimeSeriesElement<T> && requires(T const & t) {
+    { t.value() } -> std::convertible_to<V>;
+};
+
+/**
+ * @brief Concept for complete clock-tick elements with both entity and value
+ */
+template<typename T, typename V>
+concept ClockFullElement = ClockEntityElement<T> && ClockValueElement<T, V>;
 
 /**
  * @brief Concept for data containers that support overwrite-merge into another instance
@@ -207,6 +245,26 @@ template<TimeSeriesElement T>
 }
 
 /**
+ * @brief Check if a clock-tick element's time is within a range
+ */
+template<ClockTimeSeriesElement T>
+[[nodiscard]] bool isInClockTimeRange(
+        T const & elem,
+        ClockTicks start,
+        ClockTicks end) {
+    auto const time = elem.time();
+    return time >= start && time <= end;
+}
+
+/**
+ * @brief Concept for elements that expose an EntityId for filtering
+ */
+template<typename T>
+concept EntityIdElement = requires(T const & t) {
+    { t.id() } -> std::convertible_to<EntityId>;
+};
+
+/**
  * @brief Check if an element's EntityId is in a set
  * 
  * @tparam T Element type satisfying EntityElement
@@ -214,13 +272,13 @@ template<TimeSeriesElement T>
  * @param ids Set of EntityIds to check against
  * @return true if element's EntityId is in the set
  */
-template<EntityElement T>
+template<EntityIdElement T>
 [[nodiscard]] bool isInEntitySet(
         T const & elem,
         std::unordered_set<EntityId> const & ids) {
     return ids.contains(elem.id());
 }
 
-}// namespace WhiskerToolbox::Concepts
+}// namespace Neuralyzer::Concepts
 
 #endif// TIME_SERIES_CONCEPTS_HPP

@@ -74,7 +74,7 @@ void writeSimplePointCsv(std::filesystem::path const & filepath) {
 
 TEST_CASE("JsonPipelineRunner loads object-root data config",
           "[DataManager][JsonPipelineRunner]") {
-    TempPipelineDirectory temp_dir;
+    TempPipelineDirectory const temp_dir;
     auto const csv_path = temp_dir.path() / "points.csv";
     auto const json_path = temp_dir.path() / "pipeline.json";
     writeSimplePointCsv(csv_path);
@@ -98,12 +98,12 @@ TEST_CASE("JsonPipelineRunner loads object-root data config",
     }
 
     DataManager data_manager;
-    auto const result = WhiskerToolbox::DataManagerPipeline::runJsonPipelineFile(
+    auto const result = Neuralyzer::DataManagerPipeline::runJsonPipelineFile(
             data_manager,
             json_path.string());
 
     REQUIRE(result.m_success);
-    REQUIRE(result.m_failed_phase == WhiskerToolbox::DataManagerPipeline::JsonPipelinePhase::None);
+    REQUIRE(result.m_failed_phase == Neuralyzer::DataManagerPipeline::JsonPipelinePhase::None);
 
     auto loaded = data_manager.getData<PointData>("tracked_points");
     REQUIRE(loaded != nullptr);
@@ -114,9 +114,49 @@ TEST_CASE("JsonPipelineRunner loads object-root data config",
     REQUIRE(points_at_zero.front().y == Catch::Approx(2.5f));
 }
 
+TEST_CASE("JsonPipelineRunner expands loops in object-root data config",
+          "[DataManager][JsonPipelineRunner]") {
+    TempPipelineDirectory const temp_dir;
+    for (int whisker_id = 0; whisker_id <= 2; ++whisker_id) {
+        writeSimplePointCsv(temp_dir.path() / ("whisker_" + std::to_string(whisker_id) + ".csv"));
+    }
+
+    auto const json_path = temp_dir.path() / "loop_pipeline.json";
+    nlohmann::json const config = {
+            {"loops", {{"whisker_id", {{"from", 0}, {"to", 2}}}}},
+            {"data",
+             nlohmann::json::array({{{"data_type", "points"},
+                                     {"name", "whisker_{whisker_id}"},
+                                     {"filepath", "whisker_{whisker_id}.csv"},
+                                     {"format", "csv"},
+                                     {"csv_layout", "simple"},
+                                     {"frame_column", 0},
+                                     {"x_column", 1},
+                                     {"y_column", 2},
+                                     {"column_delim", ","}}})}};
+
+    {
+        std::ofstream output(json_path);
+        output << config.dump(2);
+    }
+
+    DataManager data_manager;
+    auto const result = Neuralyzer::DataManagerPipeline::runJsonPipelineFile(
+            data_manager,
+            json_path.string());
+
+    REQUIRE(result.m_success);
+
+    for (int whisker_id = 0; whisker_id <= 2; ++whisker_id) {
+        auto const key = "whisker_" + std::to_string(whisker_id);
+        auto loaded = data_manager.getData<PointData>(key);
+        REQUIRE(loaded != nullptr);
+    }
+}
+
 TEST_CASE("JsonPipelineRunner preserves legacy array config loading",
           "[DataManager][JsonPipelineRunner]") {
-    TempPipelineDirectory temp_dir;
+    TempPipelineDirectory const temp_dir;
     auto const csv_path = temp_dir.path() / "legacy_points.csv";
     writeSimplePointCsv(csv_path);
 
@@ -131,7 +171,7 @@ TEST_CASE("JsonPipelineRunner preserves legacy array config loading",
                                                           {"column_delim", ","}}});
 
     DataManager data_manager;
-    auto const result = WhiskerToolbox::DataManagerPipeline::runJsonPipeline(
+    auto const result = Neuralyzer::DataManagerPipeline::runJsonPipeline(
             data_manager,
             config,
             temp_dir.path().string());
@@ -144,23 +184,23 @@ TEST_CASE("JsonPipelineRunner preserves legacy array config loading",
 
 TEST_CASE("JsonPipelineRunner accepts root-level transformations section",
           "[DataManager][JsonPipelineRunner]") {
-    TempPipelineDirectory temp_dir;
+    TempPipelineDirectory const temp_dir;
     nlohmann::json const config = {
             {"transformations", {{"steps", nlohmann::json::array()}}}};
 
     DataManager data_manager;
-    auto const result = WhiskerToolbox::DataManagerPipeline::runJsonPipeline(
+    auto const result = Neuralyzer::DataManagerPipeline::runJsonPipeline(
             data_manager,
             config,
             temp_dir.path().string());
 
     REQUIRE(result.m_success);
-    REQUIRE(result.m_failed_phase == WhiskerToolbox::DataManagerPipeline::JsonPipelinePhase::None);
+    REQUIRE(result.m_failed_phase == Neuralyzer::DataManagerPipeline::JsonPipelinePhase::None);
 }
 
 TEST_CASE("JsonPipelineRunner executes root-level saves",
           "[DataManager][JsonPipelineRunner]") {
-    TempPipelineDirectory temp_dir;
+    TempPipelineDirectory const temp_dir;
     auto const csv_path = temp_dir.path() / "points.csv";
     auto const json_path = temp_dir.path() / "pipeline_with_save.json";
     auto const save_path = temp_dir.path() / "saved_points.csv";
@@ -189,7 +229,7 @@ TEST_CASE("JsonPipelineRunner executes root-level saves",
     }
 
     DataManager data_manager;
-    auto const result = WhiskerToolbox::DataManagerPipeline::runJsonPipelineFile(
+    auto const result = Neuralyzer::DataManagerPipeline::runJsonPipelineFile(
             data_manager,
             json_path.string());
 
@@ -201,7 +241,7 @@ TEST_CASE("JsonPipelineRunner executes root-level saves",
 
 TEST_CASE("JsonPipelineRunner executes root-level command sequences",
           "[DataManager][JsonPipelineRunner]") {
-    TempPipelineDirectory temp_dir;
+    TempPipelineDirectory const temp_dir;
     nlohmann::json const config = {
             {"variables", {{"interval_key", "review_intervals"}}},
             {"commands",
@@ -213,7 +253,7 @@ TEST_CASE("JsonPipelineRunner executes root-level command sequences",
                                        {"create_if_missing", true}}}}})}};
 
     DataManager data_manager;
-    auto const result = WhiskerToolbox::DataManagerPipeline::runJsonPipeline(
+    auto const result = Neuralyzer::DataManagerPipeline::runJsonPipeline(
             data_manager,
             config,
             temp_dir.path().string());
@@ -229,27 +269,27 @@ TEST_CASE("JsonPipelineRunner executes root-level command sequences",
 
 TEST_CASE("JsonPipelineRunner reports command sequence failures",
           "[DataManager][JsonPipelineRunner]") {
-    TempPipelineDirectory temp_dir;
+    TempPipelineDirectory const temp_dir;
     nlohmann::json const config = {
             {"commands",
              nlohmann::json::array({{{"command_name", "UnknownCommand"},
                                      {"parameters", nlohmann::json::object()}}})}};
 
     DataManager data_manager;
-    auto const result = WhiskerToolbox::DataManagerPipeline::runJsonPipeline(
+    auto const result = Neuralyzer::DataManagerPipeline::runJsonPipeline(
             data_manager,
             config,
             temp_dir.path().string());
 
     REQUIRE_FALSE(result.m_success);
-    REQUIRE(result.m_failed_phase == WhiskerToolbox::DataManagerPipeline::JsonPipelinePhase::Command);
+    REQUIRE(result.m_failed_phase == Neuralyzer::DataManagerPipeline::JsonPipelinePhase::Command);
     REQUIRE(result.m_failed_command_index == 0);
     REQUIRE(result.m_error_message.find("UnknownCommand") != std::string::npos);
 }
 
 TEST_CASE("JsonPipelineRunner reports save command failures",
           "[DataManager][JsonPipelineRunner]") {
-    TempPipelineDirectory temp_dir;
+    TempPipelineDirectory const temp_dir;
     nlohmann::json const config = {
             {"saves",
              nlohmann::json::array({{{"data_key", "missing_points"},
@@ -257,13 +297,13 @@ TEST_CASE("JsonPipelineRunner reports save command failures",
                                      {"path", "missing.csv"}}})}};
 
     DataManager data_manager;
-    auto const result = WhiskerToolbox::DataManagerPipeline::runJsonPipeline(
+    auto const result = Neuralyzer::DataManagerPipeline::runJsonPipeline(
             data_manager,
             config,
             temp_dir.path().string());
 
     REQUIRE_FALSE(result.m_success);
-    REQUIRE(result.m_failed_phase == WhiskerToolbox::DataManagerPipeline::JsonPipelinePhase::Save);
+    REQUIRE(result.m_failed_phase == Neuralyzer::DataManagerPipeline::JsonPipelinePhase::Save);
     REQUIRE(result.m_error_message.find("missing_points") != std::string::npos);
 }
 
@@ -271,12 +311,12 @@ TEST_CASE("JsonPipelineRunner reports normalize errors",
           "[DataManager][JsonPipelineRunner]") {
     DataManager data_manager;
     nlohmann::json const scalar_root = 42;
-    auto const result = WhiskerToolbox::DataManagerPipeline::runJsonPipeline(
+    auto const result = Neuralyzer::DataManagerPipeline::runJsonPipeline(
             data_manager,
             scalar_root,
             ".");
 
     REQUIRE_FALSE(result.m_success);
-    REQUIRE(result.m_failed_phase == WhiskerToolbox::DataManagerPipeline::JsonPipelinePhase::Normalize);
+    REQUIRE(result.m_failed_phase == Neuralyzer::DataManagerPipeline::JsonPipelinePhase::Normalize);
     REQUIRE_FALSE(result.m_error_message.empty());
 }

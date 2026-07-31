@@ -13,10 +13,10 @@
  *      used by the MLCore_Widget pathway.
  */
 
-#ifndef WHISKERTOOLBOX_V2_DIMREDUCTION_OUTPUT_BUILDER_HPP
-#define WHISKERTOOLBOX_V2_DIMREDUCTION_OUTPUT_BUILDER_HPP
+#ifndef NEURALYZER_V2_DIMREDUCTION_OUTPUT_BUILDER_HPP
+#define NEURALYZER_V2_DIMREDUCTION_OUTPUT_BUILDER_HPP
 
-#include "NaNFilter.hpp"
+#include "NaNPolicy.hpp"
 
 #include <armadillo>
 
@@ -27,7 +27,7 @@
 
 class TensorData;
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 /**
  * @brief Build an output TensorData from a reduced matrix, handling NaN policies
@@ -61,6 +61,6 @@ namespace WhiskerToolbox::Transforms::V2 {
         std::size_t n_components,
         std::vector<std::string> const & col_names);
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-#endif// WHISKERTOOLBOX_V2_DIMREDUCTION_OUTPUT_BUILDER_HPP
+#endif// NEURALYZER_V2_DIMREDUCTION_OUTPUT_BUILDER_HPP

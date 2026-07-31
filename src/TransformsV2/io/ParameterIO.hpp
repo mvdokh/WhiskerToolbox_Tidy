@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_PARAMETER_IO_HPP
-#define WHISKERTOOLBOX_V2_PARAMETER_IO_HPP
+#ifndef NEURALYZER_V2_PARAMETER_IO_HPP
+#define NEURALYZER_V2_PARAMETER_IO_HPP
 
 #include <rfl.hpp>
 #include <rfl/DefaultIfMissing.hpp>
@@ -10,7 +10,7 @@
 #include <optional>
 #include <string>
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 /**
  * @brief Load parameters from JSON string
@@ -122,6 +122,6 @@ std::any loadParametersForTransform(
     std::string const& transform_name,
     std::string const& json_str);
 
-} // namespace WhiskerToolbox::Transforms::V2::Examples
+} // namespace Neuralyzer::Transforms::V2::Examples
 
-#endif // WHISKERTOOLBOX_V2_PARAMETER_IO_HPP
+#endif // NEURALYZER_V2_PARAMETER_IO_HPP

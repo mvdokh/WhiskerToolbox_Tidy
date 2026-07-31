@@ -12,8 +12,8 @@ namespace {
  * @param interval Interval with inclusive start and end indices.
  * @return Number of samples covered by the interval.
  */
-[[nodiscard]] int64_t inclusiveIntervalDuration(Interval const & interval) noexcept {
-    return interval.end - interval.start + 1;
+[[nodiscard]] int64_t inclusiveIntervalDuration(TimeFrameInterval const & interval) noexcept {
+    return interval.end.getValue() - interval.start.getValue() + 1;
 }
 
 }// namespace
@@ -28,6 +28,9 @@ void IntervalTableModel::setIntervals(DigitalIntervalSeries const * interval_dat
     _interval_data_source = interval_data;
 
     if (interval_data) {
+
+        auto time_frame = interval_data->getTimeFrame();
+
         for (auto const & interval_with_id: interval_data->view()) {
             QString group_name = "No Group";
             EntityId const eid = interval_with_id.id();
@@ -41,9 +44,10 @@ void IntervalTableModel::setIntervals(DigitalIntervalSeries const * interval_dat
                     }
                 }
             }
-
+            TimeFrameIndex const start_index = time_frame->getIndexAtTime(interval_with_id.interval.start, false);
+            TimeFrameIndex const end_index = time_frame->getIndexAtTime(interval_with_id.interval.end, true);
             _all_data.push_back(IntervalTableRow{
-                    .interval = interval_with_id.value(),
+                    .interval = TimeFrameInterval{start_index, end_index},
                     .entity_id = eid,
                     .group_name = group_name});
         }
@@ -138,14 +142,14 @@ IntervalTableRow IntervalTableModel::getRowData(int row) const {
     if (row >= 0 && row < static_cast<int>(_display_data.size())) {
         return _display_data[row];
     }
-    return IntervalTableRow{Interval{-1, -1}, EntityId(0), "Invalid"};
+    return IntervalTableRow{TimeFrameInterval{TimeFrameIndex{-1}, TimeFrameIndex{-1}}, EntityId(0), "Invalid"};
 }
 
-Interval IntervalTableModel::getInterval(int row) const {
+TimeFrameInterval IntervalTableModel::getInterval(int row) const {
     if (row >= 0 && row < static_cast<int>(_display_data.size())) {
         return _display_data[row].interval;
     }
-    return Interval{-1, -1};
+    return TimeFrameInterval{TimeFrameIndex{-1}, TimeFrameIndex{-1}};
 }
 
 void IntervalTableModel::_applyGroupFilter() {

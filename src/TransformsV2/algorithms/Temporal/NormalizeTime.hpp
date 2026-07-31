@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_NORMALIZE_TIME_HPP
-#define WHISKERTOOLBOX_V2_NORMALIZE_TIME_HPP
+#ifndef NEURALYZER_V2_NORMALIZE_TIME_HPP
+#define NEURALYZER_V2_NORMALIZE_TIME_HPP
 
 /**
  * @file NormalizeTime.hpp
@@ -34,7 +34,7 @@
  * }
  *
  * // At runtime
- * auto store = gather_result.buildTrialStore(trial_idx);  // Populates alignment_time
+ * auto store = buildGatherRowStore(gather_result, trial_idx);  // Populates alignment_time
  * // Pipeline applies bindings automatically
  * ```
  *
@@ -48,8 +48,8 @@
  * @see PipelineValueStore for value store documentation
  */
 
-#include "DigitalTimeSeries/EventWithId.hpp"
 #include "AnalogTimeSeries/Analog_Time_Series.hpp"
+#include "DigitalTimeSeries/EventWithId.hpp"
 
 #include <rfl.hpp>
 #include <rfl/json.hpp>
@@ -57,7 +57,7 @@
 #include <optional>
 #include <stdexcept>
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 // ============================================================================
 // V1 Parameters (manual alignment time setting)
@@ -93,7 +93,7 @@ namespace WhiskerToolbox::Transforms::V2 {
  * }
  *
  * // At runtime with GatherResult
- * auto store = gather_result.buildTrialStore(i);  // Contains "alignment_time"
+ * auto store = buildGatherRowStore(gather_result, i);  // Contains "alignment_time"
  * // Pipeline applies bindings automatically
  * @endcode
  *
@@ -129,8 +129,21 @@ struct NormalizeTimeParamsV2 {
  * @endcode
  */
 [[nodiscard]] inline float normalizeTimeValueV2(
-        TimeFrameIndex const& time,
-        NormalizeTimeParamsV2 const& params) {
+        TimeFrameIndex const & time,
+        NormalizeTimeParamsV2 const & params) {
+    return static_cast<float>(time.getValue() - params.alignment_time);
+}
+
+/**
+ * @brief Normalize a ClockTicks value to float (V2 - uses bound params)
+ *
+ * @param time Input clock-tick time to normalize
+ * @param params Parameters with alignment_time bound from store
+ * @return float The normalized time (time - alignment_time)
+ */
+[[nodiscard]] inline float normalizeClockTicksValueV2(
+        ClockTicks const & time,
+        NormalizeTimeParamsV2 const & params) {
     return static_cast<float>(time.getValue() - params.alignment_time);
 }
 
@@ -144,8 +157,23 @@ struct NormalizeTimeParamsV2 {
  * @return float The normalized time (event.time() - alignment_time)
  */
 [[nodiscard]] inline float normalizeEventTimeValueV2(
-        EventWithId const& event,
-        NormalizeTimeParamsV2 const& params) {
+        EventWithId const & event,
+        NormalizeTimeParamsV2 const & params) {
+    return static_cast<float>(event.time().getValue() - params.alignment_time);
+}
+
+/**
+ * @brief Normalize clock-tick event time to float value (V2 - uses bound params)
+ *
+ * Convenience function for ClockTicksWithId that extracts time and normalizes.
+ *
+ * @param event Input event with absolute clock-tick time
+ * @param params Parameters with alignment_time bound from store
+ * @return float The normalized time (event.time() - alignment_time)
+ */
+[[nodiscard]] inline float normalizeClockTicksWithIdValueV2(
+        ClockTicksWithId const & event,
+        NormalizeTimeParamsV2 const & params) {
     return static_cast<float>(event.time().getValue() - params.alignment_time);
 }
 
@@ -157,11 +185,11 @@ struct NormalizeTimeParamsV2 {
  * @return float The normalized time (sample.time() - alignment_time)
  */
 [[nodiscard]] inline float normalizeSampleTimeValueV2(
-        AnalogTimeSeries::TimeValuePoint const& sample,
-        NormalizeTimeParamsV2 const& params) {
+        AnalogTimeSeries::TimeValuePoint const & sample,
+        NormalizeTimeParamsV2 const & params) {
     return static_cast<float>(sample.time().getValue() - params.alignment_time);
 }
 
-}  // namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-#endif  // WHISKERTOOLBOX_V2_NORMALIZE_TIME_HPP
+#endif// NEURALYZER_V2_NORMALIZE_TIME_HPP

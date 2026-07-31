@@ -386,10 +386,10 @@ std::unique_ptr<IRowSelector> TablePipeline::createRowSelector(nlohmann::json co
                 return nullptr;
             }
 
-            // Convert Interval objects to TimeFrameInterval objects
+            // Convert ClockTicksInterval objects to TimeFrameInterval objects
             std::vector<TimeFrameInterval> time_frame_intervals;
             for (auto const & interval: intervals) {
-                time_frame_intervals.emplace_back(TimeFrameIndex(interval.start), TimeFrameIndex(interval.end));
+                time_frame_intervals.push_back(toTimeFrameInterval(interval, *source_timeframe));
             }
 
             return std::make_unique<IntervalSelector>(std::move(time_frame_intervals), source_timeframe);
@@ -509,7 +509,7 @@ std::unique_ptr<IRowSelector> TablePipeline::createRowSelector(nlohmann::json co
                     int frame_count = timeFrame->getTotalFrameCount();
                     timestamps.reserve(static_cast<size_t>(frame_count));
                     for (int i = 0; i < frame_count; ++i) {
-                        timestamps.emplace_back(timeFrame->getTimeAtIndex(TimeFrameIndex(i)));
+                        timestamps.emplace_back(timeFrame->getTimeAtIndex(TimeFrameIndex(i)).getValue());
                     }
                 } else {
                     std::cerr << "TablePipeline: Cannot resolve timestamp source: " << source_key << std::endl;
@@ -575,7 +575,7 @@ std::unique_ptr<IComputerBase> TablePipeline::createColumnComputer(nlohmann::jso
             }
         }
     }
-    
+
     // Add data source name as a special parameter for factories that need it
     if (!data_source_name.empty()) {
         parameters["__source_name__"] = data_source_name;

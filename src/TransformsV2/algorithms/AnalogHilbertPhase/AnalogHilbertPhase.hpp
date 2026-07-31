@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_ANALOG_HILBERT_PHASE_HPP
-#define WHISKERTOOLBOX_V2_ANALOG_HILBERT_PHASE_HPP
+#ifndef NEURALYZER_V2_ANALOG_HILBERT_PHASE_HPP
+#define NEURALYZER_V2_ANALOG_HILBERT_PHASE_HPP
 
 #include <rfl.hpp>
 #include <rfl/json.hpp>
@@ -8,11 +8,11 @@
 #include <memory>
 
 class AnalogTimeSeries;
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 /**
  * @brief Parameters for Hilbert phase/amplitude extraction
@@ -101,6 +101,6 @@ std::shared_ptr<AnalogTimeSeries> analogHilbertPhase(
         AnalogHilbertPhaseParams const & params,
         ComputeContext const & ctx);
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
-#endif// WHISKERTOOLBOX_V2_ANALOG_HILBERT_PHASE_HPP
+#endif// NEURALYZER_V2_ANALOG_HILBERT_PHASE_HPP

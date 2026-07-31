@@ -11,8 +11,8 @@
  * generators convert from the typed variant representation using
  * toTrajectoryParams().
  */
-#ifndef WHISKERTOOLBOX_DATASYNTHESIZER_MOTION_PARAMS_HPP
-#define WHISKERTOOLBOX_DATASYNTHESIZER_MOTION_PARAMS_HPP
+#ifndef NEURALYZER_DATASYNTHESIZER_MOTION_PARAMS_HPP
+#define NEURALYZER_DATASYNTHESIZER_MOTION_PARAMS_HPP
 
 #include "Trajectory.hpp"
 
@@ -20,7 +20,7 @@
 #include <rfl.hpp>
 #include <string>
 
-namespace WhiskerToolbox::DataSynthesizer {
+namespace Neuralyzer::DataSynthesizer {
 
 // ============================================================================
 // Boundary
@@ -155,6 +155,6 @@ inline TrajectoryParams toTrajectoryParams(
     return tp;
 }
 
-}// namespace WhiskerToolbox::DataSynthesizer
+}// namespace Neuralyzer::DataSynthesizer
 
-#endif// WHISKERTOOLBOX_DATASYNTHESIZER_MOTION_PARAMS_HPP
+#endif// NEURALYZER_DATASYNTHESIZER_MOTION_PARAMS_HPP

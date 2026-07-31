@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_ANALOG_INTERVAL_PEAK_HPP
-#define WHISKERTOOLBOX_V2_ANALOG_INTERVAL_PEAK_HPP
+#ifndef NEURALYZER_V2_ANALOG_INTERVAL_PEAK_HPP
+#define NEURALYZER_V2_ANALOG_INTERVAL_PEAK_HPP
 
 #include <memory>
 
@@ -7,11 +7,11 @@ class AnalogTimeSeries;
 class DigitalEventSeries;
 class DigitalIntervalSeries;
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 /**
  * @brief Parameters for analog interval peak detection
@@ -69,7 +69,9 @@ struct AnalogIntervalPeakParams {
  * @param analog Analog time series to search for peaks
  * @param params Parameters controlling peak type and search mode
  * @param ctx Compute context for progress reporting and cancellation
- * @return Digital event series with peak timestamps (in interval coordinate system)
+ * @return Digital event series with peak timestamps stored as analog TimeFrameIndex
+ *         values. The implementation attaches the analog TimeFrame (when present) so
+ *         view() resolves ClockTicks correctly; see AnalogIntervalPeak.qmd.
  */
 std::shared_ptr<DigitalEventSeries> analogIntervalPeak(
         DigitalIntervalSeries const & intervals,
@@ -77,6 +79,6 @@ std::shared_ptr<DigitalEventSeries> analogIntervalPeak(
         AnalogIntervalPeakParams const & params,
         ComputeContext const & ctx);
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-#endif// WHISKERTOOLBOX_V2_ANALOG_INTERVAL_PEAK_HPP
+#endif// NEURALYZER_V2_ANALOG_INTERVAL_PEAK_HPP

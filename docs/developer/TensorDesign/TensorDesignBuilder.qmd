@@ -1,0 +1,159 @@
+---
+title: "TensorDesign Library"
+format: html
+---
+
+The **TensorDesign** library (`src/TensorDesign/`) provides Qt-free `DataManager` operations for tensor workflows. It is the headless counterpart to the TensorDesigner UI panel and TensorInspector column-view actions.
+
+## Motivation
+
+`TensorColumnBuilders` can build individual column providers from `ColumnRecipe` + pipeline JSON, but assembling a full tensor (row source, `RowDescriptor`, invalidation wiring, optional `DataManager` registration) was previously duplicated in `TensorDesigner::_buildTensor()`. Similarly, tensor↔analog `DataManager` glue lived in `TensorColumnViewCreator` inside the UI library. Extracting both enables:
+
+- Integration tests that exercise production code without linking `DataInspector_Widget`
+- Future workspace hooks (`tensor_designs` after `data_loads`)
+- A single source of truth shared by UI and library code
+
+See [Tensor stack overview](../tensor_stack.qmd) for how build, pack, and view operations relate.
+
+## Dependency graph
+
+```
+TensorData  ←  TransformsV2  ←  TensorDesign  ←  DataInspector_Widget
+DataManager  ←─────────────────┘
+```
+
+Consumers that execute pipelines must link `TransformsV2` with **whole-archive** on Linux so static transform registrations are not stripped.
+
+## JSON envelope
+
+The format matches `TensorDesigner::toJson()` / `fromJson()`:
+
+```json
+{
+  "tensor_key": "contact_features",
+  "output_time_key": "default",
+  "row_source": {
+    "data_key": "Contact",
+    "row_type": "interval"
+  },
+  "columns": [
+    {
+      "name": "mean_curvature",
+      "source_key": "Curvature",
+      "row_pipeline_json": "{\"steps\": []}",
+      "pipeline_json": "{\"steps\": [], \"range_reduction\": {\"reduction_name\": \"MeanValue\"}}"
+    },
+    {
+      "name": "spike_count",
+      "source_key": "Spikes",
+      "pipeline_json": "{\"steps\": [], \"range_reduction\": {\"reduction_name\": \"EventCount\"}}"
+    }
+  ]
+}
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `tensor_key` | For `populateDataManager` only | DataManager key for the output tensor |
+| `output_time_key` | No (default `"default"`) | `TimeKey` when registering in DataManager |
+| `row_source.data_key` | Yes | Row source object in DataManager |
+| `row_source.row_type` | Yes | `interval`, `timestamp`, `derived_from_source`, `ordinal` (unsupported), or `none` |
+| `columns[].name` | Yes | Column display name |
+| `columns[].source_key` | For data columns | DataManager source key |
+| `columns[].row_pipeline_json` | No | Embedded row `PipelineDescriptor` JSON string. Empty or explicit identity (`{"steps": []}`) preserves current row geometry; interval-row pipelines that produce a row-aligned `DigitalIntervalSeries` provide prepared gather windows. |
+| `columns[].pipeline_json` | For interval/timestamp data columns | Embedded `PipelineDescriptor` JSON string |
+| `columns[].interval_property` | For property columns | `start`, `end`, or `duration` (no `source_key` needed) |
+
+Each `pipeline_json` string is a [`PipelineDescriptor`](../transforms_v2/pipeline_loader.qmd) fragment. Interval-row columns require a terminal `range_reduction`.
+
+Current interval-row tensor columns gather over the full row interval when `row_pipeline_json` is omitted, empty, or an explicit identity descriptor such as `{"steps": []}`. Non-identity row pipelines may now run against the original interval row source when they produce a `DigitalIntervalSeries` with the same row count; the output is used as prepared gather windows for that column. `DigitalEventSeries` sample-time output remains deferred to the timestamp/sample row-pipeline phase. Per-row normalization markers should be bound into the column TransformPipeline through TransformsV2 `PipelineValueStore` parameter bindings rather than through `row_pipeline_json`; `GatherResult` remains only the row container and direct gather executor.
+
+There is still a temporary compatibility path in `TensorDesignBuilder::buildColumnProvider()` that detects a top-level `"offset"` field inside `pipeline_json` for analog sample-at-offset columns. This should be removed once point sampling is expressible through the row-pipeline design.
+
+## Build API (lazy-column tensors)
+
+Header: `TensorDesign/TensorDesignBuilder.hpp`
+
+```cpp
+namespace Neuralyzer::TensorDesign {
+
+std::optional<TensorDesignSpec> parseDesignJson(std::string const& json);
+std::string serializeDesignJson(TensorDesignSpec const& spec);
+
+std::optional<TensorData> buildTensor(DataManager& dm, TensorDesignSpec const& spec);
+std::optional<TensorData> buildTensorFromDesignJson(DataManager& dm, std::string const& json);
+
+bool populateDataManager(DataManager& dm, TensorDesignSpec const& spec);
+
+}
+```
+
+- **`buildTensor`** — returns lazy `TensorData` without registering in DataManager
+- **`populateDataManager`** — builds and calls `dm.setData<TensorData>(spec.tensor_key, …)`
+- Errors are logged via `spdlog` and surfaced as `std::nullopt` / `false`
+
+## Tensor column views (pack / view in DataManager)
+
+Header: `TensorDesign/TensorColumnViews.hpp`
+
+```cpp
+namespace Neuralyzer::TensorDesign {
+
+struct AnalogKeyGroup {
+    std::string prefix;
+    std::vector<std::string> keys;
+};
+
+std::size_t createTensorColumnViews(
+    DataManager& dm, std::string const& tensor_key,
+    std::string const& prefix, std::vector<int> const& columns);
+
+std::vector<AnalogKeyGroup> discoverAnalogKeyGroups(DataManager& dm);
+
+bool populateTensorFromAnalogKeys(
+    DataManager& dm, std::string const& tensor_key,
+    std::vector<std::string> const& analog_keys);
+
+}
+```
+
+| Function | Direction | Description |
+|----------|-----------|-------------|
+| `createTensorColumnViews` | Tensor → Analog | Zero-copy views registered as `{prefix}/{column_name}` |
+| `discoverAnalogKeyGroups` | — | Find analog keys sharing a prefix (≥2 keys) |
+| `populateTensorFromAnalogKeys` | Analog → Tensor | Pack channels into an existing `TensorData` |
+
+`TensorInspector` delegates to these functions for its Column Views and Populate from AnalogTimeSeries sections.
+
+## Example (build)
+
+After loading scenario data (see [Whisker contact scenario](../testing/scenarios/whisker_contact.qmd)):
+
+```cpp
+#include "TensorDesign/TensorDesignBuilder.hpp"
+
+auto tensor = Neuralyzer::TensorDesign::buildTensorFromDesignJson(dm, json);
+REQUIRE(tensor.has_value());
+```
+
+## Tests
+
+| Binary | Tags |
+|--------|------|
+| `test_tensor_design` | `[TensorDesign]` |
+| `test_TransformsV2` | `[TensorColumnViews][TensorDesign]`, `[TensorColumnBuilders][whisker_contact]` |
+
+## Related documentation
+
+- [Tensor stack overview](../tensor_stack.qmd)
+- [Column row pipeline design](column_row_pipeline.qmd) — planned per-column gather geometry through row TransformPipelines
+- [Column row pipeline roadmap](column_row_pipeline_roadmap.qmd) — implementation sequence for `row_pipeline_json`
+- [Tensor Inspector (Dev)](../ui/data_inspectors/tensor_inspector.qmd) — UI delegates to this library
+- [TensorColumnBuilders](../transforms_v2/TensorColumnBuilders.qmd) — per-column builder layer
+- [Integration test scenarios](../testing/test_scenarios.qmd)
+
+## Limitations
+
+- **Ordinal rows** — not yet supported (same as TensorDesigner UI)
+- **Round-trip from built tensor** — cannot recover `ColumnRecipe` list from existing `LazyColumnTensorStorage`
+- **Workspace restore** — tensor designs are not replayed automatically after `data_loads` (future work)

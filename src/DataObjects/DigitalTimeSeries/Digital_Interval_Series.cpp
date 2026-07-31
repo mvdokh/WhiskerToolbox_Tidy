@@ -6,14 +6,35 @@
 #include "Entity/EntityRegistry.hpp"
 
 #include <algorithm>
+#include <cassert>
+#include <climits>
 #include <iostream>
+#include <limits>
 #include <ranges>
 #include <utility>
 #include <vector>
 
+namespace {
+
+/**
+ * @brief Get or create an EntityId keyed on interval (start, end) bounds.
+ * @pre interval.end >= 0 && interval.end <= INT_MAX
+ */
+EntityId ensureIntervalEntityId(EntityRegistry & registry,
+                                std::string const & data_key,
+                                TimeFrameInterval const & interval) {
+    assert(interval.end.getValue() >= 0 && interval.end.getValue() <= INT_MAX);
+    return registry.ensureId(data_key,
+                             EntityKind::IntervalEntity,
+                             interval.start,
+                             interval.end.getValue());
+}
+
+}// namespace
+
 // ========== Constructors ==========
 
-DigitalIntervalSeries::DigitalIntervalSeries(std::vector<Interval> digital_vector) {
+DigitalIntervalSeries::DigitalIntervalSeries(std::vector<TimeFrameInterval> digital_vector) {
     // Sort the input
     std::sort(digital_vector.begin(), digital_vector.end());
 
@@ -25,13 +46,15 @@ DigitalIntervalSeries::DigitalIntervalSeries(std::vector<Interval> digital_vecto
     }
     _storage = DigitalIntervalStorageWrapper{std::move(new_storage)};
     _cacheOptimizationPointers();
+    _syncStorageDisjointHint();
 }
 
 DigitalIntervalSeries::DigitalIntervalSeries(std::vector<std::pair<float, float>> const & digital_vector) {
-    std::vector<Interval> intervals;
+    std::vector<TimeFrameInterval> intervals;
     intervals.reserve(digital_vector.size());
     for (auto const & interval: digital_vector) {
-        intervals.emplace_back(Interval{static_cast<int64_t>(interval.first), static_cast<int64_t>(interval.second)});
+        intervals.emplace_back(TimeFrameInterval{TimeFrameIndex{static_cast<int64_t>(interval.first)},
+                                                 TimeFrameIndex{static_cast<int64_t>(interval.second)}});
     }
     std::sort(intervals.begin(), intervals.end());
 
@@ -43,11 +66,31 @@ DigitalIntervalSeries::DigitalIntervalSeries(std::vector<std::pair<float, float>
     }
     _storage = DigitalIntervalStorageWrapper{std::move(new_storage)};
     _cacheOptimizationPointers();
+    _syncStorageDisjointHint();
+}
+
+std::shared_ptr<DigitalIntervalSeries> DigitalIntervalSeries::createOverlapping(
+        std::vector<TimeFrameInterval> intervals,
+        std::shared_ptr<TimeFrame> time_frame) {
+    auto result = std::make_shared<DigitalIntervalSeries>();
+    result->_layout = IntervalLayout::Overlapping;
+    result->_time_frame = std::move(time_frame);
+
+    std::sort(intervals.begin(), intervals.end());
+    OwningDigitalIntervalStorage new_storage;
+    new_storage.reserve(intervals.size());
+    for (auto const & interval: intervals) {
+        new_storage.addInterval(interval, EntityId{0});
+    }
+    new_storage.setAssumeDisjointIntervals(false);
+    result->_storage = DigitalIntervalStorageWrapper{std::move(new_storage)};
+    result->_cacheOptimizationPointers();
+    return result;
 }
 
 // ========== Getters ==========
 
-void DigitalIntervalSeries::addEvent(Interval new_interval) {
+void DigitalIntervalSeries::addEvent(TimeFrameInterval new_interval) {
     auto * owning = _storage.tryGetMutableOwning();
     if (!owning) {
         // Non-owning storage - need to materialize first
@@ -57,24 +100,17 @@ void DigitalIntervalSeries::addEvent(Interval new_interval) {
         if (!owning) {
             throw std::runtime_error("Failed to get mutable storage for addEvent");
         }
+        _syncStorageDisjointHint();
     }
 
-    size_t const old_size = owning->size();
-    _addEventInternal(new_interval);
-    size_t const new_size = owning->size();
+    auto const result_interval = _addEventInternal(new_interval);
 
-    // If an interval was actually added (not merged into existing), assign EntityId
-    if (new_size > old_size && _identity_registry) {
-        // Find the index of the newly added interval (search in storage)
-        for (size_t idx = 0; idx < owning->size(); ++idx) {
-            if (owning->getInterval(idx) == new_interval) {
-                EntityId const entity_id = _identity_registry->ensureId(
-                        _identity_data_key,
-                        EntityKind::IntervalEntity,
-                        TimeFrameIndex{new_interval.start},
-                        static_cast<int>(idx));
-                owning->setEntityId(idx, entity_id);
-                break;
+    if (result_interval && _identity_registry) {
+        if (auto const idx = owning->findByInterval(*result_interval)) {
+            if (owning->getEntityId(*idx) == EntityId{0}) {
+                EntityId const entity_id = ensureIntervalEntityId(
+                        *_identity_registry, _identity_data_key, *result_interval);
+                owning->setEntityId(*idx, entity_id);
             }
         }
     }
@@ -90,26 +126,43 @@ void DigitalIntervalSeries::addEvent(TimeFrameIndex start, TimeFrameIndex end) {
         return;
     }
 
-    addEvent(Interval{start.getValue(), end.getValue()});
+    addEvent(TimeFrameInterval{start, end});
 }
 
-void DigitalIntervalSeries::_addEventInternal(Interval new_interval) {
+std::optional<TimeFrameInterval> DigitalIntervalSeries::_addEventInternal(TimeFrameInterval new_interval) {
     auto * owning = _storage.tryGetMutableOwning();
     if (!owning) {
-        return;// Caller should have ensured mutable storage
+        return std::nullopt;// Caller should have ensured mutable storage
+    }
+
+    if (_layout == IntervalLayout::Overlapping) {
+        if (owning->addInterval(new_interval, EntityId{0})) {
+            return new_interval;
+        }
+        return std::nullopt;
     }
 
     // Collect indices of overlapping/contiguous intervals to merge
     std::vector<size_t> indices_to_remove;
+    EntityId inherited_id{0};
+    int64_t min_start = std::numeric_limits<int64_t>::max();
+
     for (size_t i = 0; i < owning->size(); ++i) {
-        Interval const existing = owning->getInterval(i);
+        TimeFrameInterval const existing = owning->getInterval(i);
         if (is_overlapping(existing, new_interval) || is_contiguous(existing, new_interval)) {
             new_interval.start = std::min(new_interval.start, existing.start);
             new_interval.end = std::max(new_interval.end, existing.end);
             indices_to_remove.push_back(i);
+
+            if (existing.start.getValue() < min_start) {
+                min_start = existing.start.getValue();
+                inherited_id = owning->getEntityId(i);
+            } else if (existing.start.getValue() == min_start && inherited_id == EntityId{0}) {
+                inherited_id = owning->getEntityId(i);
+            }
         } else if (is_contained(new_interval, existing)) {
             // The new interval is completely contained within an existing interval, so we do nothing.
-            return;
+            return std::nullopt;
         }
     }
 
@@ -120,17 +173,26 @@ void DigitalIntervalSeries::_addEventInternal(Interval new_interval) {
     }
 
     // Add the merged interval
-    owning->addInterval(new_interval, EntityId{0});
+    owning->addInterval(new_interval, inherited_id);
     owning->sort();
+
+    if (inherited_id != EntityId{0} && _identity_registry) {
+        _identity_registry->rebindKey(inherited_id,
+                                      TimeFrameIndex{new_interval.start},
+                                      new_interval.end.getValue());
+    }
+
+    return new_interval;
 }
 
 void DigitalIntervalSeries::setEventAtTime(TimeFrameIndex time, bool const event) {
+    assert(_layout == IntervalLayout::Disjoint && "setEventAtTime requires Disjoint layout");
     _setEventAtTimeInternal(time, event);
     _cacheOptimizationPointers();
     notifyObservers();
 }
 
-bool DigitalIntervalSeries::removeInterval(Interval const & interval) {
+bool DigitalIntervalSeries::removeInterval(TimeFrameInterval const & interval) {
     auto * owning = _storage.tryGetMutableOwning();
     if (!owning) {
         // Non-owning storage - need to materialize first
@@ -153,7 +215,7 @@ bool DigitalIntervalSeries::removeInterval(Interval const & interval) {
     return false;
 }
 
-size_t DigitalIntervalSeries::removeIntervals(std::vector<Interval> const & intervals) {
+size_t DigitalIntervalSeries::removeIntervals(std::vector<TimeFrameInterval> const & intervals) {
     auto * owning = _storage.tryGetMutableOwning();
     if (!owning) {
         // Non-owning storage - need to materialize first
@@ -195,10 +257,11 @@ size_t DigitalIntervalSeries::removeIntervals(std::vector<Interval> const & inte
 }
 
 void DigitalIntervalSeries::_setEventAtTimeInternal(TimeFrameIndex time, bool const event) {
+    assert(_layout == IntervalLayout::Disjoint && "setEventAtTime requires Disjoint layout");
     if (!event) {
         _removeEventAtTimeInternal(time);
     } else {
-        _addEventInternal(Interval{time.getValue(), time.getValue()});
+        _addEventInternal(TimeFrameInterval{time, time});
     }
 }
 
@@ -209,18 +272,18 @@ void DigitalIntervalSeries::_removeEventAtTimeInternal(TimeFrameIndex const time
     }
 
     for (size_t i = 0; i < owning->size(); ++i) {
-        Interval const existing = owning->getInterval(i);
-        if (is_contained(existing, time.getValue())) {
-            if (time.getValue() == existing.start && time.getValue() == existing.end) {
+        TimeFrameInterval const existing = owning->getInterval(i);
+        if (is_contained(existing, time)) {
+            if (time == existing.start && time == existing.end) {
                 owning->removeAt(i);
-            } else if (time.getValue() == existing.start) {
-                owning->setInterval(i, Interval{time.getValue() + 1, existing.end});
-            } else if (time.getValue() == existing.end) {
-                owning->setInterval(i, Interval{existing.start, time.getValue() - 1});
+            } else if (time == existing.start) {
+                owning->setInterval(i, TimeFrameInterval{time + TimeFrameIndex{1}, existing.end});
+            } else if (time == existing.end) {
+                owning->setInterval(i, TimeFrameInterval{existing.start, time - TimeFrameIndex{1}});
             } else {
                 // Split the interval
-                auto preceding_event = Interval{existing.start, time.getValue() - 1};
-                auto following_event = Interval{time.getValue() + 1, existing.end};
+                auto preceding_event = TimeFrameInterval{existing.start, time - TimeFrameIndex{1}};
+                auto following_event = TimeFrameInterval{time + TimeFrameIndex{1}, existing.end};
                 owning->removeAt(i);
                 owning->addInterval(preceding_event, EntityId{0});
                 owning->addInterval(following_event, EntityId{0});
@@ -239,12 +302,8 @@ void DigitalIntervalSeries::rebuildAllEntityIds() {
 
     for (size_t i = 0; i < owning->size(); ++i) {
         if (_identity_registry) {
-            Interval const interval = owning->getInterval(i);
-            EntityId const id = _identity_registry->ensureId(
-                    _identity_data_key,
-                    EntityKind::IntervalEntity,
-                    TimeFrameIndex{interval.start},
-                    static_cast<int>(i));
+            TimeFrameInterval const interval = owning->getInterval(i);
+            EntityId const id = ensureIntervalEntityId(*_identity_registry, _identity_data_key, interval);
             owning->setEntityId(i, id);
         } else {
             owning->setEntityId(i, EntityId{0});
@@ -277,7 +336,7 @@ std::size_t DigitalIntervalSeries::copyByEntityIds(
 
 // ========== Entity Lookup Methods ==========
 
-std::optional<Interval> DigitalIntervalSeries::getIntervalByEntityId(EntityId entity_id) const {
+std::optional<ClockTicksInterval> DigitalIntervalSeries::getIntervalByEntityId(EntityId entity_id) const {
     if (!_identity_registry) {
         return std::nullopt;
     }
@@ -287,17 +346,16 @@ std::optional<Interval> DigitalIntervalSeries::getIntervalByEntityId(EntityId en
         return std::nullopt;
     }
 
-    int const local_index = descriptor->local_index;
-
-    if (local_index < 0 || static_cast<size_t>(local_index) >= _storage.size()) {
-        return std::nullopt;
+    if (auto const idx = _storage.findByEntityId(entity_id)) {
+        TimeFrameInterval interval = _storage.getInterval(*idx);
+        return toClockTicksInterval(interval, *_time_frame);
     }
 
-    return _storage.getInterval(static_cast<size_t>(local_index));
+    return std::nullopt;
 }
 
-std::vector<std::pair<EntityId, Interval>> DigitalIntervalSeries::getIntervalsByEntityIds(std::vector<EntityId> const & entity_ids) const {
-    std::vector<std::pair<EntityId, Interval>> result;
+std::vector<std::pair<EntityId, ClockTicksInterval>> DigitalIntervalSeries::getIntervalsByEntityIds(std::vector<EntityId> const & entity_ids) const {
+    std::vector<std::pair<EntityId, ClockTicksInterval>> result;
     result.reserve(entity_ids.size());
 
     for (EntityId const entity_id: entity_ids) {
@@ -311,35 +369,45 @@ std::vector<std::pair<EntityId, Interval>> DigitalIntervalSeries::getIntervalsBy
 }
 
 
-std::pair<int64_t, int64_t> DigitalIntervalSeries::_getTimeRangeFromIndices(
+std::pair<ClockTicks, ClockTicks> DigitalIntervalSeries::_getTimeRangeFromIndices(
         TimeFrameIndex start_index,
         TimeFrameIndex stop_index) const {
 
     if (_time_frame) {
         auto start_time_value = _time_frame->getTimeAtIndex(start_index);
         auto stop_time_value = _time_frame->getTimeAtIndex(stop_index);
-        return {static_cast<int64_t>(start_time_value), static_cast<int64_t>(stop_time_value)};
+        return {start_time_value, stop_time_value};
     } else {
-        // Fallback to using indices as time values if no timeframe
-        return {start_index.getValue(), stop_index.getValue()};
+        // We should never get here
+        throw std::runtime_error("No time frame set for DigitalIntervalSeries");
     }
 }
 
-int find_closest_preceding_event(DigitalIntervalSeries * digital_series, TimeFrameIndex time) {
-    auto const & intervals = digital_series->view();
+std::vector<ClockTicksInterval> DigitalIntervalSeries::_getClockTicksIntervalsClipped(
+        TimeFrameIndex start_time,
+        TimeFrameIndex stop_time) const {
+    TimeFrame const * time_frame = _time_frame.get();
+    assert(time_frame != nullptr && "_getClockTicksIntervalsClipped requires series time frame");
 
+    std::vector<ClockTicksInterval> result;
+    for (TimeFrameInterval const & interval: _getIntervalsAsVectorClipped(start_time, stop_time)) {
+        result.push_back(toClockTicksInterval(interval, *time_frame));
+    }
+    return result;
+}
+
+int find_closest_preceding_event(DigitalIntervalSeries * digital_series, TimeFrameIndex time) {
     int closest_index = -1;
-    int i = 0;
-    for (auto const & interval: intervals) {
-        if (interval.value().start <= time.getValue()) {
+    for (size_t i = 0; i < digital_series->size(); ++i) {
+        TimeFrameInterval const interval = digital_series->getStoredInterval(i);
+        if (interval.start <= time) {
             closest_index = static_cast<int>(i);
-            if (time.getValue() <= interval.value().end) {
+            if (time <= interval.end) {
                 return static_cast<int>(i);
             }
         } else {
             break;
         }
-        ++i;
     }
     return closest_index;
 }
@@ -350,12 +418,18 @@ void DigitalIntervalSeries::_cacheOptimizationPointers() {
     _cached_storage = _storage.tryGetCache();
 }
 
+void DigitalIntervalSeries::_syncStorageDisjointHint() {
+    if (auto * owning = _storage.tryGetMutableOwning()) {
+        owning->setAssumeDisjointIntervals(_layout == IntervalLayout::Disjoint);
+    }
+}
+
 // ========== Factory Methods ==========
 
 std::shared_ptr<DigitalIntervalSeries> DigitalIntervalSeries::createView(
         std::shared_ptr<DigitalIntervalSeries const> const & source,
-        int64_t start,
-        int64_t end) {
+        TimeFrameIndex start,
+        TimeFrameIndex end) {
     // Get shared owning storage from source (zero-copy via aliasing constructor)
     auto shared_owning = source->_storage.getSharedOwningStorage();
     if (!shared_owning) {
@@ -369,6 +443,7 @@ std::shared_ptr<DigitalIntervalSeries> DigitalIntervalSeries::createView(
     view.filterByOverlappingRange(start, end);
 
     auto result = std::make_shared<DigitalIntervalSeries>();
+    result->_layout = source->layout();
     result->_storage = DigitalIntervalStorageWrapper{std::move(view)};
     result->_time_frame = source->_time_frame;
     result->_identity_data_key = source->_identity_data_key;
@@ -381,6 +456,7 @@ std::shared_ptr<DigitalIntervalSeries> DigitalIntervalSeries::createView(
         std::shared_ptr<DigitalIntervalSeries const> const & source,
         std::unordered_set<EntityId> const & entity_ids) {
     auto result = std::make_shared<DigitalIntervalSeries>();
+    result->_layout = source->layout();
     result->_time_frame = source->_time_frame;
     result->_identity_data_key = source->_identity_data_key;
     result->_identity_registry = source->_identity_registry;
@@ -407,6 +483,7 @@ std::shared_ptr<DigitalIntervalSeries> DigitalIntervalSeries::createView(
 
 std::shared_ptr<DigitalIntervalSeries> DigitalIntervalSeries::materialize() const {
     auto result = std::make_shared<DigitalIntervalSeries>();
+    result->_layout = _layout;
     result->_time_frame = _time_frame;
     result->_identity_data_key = _identity_data_key;
     result->_identity_registry = _identity_registry;
@@ -420,6 +497,7 @@ std::shared_ptr<DigitalIntervalSeries> DigitalIntervalSeries::materialize() cons
     }
 
     result->_storage = DigitalIntervalStorageWrapper{std::move(new_storage)};
+    result->_syncStorageDisjointHint();
     result->_cacheOptimizationPointers();
     return result;
 }

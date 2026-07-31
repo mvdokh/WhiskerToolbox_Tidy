@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_ANALOG_EVENT_THRESHOLD_HPP
-#define WHISKERTOOLBOX_ANALOG_EVENT_THRESHOLD_HPP
+#ifndef NEURALYZER_ANALOG_EVENT_THRESHOLD_HPP
+#define NEURALYZER_ANALOG_EVENT_THRESHOLD_HPP
 
 #include "transforms/data_transforms.hpp"
 
@@ -42,7 +42,7 @@ std::shared_ptr<DigitalEventSeries> event_threshold(
 std::shared_ptr<DigitalEventSeries> event_threshold(
         AnalogTimeSeries const * analog_time_series,
         ThresholdParams const & thresholdParams,
-        ProgressCallback progressCallback);
+        const ProgressCallback& progressCallback);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -84,4 +84,4 @@ public:// Added public keyword here for clarity, assuming it was intended.
                             ProgressCallback progressCallback) override;
 };
 
-#endif//WHISKERTOOLBOX_ANALOG_EVENT_THRESHOLD_HPP
+#endif//NEURALYZER_ANALOG_EVENT_THRESHOLD_HPP

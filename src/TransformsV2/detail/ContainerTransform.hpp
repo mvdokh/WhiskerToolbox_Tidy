@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_CONTAINER_TRANSFORM_HPP
-#define WHISKERTOOLBOX_V2_CONTAINER_TRANSFORM_HPP
+#ifndef NEURALYZER_V2_CONTAINER_TRANSFORM_HPP
+#define NEURALYZER_V2_CONTAINER_TRANSFORM_HPP
 
 #include "core/ElementRegistry.hpp"
 #include "detail/ExtractElement.hpp"        // extractElement
@@ -17,7 +17,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 
 // ============================================================================
@@ -44,8 +44,8 @@ namespace WhiskerToolbox::Transforms::V2 {
  * @return Shared pointer to output container
  */
 template<typename InContainer, typename OutContainer, typename InElement, typename OutElement, typename Params>
-    requires TypeTraits::RaggedContainer<InContainer> &&
-             std::is_same_v<TypeTraits::ElementFor_t<InContainer>, InElement>
+    requires Neuralyzer::TypeTraits::RaggedContainer<InContainer> &&
+             std::is_same_v<Neuralyzer::TypeTraits::ElementFor_t<InContainer>, InElement>
 std::shared_ptr<OutContainer> applyElementTransform(
         InContainer const & input,
         std::string const & transform_name,
@@ -79,8 +79,8 @@ std::shared_ptr<OutContainer> applyElementTransform(
  * @brief Apply element transform to a ragged container (no params version)
  */
 template<typename InContainer, typename OutContainer, typename InElement, typename OutElement>
-    requires TypeTraits::RaggedContainer<InContainer> &&
-             std::is_same_v<TypeTraits::ElementFor_t<InContainer>, InElement>
+    requires Neuralyzer::TypeTraits::RaggedContainer<InContainer> &&
+             std::is_same_v<Neuralyzer::TypeTraits::ElementFor_t<InContainer>, InElement>
 std::shared_ptr<OutContainer> applyElementTransform(
         InContainer const & input,
         std::string const & transform_name) {
@@ -108,8 +108,8 @@ std::shared_ptr<OutContainer> applyElementTransform(
  * @return Shared pointer to output container
  */
 template<typename InContainer, typename OutContainer, typename InElement, typename OutElement, typename Params>
-    requires TypeTraits::RaggedContainer<InContainer> &&
-             std::is_same_v<TypeTraits::ElementFor_t<InContainer>, InElement>
+    requires Neuralyzer::TypeTraits::RaggedContainer<InContainer> &&
+             std::is_same_v<Neuralyzer::TypeTraits::ElementFor_t<InContainer>, InElement>
 std::shared_ptr<OutContainer> applyTimeGroupedTransform(
         InContainer const & input,
         std::string const & transform_name,
@@ -158,8 +158,8 @@ std::shared_ptr<OutContainer> applyTimeGroupedTransform(
  * @brief Apply time-grouped transform (no params version)
  */
 template<typename InContainer, typename OutContainer, typename InElement, typename OutElement>
-    requires TypeTraits::RaggedContainer<InContainer> &&
-             std::is_same_v<TypeTraits::ElementFor_t<InContainer>, InElement>
+    requires Neuralyzer::TypeTraits::RaggedContainer<InContainer> &&
+             std::is_same_v<Neuralyzer::TypeTraits::ElementFor_t<InContainer>, InElement>
 std::shared_ptr<OutContainer> applyTimeGroupedTransform(
         InContainer const & input,
         std::string const & transform_name) {
@@ -208,7 +208,7 @@ std::shared_ptr<OutContainer> applyTimeGroupedTransform(
  */
 template<typename InContainer, typename InElement, typename OutElement, typename Params>
     requires requires(InContainer const & c) { c.elements(); } &&
-             std::is_same_v<TypeTraits::ElementFor_t<InContainer>, InElement>
+             std::is_same_v<Neuralyzer::TypeTraits::ElementFor_t<InContainer>, InElement>
 auto applyElementTransformView(
         InContainer const & input,
         std::string const & transform_name,
@@ -237,7 +237,7 @@ auto applyElementTransformView(
  */
 template<typename InContainer, typename InElement, typename OutElement>
     requires requires(InContainer const & c) { c.elements(); } &&
-             std::is_same_v<TypeTraits::ElementFor_t<InContainer>, InElement>
+             std::is_same_v<Neuralyzer::TypeTraits::ElementFor_t<InContainer>, InElement>
 auto applyElementTransformView(
         InContainer const & input,
         std::string const & transform_name) {
@@ -275,7 +275,7 @@ auto applyTransform(
         throw std::runtime_error("Transform not found: " + transform_name);
     }
 
-    using InElement = TypeTraits::ElementFor_t<InContainer>;
+    using InElement = Neuralyzer::TypeTraits::ElementFor_t<InContainer>;
 
     // Verify input type matches
     if (meta->input_type != typeid(InElement)) {
@@ -298,6 +298,6 @@ auto applyTransform(
     throw std::runtime_error("Unsupported output type for transform: " + transform_name);
 }
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-#endif// WHISKERTOOLBOX_V2_CONTAINER_TRANSFORM_HPP
+#endif// NEURALYZER_V2_CONTAINER_TRANSFORM_HPP

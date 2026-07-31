@@ -9,15 +9,15 @@
  * suitable for UI validation and display.
  */
 
-#ifndef WHISKERTOOLBOX_TYPE_CHAIN_RESOLVER_HPP
-#define WHISKERTOOLBOX_TYPE_CHAIN_RESOLVER_HPP
+#ifndef NEURALYZER_V2_TYPE_CHAIN_RESOLVER_HPP
+#define NEURALYZER_V2_TYPE_CHAIN_RESOLVER_HPP
 
 #include <span>         // std::span
 #include <string>       // std::string
 #include <typeindex>    // std::type_index
 #include <vector>       // std::vector
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 /**
  * @brief Per-step type resolution result
@@ -65,6 +65,6 @@ TypeChainResult resolveTypeChain(
         std::type_index input_container_type,
         std::span<std::string const> step_names);
 
-} // namespace WhiskerToolbox::Transforms::V2
+} // namespace Neuralyzer::Transforms::V2
 
-#endif // WHISKERTOOLBOX_TYPE_CHAIN_RESOLVER_HPP
+#endif // NEURALYZER_V2_TYPE_CHAIN_RESOLVER_HPP

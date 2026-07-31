@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_EVENT_RANGE_REDUCTIONS_HPP
-#define WHISKERTOOLBOX_V2_EVENT_RANGE_REDUCTIONS_HPP
+#ifndef NEURALYZER_V2_EVENT_RANGE_REDUCTIONS_HPP
+#define NEURALYZER_V2_EVENT_RANGE_REDUCTIONS_HPP
 
 /**
  * @file EventRangeReductions.hpp
@@ -40,7 +40,7 @@
 #include <limits>
 #include <span>
 
-namespace WhiskerToolbox::Transforms::V2::RangeReductions {
+namespace Neuralyzer::Transforms::V2::RangeReductions {
 
 // ============================================================================
 // Parameter Types
@@ -232,6 +232,6 @@ template<typename Element>
     return events.empty() ? 0 : 1;
 }
 
-}// namespace WhiskerToolbox::Transforms::V2::RangeReductions
+}// namespace Neuralyzer::Transforms::V2::RangeReductions
 
-#endif// WHISKERTOOLBOX_V2_EVENT_RANGE_REDUCTIONS_HPP
+#endif// NEURALYZER_V2_EVENT_RANGE_REDUCTIONS_HPP

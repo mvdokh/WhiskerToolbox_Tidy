@@ -1,15 +1,15 @@
-#ifndef WHISKERTOOLBOX_V2_LINE_POINT_EXTRACTION_TRANSFORM_HPP
-#define WHISKERTOOLBOX_V2_LINE_POINT_EXTRACTION_TRANSFORM_HPP
+#ifndef NEURALYZER_V2_LINE_POINT_EXTRACTION_TRANSFORM_HPP
+#define NEURALYZER_V2_LINE_POINT_EXTRACTION_TRANSFORM_HPP
 
 class Line2D;
 template<typename T>
 struct Point2D;
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 /**
  * @brief Point extraction method
@@ -95,6 +95,6 @@ Point2D<float> extractLinePointWithContext(
         LinePointExtractionParams const & params,
         ComputeContext const & ctx);
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
-#endif// WHISKERTOOLBOX_V2_LINE_POINT_EXTRACTION_TRANSFORM_HPP
+#endif// NEURALYZER_V2_LINE_POINT_EXTRACTION_TRANSFORM_HPP

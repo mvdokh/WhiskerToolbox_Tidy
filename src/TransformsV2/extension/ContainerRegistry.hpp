@@ -1,11 +1,11 @@
-#ifndef WHISKERTOOLBOX_V2_CONTAINER_REGISTRY_HPP
-#define WHISKERTOOLBOX_V2_CONTAINER_REGISTRY_HPP
+#ifndef NEURALYZER_V2_CONTAINER_REGISTRY_HPP
+#define NEURALYZER_V2_CONTAINER_REGISTRY_HPP
 
 #include <string>
 #include <typeindex>
 #include <vector>
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 /**
  * @brief Metadata specific to container-level transforms
@@ -43,7 +43,7 @@ struct ContainerTransformMetadata {
 };
 
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
 
-#endif// WHISKERTOOLBOX_V2_CONTAINER_REGISTRY_HPP
+#endif// NEURALYZER_V2_CONTAINER_REGISTRY_HPP

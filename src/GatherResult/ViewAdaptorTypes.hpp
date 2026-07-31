@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_VIEW_ADAPTOR_TYPES_HPP
-#define WHISKERTOOLBOX_V2_VIEW_ADAPTOR_TYPES_HPP
+#ifndef NEURALYZER_V2_VIEW_ADAPTOR_TYPES_HPP
+#define NEURALYZER_V2_VIEW_ADAPTOR_TYPES_HPP
 
 /**
  * @file ViewAdaptorTypes.hpp
@@ -17,11 +17,11 @@
  * terminal range reduction via `RangeReductionRegistry::executeErased()`.
  *
  * **Per-element projection (raster plots):**
- * `bindValueProjectionV2()` + `GatherResult::project()` with
- * `PipelineValueStore` from `buildTrialStore()`.
+ * `bindValueProjectionV2()` + `projectGatherRows()` with row stores from
+ * `buildGatherRowStore()`.
  *
  * **Trial sorting / batch reduce:**
- * Build a `ReducerFactoryV2` lambda and pass it to `GatherResult::reduce()`.
+ * Build a `ReducerFactoryV2` lambda and pass it to `reduceGatherRows()`.
  *
  * ```cpp
  * ReducerFactoryV2<EventWithId, float> factory =
@@ -33,7 +33,7 @@
  *                 "FirstPositiveLatency", typeid(EventWithId), input_any, {}));
  *         };
  *     };
- * auto latencies = gather.reduce(factory);
+ * auto latencies = reduceGatherRows(gather, factory);
  * ```
  *
  * @see TransformPipeline::bindValueProjectionV2()
@@ -55,11 +55,11 @@
 #include <typeindex>
 #include <vector>
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 class PipelineValueStore;
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-namespace WhiskerToolbox::Gather {
+namespace Neuralyzer::Gather {
 
 // ============================================================================
 // View Adaptor Types
@@ -113,12 +113,12 @@ using ErasedReducerFn = std::function<std::any(std::any const &)>;
  * @see PipelineValueStore for store documentation
  */
 template<typename InElement, typename Scalar>
-using ReducerFactoryV2 = std::function<ReducerFn<InElement, Scalar>(WhiskerToolbox::Transforms::V2::PipelineValueStore const &)>;
+using ReducerFactoryV2 = std::function<ReducerFn<InElement, Scalar>(Neuralyzer::Transforms::V2::PipelineValueStore const &)>;
 
 /**
  * @brief Type-erased reducer factory (V2 pattern)
  */
-using ErasedReducerFactoryV2 = std::function<ErasedReducerFn(WhiskerToolbox::Transforms::V2::PipelineValueStore const &)>;
+using ErasedReducerFactoryV2 = std::function<ErasedReducerFn(Neuralyzer::Transforms::V2::PipelineValueStore const &)>;
 
 // ============================================================================
 // Concepts for View Adaptors
@@ -195,6 +195,6 @@ struct BoundReducer {
     std::type_index intermediate_type = typeid(void);
 };
 
-}// namespace WhiskerToolbox::Gather
+}// namespace Neuralyzer::Gather
 
-#endif// WHISKERTOOLBOX_V2_VIEW_ADAPTOR_TYPES_HPP
+#endif// NEURALYZER_V2_VIEW_ADAPTOR_TYPES_HPP

@@ -1,14 +1,14 @@
-#ifndef WHISKERTOOLBOX_V2_ELEMENT_REGISTRY_HPP
-#define WHISKERTOOLBOX_V2_ELEMENT_REGISTRY_HPP
+#ifndef NEURALYZER_V2_ELEMENT_REGISTRY_HPP
+#define NEURALYZER_V2_ELEMENT_REGISTRY_HPP
 
 #include "ComputeContext.hpp"
-#include "ParameterSchema/ParameterSchema.hpp"// ParameterSchema, extractParameterSchema
-#include "detail/ContainerExecutor.hpp"       // for IContainerExecutor
 #include "DataManager/utils/ContainerElementMapping.hpp"
-#include "detail/ParamExecutor.hpp"       // IParamExecutor, TypedParamExecutor, ITimeGroupedParamExecutor, TypedTimeGroupedParamExecutor
-#include "extension/ContainerRegistry.hpp"// ContainerTransformMetadata
-#include "extension/ElementTransform.hpp" // TypedTimeGroupedTransform, TypedTransform, is_tuple_v
-#include "TransformTypes/TransformTypes.hpp"   // ElementVariant, TransformLineageType, BatchVariant
+#include "ParameterSchema/ParameterSchema.hpp"// ParameterSchema, extractParameterSchema
+#include "TransformTypes/TransformTypes.hpp"  // ElementVariant, TransformLineageType, BatchVariant
+#include "detail/ContainerExecutor.hpp"       // for IContainerExecutor
+#include "detail/ParamExecutor.hpp"           // IParamExecutor, TypedParamExecutor, ITimeGroupedParamExecutor, TypedTimeGroupedParamExecutor
+#include "extension/ContainerRegistry.hpp"    // ContainerTransformMetadata
+#include "extension/ElementTransform.hpp"     // TypedTimeGroupedTransform, TypedTransform, is_tuple_v
 
 #include "DataManagerTypes.hpp"
 
@@ -31,7 +31,7 @@
 #include <vector>
 
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 
 struct TimeSeriesOps;
 
@@ -452,9 +452,8 @@ public:
 
         auto result = transform->execute(input, params, ctx);
 
-        // Pipeline/registry handles TimeFrame propagation
-        // Copy TimeFrame from input to output if output supports it
-        if (result && input.getTimeFrame()) {
+        // Pipeline/registry handles TimeFrame propagation when the transform did not set one
+        if (result && !result->getTimeFrame() && input.getTimeFrame()) {
             result->setTimeFrame(input.getTimeFrame());
         }
 
@@ -605,8 +604,8 @@ public:
         auto const inputs = std::tie(input1, input2);
         auto result = transform->execute(inputs, params, ctx);
 
-        // Propagate TimeFrame from first input if available
-        if (result && input1.getTimeFrame()) {
+        // Propagate TimeFrame from first input when the transform did not set one
+        if (result && !result->getTimeFrame() && input1.getTimeFrame()) {
             result->setTimeFrame(input1.getTimeFrame());
         }
 
@@ -1654,6 +1653,6 @@ public:
 };
 
 
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-#endif// WHISKERTOOLBOX_V2_ELEMENT_REGISTRY_HPP
+#endif// NEURALYZER_V2_ELEMENT_REGISTRY_HPP

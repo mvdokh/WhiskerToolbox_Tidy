@@ -6,20 +6,20 @@
  * Preserves the input's RowDescriptor (TimeFrameIndex rows survive reduction).
  */
 
-#ifndef WHISKERTOOLBOX_V2_TENSOR_ICA_HPP
-#define WHISKERTOOLBOX_V2_TENSOR_ICA_HPP
+#ifndef NEURALYZER_V2_TENSOR_ICA_HPP
+#define NEURALYZER_V2_TENSOR_ICA_HPP
 
-#include "TransformsV2/utils/NaNFilter.hpp"
+#include "TransformsV2/utils/NaNPolicy.hpp"
 
 #include <cstddef>
 #include <memory>
 
 class TensorData;
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 struct ComputeContext;
 }
 
-namespace WhiskerToolbox::Transforms::V2::Examples {
+namespace Neuralyzer::Transforms::V2::Examples {
 
 /**
  * @brief Parameters for ICA container transform (reflect-cpp compatible)
@@ -38,8 +38,8 @@ struct TensorICAParams {
     std::size_t sweeps = 0;
 
     /// How to handle rows containing NaN/Inf values
-    WhiskerToolbox::Transforms::V2::NaNPolicy nan_policy =
-            WhiskerToolbox::Transforms::V2::NaNPolicy::Propagate;
+    Neuralyzer::Transforms::V2::NaNPolicy nan_policy =
+            Neuralyzer::Transforms::V2::NaNPolicy::Propagate;
 };
 
 /**
@@ -67,6 +67,6 @@ struct TensorICAParams {
         TensorICAParams const & params,
         ComputeContext const & ctx) -> std::shared_ptr<TensorData>;
 
-}// namespace WhiskerToolbox::Transforms::V2::Examples
+}// namespace Neuralyzer::Transforms::V2::Examples
 
-#endif// WHISKERTOOLBOX_V2_TENSOR_ICA_HPP
+#endif// NEURALYZER_V2_TENSOR_ICA_HPP

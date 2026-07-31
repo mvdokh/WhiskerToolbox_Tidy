@@ -1,5 +1,5 @@
-#ifndef WHISKERTOOLBOX_V2_TENSOR_COLUMN_BUILDERS_HPP
-#define WHISKERTOOLBOX_V2_TENSOR_COLUMN_BUILDERS_HPP
+#ifndef NEURALYZER_V2_TENSOR_COLUMN_BUILDERS_HPP
+#define NEURALYZER_V2_TENSOR_COLUMN_BUILDERS_HPP
 
 /**
  * @file TensorColumnBuilders.hpp
@@ -18,9 +18,9 @@
  * @see GatherResult for the gather+reduce pattern
  */
 
-#include "Tensors/InvalidationWiringFn.hpp"                     // InvalidationWiringFn
+#include "Tensors/InvalidationWiringFn.hpp"           // InvalidationWiringFn
 #include "Tensors/storage/LazyColumnTensorStorage.hpp"// ColumnProviderFn, ColumnSource
-#include "TimeFrame/TimeFrameIndex.hpp"                           // TimeFrameIndex
+#include "TimeFrame/TimeFrameIndex.hpp"               // TimeFrameIndex
 
 #include <functional>
 #include <memory>
@@ -31,11 +31,11 @@
 class DataManager;
 class DigitalIntervalSeries;
 
-namespace WhiskerToolbox::Transforms::V2 {
+namespace Neuralyzer::Transforms::V2 {
 class TransformPipeline;
-}// namespace WhiskerToolbox::Transforms::V2
+}// namespace Neuralyzer::Transforms::V2
 
-namespace WhiskerToolbox::TensorBuilders {
+namespace Neuralyzer::TensorBuilders {
 
 // ============================================================================
 // Interval Property Enum
@@ -78,6 +78,11 @@ struct ColumnRecipe {
     /// JSON string describing the TransformPipeline (empty for passthrough)
     std::string pipeline_json;
 
+    /// JSON string describing a row TransformPipeline for per-column geometry.
+    /// Empty means current row-source geometry is used; interval-row pipelines
+    /// may produce row-aligned DigitalIntervalSeries gather windows.
+    std::string row_pipeline_json;
+
     /// If this is an interval-property column, which property to extract.
     /// nullopt means this is a data-source column, not an interval-property column.
     std::optional<IntervalProperty> interval_property;
@@ -99,7 +104,7 @@ struct ColumnRecipe {
  * @return ColumnProviderFn producing one float per interval
  */
 ColumnProviderFn buildIntervalPropertyProvider(
-        std::shared_ptr<DigitalIntervalSeries> intervals,
+        std::shared_ptr<DigitalIntervalSeries const> intervals,
         IntervalProperty property);
 
 /**
@@ -164,7 +169,7 @@ ColumnProviderFn buildPipelineColumnProvider(
         DataManager & dm,
         std::string const & source_key,
         std::vector<TimeFrameIndex> const & row_times,
-        WhiskerToolbox::Transforms::V2::TransformPipeline pipeline);
+        Neuralyzer::Transforms::V2::TransformPipeline pipeline);
 
 /**
  * @brief Build a generic ColumnProviderFn for interval-row tensors from any
@@ -202,8 +207,8 @@ ColumnProviderFn buildPipelineColumnProvider(
 ColumnProviderFn buildIntervalPipelineProvider(
         DataManager & dm,
         std::string const & source_key,
-        std::shared_ptr<DigitalIntervalSeries> intervals,
-        WhiskerToolbox::Transforms::V2::TransformPipeline pipeline);
+        std::shared_ptr<DigitalIntervalSeries const> intervals,
+        Neuralyzer::Transforms::V2::TransformPipeline pipeline);
 
 /**
  * @brief Build a ColumnProviderFn from a ColumnRecipe.
@@ -222,7 +227,7 @@ ColumnProviderFn buildProviderFromRecipe(
         DataManager & dm,
         ColumnRecipe const & recipe,
         std::vector<TimeFrameIndex> const & row_times,
-        std::shared_ptr<DigitalIntervalSeries> intervals);
+        std::shared_ptr<DigitalIntervalSeries const> const & intervals);
 
 // ============================================================================
 // Invalidation Wiring
@@ -247,6 +252,6 @@ InvalidationWiringFn buildInvalidationWiringFn(
         DataManager & dm,
         std::vector<std::string> const & source_keys);
 
-}// namespace WhiskerToolbox::TensorBuilders
+}// namespace Neuralyzer::TensorBuilders
 
-#endif// WHISKERTOOLBOX_V2_TENSOR_COLUMN_BUILDERS_HPP
+#endif// NEURALYZER_V2_TENSOR_COLUMN_BUILDERS_HPP

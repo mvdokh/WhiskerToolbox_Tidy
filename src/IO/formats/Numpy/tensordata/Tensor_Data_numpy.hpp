@@ -12,8 +12,8 @@
  * On load, if the sidecar is absent the tensor defaults to ordinal rows.
  */
 
-#ifndef WHISKERTOOLBOX_TENSOR_DATA_NUMPY_HPP
-#define WHISKERTOOLBOX_TENSOR_DATA_NUMPY_HPP
+#ifndef NEURALYZER_TENSOR_DATA_NUMPY_HPP
+#define NEURALYZER_TENSOR_DATA_NUMPY_HPP
 
 #include "datamanagerio_numpy_export.h"
 
@@ -45,7 +45,7 @@ struct NpyTensorLoaderOptions {
     std::string row_type = "ordinal";
 };
 
-static_assert(WhiskerToolbox::ValidLoaderOptions<NpyTensorLoaderOptions>,
+static_assert(Neuralyzer::ValidLoaderOptions<NpyTensorLoaderOptions>,
               "NpyTensorLoaderOptions must satisfy ValidLoaderOptions");
 
 /**
@@ -105,4 +105,4 @@ struct ParameterUIHints<NpyTensorSaverOptions> {
     }
 };
 
-#endif// WHISKERTOOLBOX_TENSOR_DATA_NUMPY_HPP
+#endif// NEURALYZER_TENSOR_DATA_NUMPY_HPP

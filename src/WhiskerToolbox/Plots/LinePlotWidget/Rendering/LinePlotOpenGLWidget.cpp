@@ -377,8 +377,8 @@ void LinePlotOpenGLWidget::mouseDoubleClickEvent(QMouseEvent * event) {
         // Convert to absolute time using the first trial's alignment time.
         // (All trials are overlaid, so we can't determine which trial was clicked.)
         if (!_cached_alignment_times.empty()) {
-            int64_t const alignment_time = _cached_alignment_times.front();
-            int64_t const absolute_time = alignment_time + static_cast<int64_t>(world.x());
+            ClockTicks const alignment_time = _cached_alignment_times.front();
+            int64_t const absolute_time = alignment_time.getValue() + static_cast<int64_t>(world.x());
             emit plotDoubleClicked(absolute_time, QString::fromStdString(_cached_series_key));
         }
     }
@@ -520,7 +520,7 @@ void LinePlotOpenGLWidget::rebuildScene() {
             continue;
         }
 
-        int64_t const alignment_time = gathered.alignmentTimeAt(trial);
+        ClockTicks const alignment_time = gathered.alignmentTimeAt(trial);
         auto trial_tf = trial_view->getTimeFrame();
 
         auto all_samples = trial_view->view();
@@ -539,10 +539,14 @@ void LinePlotOpenGLWidget::rebuildScene() {
             continue;
         }
 
-        int64_t const first_abs = trial_tf ? trial_tf->getTimeAtIndex(first_time) : first_time.getValue();
-        int64_t const last_abs = trial_tf ? trial_tf->getTimeAtIndex(last_time) : last_time.getValue();
-        auto const rel_start = static_cast<double>(first_abs - alignment_time);
-        auto const rel_end = static_cast<double>(last_abs - alignment_time);
+        if (!trial_tf) {
+            std::throw_with_nested(std::runtime_error("LinePlotOpenGLWidget: no TimeFrame"));
+        }
+
+        ClockTicks const first_abs = trial_tf->getTimeAtIndex(first_time);
+        ClockTicks const last_abs = trial_tf->getTimeAtIndex(last_time);
+        auto const rel_start = static_cast<double>((first_abs - alignment_time.getValue()).getValue());
+        auto const rel_end = static_cast<double>((last_abs - alignment_time.getValue()).getValue());
         x_min = std::min(x_min, rel_start);
         x_max = std::max(x_max, rel_end);
     }
@@ -567,7 +571,7 @@ void LinePlotOpenGLWidget::rebuildScene() {
     // =========================================================================
     // Build LineBatchData from gathered trial data and upload to GPU
     // =========================================================================
-    std::vector<std::int64_t> alignment_times;
+    std::vector<ClockTicks> alignment_times;
     alignment_times.reserve(num_trials);
     for (size_t trial = 0; trial < num_trials; ++trial) {
         alignment_times.push_back(gathered.alignmentTimeAt(trial));
@@ -587,7 +591,7 @@ void LinePlotOpenGLWidget::rebuildScene() {
         }
     }
 
-    auto batch = CorePlotting::buildLineBatchFromGatherResult(gathered, alignment_times);
+    auto batch = CorePlotting::buildLineBatchFromGatherResult(gathered);
 
     // Restore selection mask from previous selection (if trials still match)
     if (!_selected_trial_indices.empty()) {
@@ -614,12 +618,12 @@ void LinePlotOpenGLWidget::rebuildScene() {
 
 void LinePlotOpenGLWidget::updateMatrices() {
     _projection_matrix =
-            WhiskerToolbox::Plots::computeOrthoProjection(_cached_view_state);
+            Neuralyzer::Plots::computeOrthoProjection(_cached_view_state);
     _view_matrix = glm::mat4(1.0f);
 }
 
 QPointF LinePlotOpenGLWidget::screenToWorld(QPoint const & screen_pos) const {
-    return WhiskerToolbox::Plots::screenToWorld(
+    return Neuralyzer::Plots::screenToWorld(
             _projection_matrix, _widget_width, _widget_height, screen_pos);
 }
 
@@ -627,7 +631,7 @@ void LinePlotOpenGLWidget::handlePanning(int delta_x, int delta_y) {
     if (!_state) {
         return;
     }
-    WhiskerToolbox::Plots::handlePanning(
+    Neuralyzer::Plots::handlePanning(
             *_state, _cached_view_state, delta_x, delta_y, _widget_width,
             _widget_height);
 }
@@ -638,7 +642,7 @@ void LinePlotOpenGLWidget::handleZoom(float delta, bool y_only, bool both_axes) 
     }
 
     // Use shared helper for zoom logic
-    WhiskerToolbox::Plots::handleZoom(
+    Neuralyzer::Plots::handleZoom(
             *_state, _cached_view_state, delta, y_only, both_axes);
 }
 
@@ -666,7 +670,7 @@ GatherResult<AnalogTimeSeries> LinePlotOpenGLWidget::gatherTrialData() const {
     }
 
     // Use the PlotAlignmentGather API for AnalogTimeSeries
-    return WhiskerToolbox::Plots::createAlignedGatherResult<AnalogTimeSeries>(
+    return Neuralyzer::Plots::createAlignedGatherResult<AnalogTimeSeries>(
             _data_manager,
             series_options->series_key,
             alignment_state->data());
@@ -692,8 +696,8 @@ void LinePlotOpenGLWidget::clearSelection() {
 }
 
 glm::vec2 LinePlotOpenGLWidget::screenToNDC(QPoint const & screen_pos) const {
-    return WhiskerToolbox::Plots::screenToNDC(screen_pos, _widget_width,
-                                              _widget_height);
+    return Neuralyzer::Plots::screenToNDC(screen_pos, _widget_width,
+                                          _widget_height);
 }
 
 void LinePlotOpenGLWidget::startSelection(QPoint const & screen_pos, bool remove_mode) {
@@ -722,7 +726,7 @@ void LinePlotOpenGLWidget::completeSelection() {
         return;
     }
     std::vector<CorePlotting::LineBatchIndex> const hit_indices =
-            WhiskerToolbox::Plots::runLineSelectionIntersection(
+            Neuralyzer::Plots::runLineSelectionIntersection(
                     *_intersector, _line_store.cpuData(), _selection_start_ndc,
                     _selection_end_ndc, _projection_matrix, _view_matrix);
     applyIntersectionResults(hit_indices, _selection_remove_mode);
@@ -783,7 +787,7 @@ void LinePlotOpenGLWidget::cancelSelection() {
 }
 
 CorePlotting::Interaction::GlyphPreview LinePlotOpenGLWidget::buildSelectionPreview() const {
-    return WhiskerToolbox::Plots::buildLineSelectionPreview(
+    return Neuralyzer::Plots::buildLineSelectionPreview(
             _selection_start_screen, _selection_end_screen, _selection_remove_mode);
 }
 
@@ -853,7 +857,7 @@ std::optional<EntityId> LinePlotOpenGLWidget::getEntityIdForTrial(std::uint32_t 
     if (trial_index >= _cached_alignment_times.size()) {
         return std::nullopt;
     }
-    return EntityId{static_cast<uint64_t>(_cached_alignment_times[trial_index])};
+    return EntityId{static_cast<uint64_t>(_cached_alignment_times[trial_index].getValue())};
 }
 
 void LinePlotOpenGLWidget::applyGroupColorsToLines() {
