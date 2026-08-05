@@ -59,11 +59,12 @@ enum class IntervalProperty : std::uint8_t;
  * @brief Row source type for the tensor designer
  */
 enum class DesignerRowType {
-    None,            ///< No row source selected
-    Interval,        ///< Rows from DigitalIntervalSeries
-    Timestamp,       ///< Rows from DigitalEventSeries
-    Ordinal,         ///< Manual ordinal rows
-    DerivedFromSource///< Derive row timestamps from any data source's timestamps
+    None,             ///< No row source selected
+    Interval,         ///< Rows from DigitalIntervalSeries
+    Timestamp,        ///< Rows from DigitalEventSeries
+    Ordinal,          ///< Manual ordinal rows
+    DerivedFromSource,///< Derive row timestamps from any data source's timestamps
+    TimeFrame         ///< Rows from a registered TimeFrame
 };
 
 /**
@@ -163,6 +164,8 @@ private slots:
     void _onRowSourceTypeChanged(int index);
     void _onRowSourceKeyChanged(int index);
     void _onAddColumnClicked();
+    void _onApplyDesignPresetClicked();
+    void _onAddPresetClicked();
     void _onRemoveColumnClicked();
     void _onEditColumnClicked();
     void _onColumnDoubleClicked(QListWidgetItem * item);
@@ -180,6 +183,9 @@ private:
     void _refreshColumnList();
     void _buildTensor();
     void _updateStatus(QString const & message);
+
+    /// Update the row-type description label and combo tooltip for @p combo_index
+    void _updateRowTypeDescription(int combo_index);
 
     /// Auto-pin the inspector state when opening a dialog
     void _pinInspectorForDialog();
@@ -219,6 +225,7 @@ private:
     QLabel * _row_section_label{nullptr};
     QComboBox * _row_type_combo{nullptr};
     QComboBox * _row_source_combo{nullptr};
+    QLabel * _row_type_description_label{nullptr};
     QLabel * _row_info_label{nullptr};
 
     // Column management section
@@ -226,6 +233,8 @@ private:
     QListWidget * _column_list{nullptr};
     QHBoxLayout * _col_button_layout{nullptr};
     QPushButton * _add_col_btn{nullptr};
+    QPushButton * _apply_design_preset_btn{nullptr};
+    QPushButton * _add_preset_btn{nullptr};
     QPushButton * _edit_col_btn{nullptr};
     QPushButton * _remove_col_btn{nullptr};
 

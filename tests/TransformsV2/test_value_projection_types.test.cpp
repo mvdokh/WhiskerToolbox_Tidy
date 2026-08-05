@@ -12,10 +12,10 @@
  */
 
 #include "DigitalTimeSeries/EventWithId.hpp"
+#include "TransformsV2/PipelineValueStore/PipelineValueStore.hpp"
 #include "TransformsV2/algorithms/Temporal/NormalizeTime.hpp"
 #include "TransformsV2/algorithms/Temporal/RegisteredTemporalTransforms.hpp"
 #include "TransformsV2/core/TransformPipeline.hpp"
-#include "TransformsV2/PipelineValueStore/PipelineValueStore.hpp"
 #include "TransformsV2/extension/ValueProjectionTypes.hpp"
 
 #include <catch2/catch_test_macros.hpp>
@@ -444,13 +444,13 @@ TEST_CASE("bindValueProjectionV2 - ClockTicksWithId gather path", "[ValueProject
     step.param_bindings = {{"alignment_time", "alignment_time"}};
     pipeline.addStep(step);
 
-    auto factory = bindValueProjectionV2<ClockTicksWithId, float>(pipeline);
+    auto factory = bindValueProjectionV2<ClockTicksWithId, ClockTicks>(pipeline);
 
     PipelineValueStore store;
-    store.set("alignment_time", int64_t{200});
+    store.set("alignment_time", ClockTicks{200});
 
     auto projection = factory(store);
 
     ClockTicksWithId const event{ClockTicks{250}, EntityId{1}};
-    REQUIRE_THAT(projection(event), WithinAbs(50.0f, 0.001f));
+    CHECK(projection(event) == ClockTicks{50});
 }

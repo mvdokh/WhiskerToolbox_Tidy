@@ -9,6 +9,8 @@
 #include "DataManager/utils/TimeIndexExtractor.hpp"
 #include "DigitalTimeSeries/Digital_Event_Series.hpp"
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
+#include "TensorDesign/ColumnRecipePresetRegistry.hpp"
+#include "TensorDesign/DesignPresetRegistry.hpp"
 #include "Tensors/RowDescriptor.hpp"
 #include "Tensors/TensorData.hpp"
 #include "Tensors/storage/LazyColumnTensorStorage.hpp"
@@ -27,7 +29,6 @@ namespace Neuralyzer::TensorDesign {
 
 namespace {
 
-using Neuralyzer::TensorBuilders::buildAnalogSampleAtOffsetProvider;
 using Neuralyzer::TensorBuilders::buildIntervalPropertyProvider;
 using Neuralyzer::TensorBuilders::buildInvalidationWiringFn;
 using Neuralyzer::TensorBuilders::buildProviderFromRecipe;
@@ -47,6 +48,9 @@ using Neuralyzer::TensorBuilders::IntervalProperty;
     if (row_type_str == "derived_from_source") {
         return RowType::DerivedFromSource;
     }
+    if (row_type_str == "timeframe") {
+        return RowType::TimeFrame;
+    }
     if (row_type_str == "none") {
         return RowType::None;
     }
@@ -63,6 +67,8 @@ using Neuralyzer::TensorBuilders::IntervalProperty;
             return "ordinal";
         case RowType::DerivedFromSource:
             return "derived_from_source";
+        case RowType::TimeFrame:
+            return "timeframe";
         case RowType::None:
             return "none";
     }
@@ -102,6 +108,20 @@ using Neuralyzer::TensorBuilders::IntervalProperty;
     recipe.pipeline_json = col.value("pipeline_json", "");
     recipe.row_pipeline_json = col.value("row_pipeline_json", "");
 
+    if (col.contains("pipeline_value_bindings")) {
+        if (!col["pipeline_value_bindings"].is_array()) {
+            spdlog::error("TensorDesign: pipeline_value_bindings must be an array");
+            return std::nullopt;
+        }
+        for (auto const & binding_json: col["pipeline_value_bindings"]) {
+            Neuralyzer::TensorBuilders::PipelineValueBindingRecipe binding;
+            binding.source_key = binding_json.value("source_key", "");
+            binding.source_pipeline_json = binding_json.value("source_pipeline_json", "");
+            binding.store_key = binding_json.value("store_key", "");
+            recipe.pipeline_value_bindings.push_back(std::move(binding));
+        }
+    }
+
     if (col.contains("interval_property")) {
         auto const prop = col["interval_property"].get<std::string>();
         auto const parsed = parseIntervalProperty(prop);
@@ -114,6 +134,125 @@ using Neuralyzer::TensorBuilders::IntervalProperty;
     }
 
     return recipe;
+}
+
+[[nodiscard]] nlohmann::json columnRecipeToJson(ColumnRecipe const & recipe) {
+    nlohmann::json col;
+    col["name"] = recipe.column_name;
+    col["source_key"] = recipe.source_key;
+    col["pipeline_json"] = recipe.pipeline_json;
+    if (!recipe.row_pipeline_json.empty()) {
+        col["row_pipeline_json"] = recipe.row_pipeline_json;
+    }
+    if (!recipe.pipeline_value_bindings.empty()) {
+        nlohmann::json bindings = nlohmann::json::array();
+        for (auto const & binding: recipe.pipeline_value_bindings) {
+            nlohmann::json binding_json;
+            binding_json["source_key"] = binding.source_key;
+            binding_json["store_key"] = binding.store_key;
+            if (!binding.source_pipeline_json.empty()) {
+                binding_json["source_pipeline_json"] = binding.source_pipeline_json;
+            }
+            bindings.push_back(binding_json);
+        }
+        col["pipeline_value_bindings"] = bindings;
+    }
+    if (recipe.interval_property.has_value()) {
+        col["interval_property"] = intervalPropertyToString(recipe.interval_property.value());
+    }
+    return col;
+}
+
+[[nodiscard]] std::optional<nlohmann::json> expandPresetColumns(nlohmann::json design_json) {
+    if (!design_json.contains("columns") || !design_json["columns"].is_array()) {
+        return design_json;
+    }
+
+    auto registry = createBuiltInColumnRecipePresetRegistry();
+    nlohmann::json expanded_columns = nlohmann::json::array();
+    for (auto const & col: design_json["columns"]) {
+        if (!col.contains("preset")) {
+            expanded_columns.push_back(col);
+            continue;
+        }
+
+        auto const preset_id = col.value("preset", std::string{});
+        if (preset_id.empty()) {
+            spdlog::error("TensorDesign: preset column is missing preset id");
+            return std::nullopt;
+        }
+
+        auto const parameters = col.value("parameters", nlohmann::json::object());
+        auto expansion = registry.expandJson(preset_id, parameters);
+        if (!expansion.has_value()) {
+            spdlog::error("TensorDesign: failed to expand column preset '{}'", preset_id);
+            return std::nullopt;
+        }
+
+        auto const row_modifier_id = col.value("row_modifier", std::string{});
+        if (!row_modifier_id.empty()) {
+            auto row_registry = Neuralyzer::TensorDesign::createBuiltInRowModifierRegistry();
+            auto const * mod_desc = row_registry.find(row_modifier_id);
+            if (!mod_desc) {
+                spdlog::error("TensorDesign: unknown row_modifier '{}'", row_modifier_id);
+                return std::nullopt;
+            }
+            auto const args = Neuralyzer::TensorDesign::parseColumnRecipePresetArgs(parameters);
+            if (!args) {
+                spdlog::error("TensorDesign: failed to parse parameters for row_modifier '{}'", row_modifier_id);
+                return std::nullopt;
+            }
+            auto mod_exp = mod_desc->expand(*args);
+            if (!mod_exp) {
+                spdlog::error("TensorDesign: failed to expand row_modifier '{}'", row_modifier_id);
+                return std::nullopt;
+            }
+            for (auto & recipe: expansion->columns) {
+                if (!mod_exp->row_pipeline_json.empty()) {
+                    recipe.row_pipeline_json = mod_exp->row_pipeline_json;
+                }
+                for (auto const & binding: mod_exp->pipeline_value_bindings) {
+                    recipe.pipeline_value_bindings.push_back(binding);
+                }
+            }
+        }
+
+        for (auto const & recipe: expansion->columns) {
+            expanded_columns.push_back(columnRecipeToJson(recipe));
+        }
+    }
+
+    design_json["columns"] = std::move(expanded_columns);
+    return design_json;
+}
+
+[[nodiscard]] std::optional<nlohmann::json> expandDesignPreset(nlohmann::json design_json) {
+    if (!design_json.contains("preset")) {
+        return design_json;
+    }
+
+    auto const preset_id = design_json.value("preset", std::string{});
+    if (preset_id.empty()) {
+        spdlog::error("TensorDesign: design preset is missing preset id");
+        return std::nullopt;
+    }
+
+    auto registry = createBuiltInDesignPresetRegistry();
+    auto const parameters = design_json.value("parameters", nlohmann::json::object());
+    auto expansion = registry.expandJson(preset_id, parameters);
+    if (!expansion.has_value()) {
+        spdlog::error("TensorDesign: failed to expand design preset '{}'", preset_id);
+        return std::nullopt;
+    }
+
+    nlohmann::json expanded_json = nlohmann::json::parse(serializeDesignJson(expansion->spec));
+    if (design_json.contains("tensor_key")) {
+        expanded_json["tensor_key"] = design_json["tensor_key"];
+    }
+    if (design_json.contains("output_time_key")) {
+        expanded_json["output_time_key"] = design_json["output_time_key"];
+    }
+    return expanded_json;
 }
 
 struct RowBuildContext {
@@ -200,6 +339,28 @@ struct RowBuildContext {
         return ctx;
     }
 
+    if (spec.row_type == RowType::TimeFrame) {
+        auto time_frame = dm.getTime(TimeKey(spec.row_time_key));
+        if (!time_frame || time_frame->getTotalFrameCount() <= 0) {
+            spdlog::error(
+                    "TensorDesign: row TimeFrame '{}' is empty or not found",
+                    spec.row_time_key);
+            return std::nullopt;
+        }
+
+        auto const count = static_cast<std::size_t>(time_frame->getTotalFrameCount());
+        ctx.row_times.reserve(count);
+        for (std::size_t i = 0; i < count; ++i) {
+            ctx.row_times.emplace_back(static_cast<int64_t>(i));
+        }
+        ctx.num_rows = ctx.row_times.size();
+
+        auto time_storage = TimeIndexStorageFactory::createFromTimeIndices(ctx.row_times);
+        ctx.row_desc = RowDescriptor::fromTimeIndices(
+                std::move(time_storage), std::move(time_frame));
+        return ctx;
+    }
+
     spdlog::error("TensorDesign: unsupported row_type");
     return std::nullopt;
 }
@@ -213,17 +374,6 @@ struct RowBuildContext {
         return buildIntervalPropertyProvider(intervals, recipe.interval_property.value());
     }
 
-    if (recipe.pipeline_json.find("\"offset\"") != std::string::npos) {
-        try {
-            auto const j = nlohmann::json::parse(recipe.pipeline_json);
-            auto const offset = j.value("offset", int64_t{0});
-            return buildAnalogSampleAtOffsetProvider(
-                    dm, recipe.source_key, row_times, offset);
-        } catch (...) {
-            return buildProviderFromRecipe(dm, recipe, row_times, intervals);
-        }
-    }
-
     return buildProviderFromRecipe(dm, recipe, row_times, intervals);
 }
 
@@ -231,7 +381,16 @@ struct RowBuildContext {
 
 std::optional<TensorDesignSpec> parseDesignJson(std::string const & json) {
     try {
-        auto const j = nlohmann::json::parse(json);
+        auto parsed_json = nlohmann::json::parse(json);
+        auto design_expanded_json = expandDesignPreset(std::move(parsed_json));
+        if (!design_expanded_json.has_value()) {
+            return std::nullopt;
+        }
+        auto const expanded_json = expandPresetColumns(std::move(design_expanded_json.value()));
+        if (!expanded_json.has_value()) {
+            return std::nullopt;
+        }
+        auto const & j = expanded_json.value();
         TensorDesignSpec spec;
 
         if (j.contains("tensor_key")) {
@@ -252,6 +411,7 @@ std::optional<TensorDesignSpec> parseDesignJson(std::string const & json) {
             }
             spec.row_type = parsed_row_type.value();
             spec.row_source_key = rs.value("data_key", "");
+            spec.row_time_key = rs.value("time_key", "");
         }
 
         if (j.contains("columns") && j["columns"].is_array()) {
@@ -282,24 +442,18 @@ std::string serializeDesignJson(TensorDesignSpec const & spec) {
     }
 
     nlohmann::json row_source;
-    row_source["data_key"] = spec.row_source_key;
+    if (!spec.row_source_key.empty()) {
+        row_source["data_key"] = spec.row_source_key;
+    }
+    if (!spec.row_time_key.empty()) {
+        row_source["time_key"] = spec.row_time_key;
+    }
     row_source["row_type"] = rowTypeToString(spec.row_type);
     j["row_source"] = row_source;
 
     nlohmann::json columns = nlohmann::json::array();
     for (auto const & recipe: spec.columns) {
-        nlohmann::json col;
-        col["name"] = recipe.column_name;
-        col["source_key"] = recipe.source_key;
-        col["pipeline_json"] = recipe.pipeline_json;
-        if (!recipe.row_pipeline_json.empty()) {
-            col["row_pipeline_json"] = recipe.row_pipeline_json;
-        }
-        if (recipe.interval_property.has_value()) {
-            col["interval_property"] =
-                    intervalPropertyToString(recipe.interval_property.value());
-        }
-        columns.push_back(col);
+        columns.push_back(columnRecipeToJson(recipe));
     }
     j["columns"] = columns;
 
@@ -353,9 +507,63 @@ std::optional<TensorData> buildTensorFromDesignJson(
     return buildTensor(dm, spec.value());
 }
 
+namespace {
+
+[[nodiscard]] std::optional<TimeKey> tryRegisteredTimeKey(
+        DataManager & dm,
+        std::string const & key_str) {
+    if (key_str.empty()) {
+        return std::nullopt;
+    }
+    TimeKey candidate(key_str);
+    if (dm.getTime(candidate) != nullptr) {
+        return candidate;
+    }
+    return std::nullopt;
+}
+
+}// namespace
+
+std::optional<TimeKey> resolveOutputTimeKey(
+        DataManager & dm,
+        TensorDesignSpec const & spec) {
+    if (!spec.output_time_key.empty() && spec.output_time_key != "default") {
+        if (auto const explicit_key = tryRegisteredTimeKey(dm, spec.output_time_key)) {
+            return explicit_key;
+        }
+    }
+
+    if (spec.row_type == RowType::TimeFrame) {
+        if (auto const row_time_key = tryRegisteredTimeKey(dm, spec.row_time_key)) {
+            return row_time_key;
+        }
+    } else if (spec.row_type != RowType::None && spec.row_type != RowType::Ordinal &&
+               !spec.row_source_key.empty()) {
+        auto const row_source_time_key = dm.getTimeKey(spec.row_source_key);
+        if (!row_source_time_key.empty()) {
+            if (auto const derived_key = tryRegisteredTimeKey(dm, row_source_time_key.str())) {
+                return derived_key;
+            }
+        }
+    }
+
+    if (auto const time_key = tryRegisteredTimeKey(dm, "time")) {
+        return time_key;
+    }
+    return tryRegisteredTimeKey(dm, "default");
+}
+
 bool populateDataManager(DataManager & dm, TensorDesignSpec const & spec) {
     if (spec.tensor_key.empty()) {
         spdlog::error("TensorDesign: tensor_key is required to populate DataManager");
+        return false;
+    }
+
+    auto const output_time_key = resolveOutputTimeKey(dm, spec);
+    if (!output_time_key.has_value()) {
+        spdlog::error(
+                "TensorDesign: could not resolve output TimeKey for tensor '{}'",
+                spec.tensor_key);
         return false;
     }
 
@@ -367,7 +575,7 @@ bool populateDataManager(DataManager & dm, TensorDesignSpec const & spec) {
     dm.setData<TensorData>(
             spec.tensor_key,
             std::make_shared<TensorData>(std::move(tensor.value())),
-            TimeKey(spec.output_time_key));
+            output_time_key.value());
     return true;
 }
 

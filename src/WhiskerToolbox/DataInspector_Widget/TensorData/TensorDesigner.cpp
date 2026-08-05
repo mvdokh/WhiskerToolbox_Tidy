@@ -4,6 +4,8 @@
 
 #include "DataInspector_Widget/DataInspectorState.hpp"
 #include "DataManager/DataManager.hpp"
+#include "TensorDesign/ColumnRecipePresetRegistry.hpp"
+#include "TensorDesign/DesignPresetRegistry.hpp"
 #include "TensorDesign/TensorDesignBuilder.hpp"
 
 //https://stackoverflow.com/questions/72533139/libtorch-errors-when-used-with-qt-opencv-and-point-cloud-library
@@ -21,14 +23,23 @@
 #include "TimeFrame/TimeIndexStorage.hpp"
 
 #include <nlohmann/json.hpp>
+#include <type_traits>
 
 #include <QComboBox>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QDoubleSpinBox>
 #include <QFileDialog>
+#include <QFormLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QListWidget>
 #include <QMessageBox>
+#include <QPointer>
 #include <QPushButton>
+#include <QSpinBox>
+#include <QTimer>
 #include <QVBoxLayout>
 
 #include <chrono>
@@ -52,6 +63,8 @@ using DesignRowType = Neuralyzer::TensorDesign::RowType;
             return DesignRowType::Ordinal;
         case DesignerRowType::DerivedFromSource:
             return DesignRowType::DerivedFromSource;
+        case DesignerRowType::TimeFrame:
+            return DesignRowType::TimeFrame;
         case DesignerRowType::None:
             return DesignRowType::None;
     }
@@ -68,10 +81,88 @@ using DesignRowType = Neuralyzer::TensorDesign::RowType;
             return DesignerRowType::Ordinal;
         case DesignRowType::DerivedFromSource:
             return DesignerRowType::DerivedFromSource;
+        case DesignRowType::TimeFrame:
+            return DesignerRowType::TimeFrame;
         case DesignRowType::None:
             return DesignerRowType::None;
     }
     return DesignerRowType::None;
+}
+
+[[nodiscard]] int rowTypeComboIndex(DesignerRowType row_type) {
+    switch (row_type) {
+        case DesignerRowType::Interval:
+            return 1;
+        case DesignerRowType::Timestamp:
+            return 2;
+        case DesignerRowType::Ordinal:
+            return 3;
+        case DesignerRowType::DerivedFromSource:
+            return 4;
+        case DesignerRowType::TimeFrame:
+            return 5;
+        case DesignerRowType::None:
+            return 0;
+    }
+    return 0;
+}
+
+[[nodiscard]] QString rowTypeDescription(int combo_index) {
+    switch (combo_index) {
+        case 1:
+            return QStringLiteral(
+                    "One row per interval (e.g. contact bouts). "
+                    "Columns summarize data within each interval.");
+        case 2:
+            return QStringLiteral(
+                    "One row per event timestamp (e.g. each spike). "
+                    "Columns extract a value at or around each event.");
+        case 3:
+            return QStringLiteral(
+                    "One row per index 0…N−1. "
+                    "Not yet supported for building tensors.");
+        case 4:
+            return QStringLiteral(
+                    "One row per timestamp extracted from any time-series data object "
+                    "(analog, events, intervals, masks, lines, or points).");
+        case 5:
+            return QStringLiteral(
+                    "One row per video frame or time index. "
+                    "Use for frame-aligned features (e.g. keypoint x/y).");
+        case 0:
+        default:
+            return QStringLiteral("Choose how tensor rows are defined.");
+    }
+}
+
+}// namespace
+
+namespace {
+
+template<typename Descriptor>
+[[nodiscard]] QString presetParameterHint(Descriptor const & descriptor) {
+    QStringList names;
+    if constexpr (std::is_same_v<std::decay_t<Descriptor>, Neuralyzer::TensorDesign::DesignPresetDescriptor>) {
+        for (auto const & field: descriptor.parameters.fields) {
+            names << QString::fromStdString(field.name);
+        }
+    } else {
+        for (auto const & field: descriptor.parameters().fields) {
+            names << QString::fromStdString(field.name);
+        }
+    }
+    return names.join(QStringLiteral(", "));
+}
+
+[[nodiscard]] std::vector<std::string> parseSourceKeys(QString const & text) {
+    std::vector<std::string> keys;
+    for (auto const & part: text.split(QStringLiteral(","), Qt::SkipEmptyParts)) {
+        auto const trimmed = part.trimmed();
+        if (!trimmed.isEmpty()) {
+            keys.push_back(trimmed.toStdString());
+        }
+    }
+    return keys;
 }
 
 }// namespace
@@ -138,8 +229,12 @@ void TensorDesigner::setTensorKey(std::string const & key) {
 std::string TensorDesigner::toJson() const {
     Neuralyzer::TensorDesign::TensorDesignSpec spec;
     spec.tensor_key = _tensor_key;
-    spec.row_source_key = _row_source_key;
     spec.row_type = toTensorDesignRowType(_row_type);
+    if (_row_type == DesignerRowType::TimeFrame) {
+        spec.row_time_key = _row_source_key;
+    } else {
+        spec.row_source_key = _row_source_key;
+    }
     spec.columns = _column_recipes;
     return Neuralyzer::TensorDesign::serializeDesignJson(spec);
 }
@@ -152,7 +247,8 @@ bool TensorDesigner::fromJson(std::string const & json) {
     }
 
     _row_type = fromTensorDesignRowType(spec->row_type);
-    _row_source_key = spec->row_source_key;
+    _row_source_key = _row_type == DesignerRowType::TimeFrame ? spec->row_time_key
+                                                              : spec->row_source_key;
     if (!spec->tensor_key.empty()) {
         _tensor_key = spec->tensor_key;
     }
@@ -170,6 +266,9 @@ bool TensorDesigner::fromJson(std::string const & json) {
             break;
         case DesignerRowType::DerivedFromSource:
             _row_type_combo->setCurrentIndex(4);
+            break;
+        case DesignerRowType::TimeFrame:
+            _row_type_combo->setCurrentIndex(5);
             break;
         case DesignerRowType::None:
             _row_type_combo->setCurrentIndex(0);
@@ -211,11 +310,25 @@ void TensorDesigner::_onRowSourceTypeChanged(int index) {
         case 4:
             _row_type = DesignerRowType::DerivedFromSource;
             break;
+        case 5:
+            _row_type = DesignerRowType::TimeFrame;
+            break;
         default:
             _row_type = DesignerRowType::None;
             break;
     }
+    _updateRowTypeDescription(index);
     _populateRowSourceKeys();
+}
+
+void TensorDesigner::_updateRowTypeDescription(int combo_index) {
+    auto const description = rowTypeDescription(combo_index);
+    if (_row_type_description_label != nullptr) {
+        _row_type_description_label->setText(description);
+    }
+    if (_row_type_combo != nullptr) {
+        _row_type_combo->setToolTip(description);
+    }
 }
 
 void TensorDesigner::_onRowSourceKeyChanged(int index) {
@@ -245,6 +358,13 @@ void TensorDesigner::_onRowSourceKeyChanged(int index) {
         _row_info_label->setText(
                 QStringLiteral("Rows: %1 timestamps (derived from source)")
                         .arg(static_cast<int>(result.size())));
+    } else if (_row_type == DesignerRowType::TimeFrame) {
+        auto time_frame = _data_manager->getTime(TimeKey(_row_source_key));
+        if (time_frame) {
+            _row_info_label->setText(
+                    QStringLiteral("Rows: %1 TimeFrame indices")
+                            .arg(time_frame->getTotalFrameCount()));
+        }
     }
 }
 
@@ -265,7 +385,7 @@ void TensorDesigner::_onAddColumnClicked() {
     _pinInspectorForDialog();
 
     auto * dialog = new ColumnConfigDialog(
-            _data_manager, _row_type, _operation_context, _pipeline_library_dir, this);
+            _data_manager, _row_type, _operation_context, _pipeline_library_dir, _row_source_key, this);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->setWindowModality(Qt::NonModal);
     _active_dialog = dialog;
@@ -277,6 +397,235 @@ void TensorDesigner::_onAddColumnClicked() {
     });
 
     dialog->show();
+}
+
+void TensorDesigner::_onApplyDesignPresetClicked() {
+    auto registry = Neuralyzer::TensorDesign::createBuiltInDesignPresetRegistry();
+    auto descriptors = registry.descriptors();
+    if (descriptors.empty()) {
+        _updateStatus(QStringLiteral("No design presets are registered."));
+        return;
+    }
+
+    QDialog dialog(this);
+    dialog.setWindowTitle(QStringLiteral("Apply Table Preset"));
+    auto * layout = new QVBoxLayout(&dialog);
+    auto * form = new QFormLayout();
+
+    auto * preset_combo = new QComboBox(&dialog);
+    for (auto const * descriptor: descriptors) {
+        preset_combo->addItem(
+                QString::fromStdString(descriptor->display_name),
+                QString::fromStdString(descriptor->id));
+    }
+    form->addRow(QStringLiteral("Preset"), preset_combo);
+
+    auto * description_label = new QLabel(&dialog);
+    description_label->setWordWrap(true);
+    form->addRow(QStringLiteral("Description"), description_label);
+
+    auto * row_source_key_edit = new QLineEdit(&dialog);
+    auto * curvature_source_key_edit = new QLineEdit(&dialog);
+    auto * spike_source_key_edit = new QLineEdit(&dialog);
+    auto * angle_source_key_edit = new QLineEdit(&dialog);
+    auto * keypoint_source_keys_edit = new QLineEdit(&dialog);
+    auto * onset_pre_spin = new QSpinBox(&dialog);
+    auto * onset_post_spin = new QSpinBox(&dialog);
+    onset_pre_spin->setRange(0, 1'000'000'000);
+    onset_post_spin->setRange(0, 1'000'000'000);
+
+    form->addRow(QStringLiteral("Row source key"), row_source_key_edit);
+    form->addRow(QStringLiteral("Curvature source key"), curvature_source_key_edit);
+    form->addRow(QStringLiteral("Spike source key"), spike_source_key_edit);
+    form->addRow(QStringLiteral("Angle source key"), angle_source_key_edit);
+    form->addRow(QStringLiteral("Keypoint keys (comma-separated)"), keypoint_source_keys_edit);
+    form->addRow(QStringLiteral("Onset pre"), onset_pre_spin);
+    form->addRow(QStringLiteral("Onset post"), onset_post_spin);
+
+    auto * hint_label = new QLabel(&dialog);
+    hint_label->setWordWrap(true);
+    form->addRow(QStringLiteral("Used fields"), hint_label);
+    layout->addLayout(form);
+
+    auto update_description = [&]() {
+        auto const id = preset_combo->currentData().toString().toStdString();
+        auto const * descriptor = registry.find(id);
+        if (descriptor == nullptr) {
+            description_label->clear();
+            hint_label->clear();
+            return;
+        }
+        description_label->setText(QString::fromStdString(descriptor->description));
+        hint_label->setText(presetParameterHint(*descriptor));
+    };
+    update_description();
+    connect(preset_combo, &QComboBox::currentIndexChanged, &dialog, update_description);
+
+    auto * buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+    layout->addWidget(buttons);
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    if (_row_type != DesignerRowType::None || !_row_source_key.empty() || !_column_recipes.empty()) {
+        auto const answer = QMessageBox::question(
+                this,
+                QStringLiteral("Replace Current Design?"),
+                QStringLiteral("Applying a table preset replaces the current row source and columns. Continue?"));
+        if (answer != QMessageBox::Yes) {
+            return;
+        }
+    }
+
+    Neuralyzer::TensorDesign::DesignPresetArgs args;
+    args.row_source_key = row_source_key_edit->text().trimmed().toStdString();
+    args.curvature_source_key = curvature_source_key_edit->text().trimmed().toStdString();
+    args.spike_source_key = spike_source_key_edit->text().trimmed().toStdString();
+    args.angle_source_key = angle_source_key_edit->text().trimmed().toStdString();
+    args.keypoint_source_keys = parseSourceKeys(keypoint_source_keys_edit->text());
+    args.onset_pre = onset_pre_spin->value();
+    args.onset_post = onset_post_spin->value();
+
+    auto const preset_id = preset_combo->currentData().toString().toStdString();
+    auto expansion = registry.expand(preset_id, args);
+    if (!expansion.has_value()) {
+        QMessageBox::warning(this, QStringLiteral("Preset Expansion Failed"),
+                             QStringLiteral("Required preset parameters are missing or invalid."));
+        return;
+    }
+
+    _row_type = fromTensorDesignRowType(expansion->spec.row_type);
+    _row_source_key = _row_type == DesignerRowType::TimeFrame ? expansion->spec.row_time_key
+                                                              : expansion->spec.row_source_key;
+    _column_recipes = std::move(expansion->spec.columns);
+    _row_type_combo->setCurrentIndex(rowTypeComboIndex(_row_type));
+    _populateRowSourceKeys();
+    _refreshColumnList();
+    _updateStatus(QStringLiteral("Table preset applied: %1 columns")
+                          .arg(static_cast<int>(_column_recipes.size())));
+}
+
+void TensorDesigner::_onAddPresetClicked() {
+    if (_row_type == DesignerRowType::None) {
+        QMessageBox::warning(this, QStringLiteral("No Row Source"),
+                             QStringLiteral("Please select a row source type first."));
+        return;
+    }
+
+    auto registry = Neuralyzer::TensorDesign::createBuiltInColumnRecipePresetRegistry();
+    auto descriptors = registry.descriptors();
+    if (descriptors.empty()) {
+        _updateStatus(QStringLiteral("No column presets are registered."));
+        return;
+    }
+
+    QDialog dialog(this);
+    dialog.setWindowTitle(QStringLiteral("Add Column Preset"));
+    auto * layout = new QVBoxLayout(&dialog);
+    auto * form = new QFormLayout();
+
+    auto * preset_combo = new QComboBox(&dialog);
+    for (auto const * descriptor: descriptors) {
+        preset_combo->addItem(
+                QString::fromStdString(descriptor->display_name()),
+                QString::fromStdString(descriptor->id()));
+    }
+    form->addRow(QStringLiteral("Preset"), preset_combo);
+
+    auto * description_label = new QLabel(&dialog);
+    description_label->setWordWrap(true);
+    form->addRow(QStringLiteral("Description"), description_label);
+
+    auto * output_name_edit = new QLineEdit(&dialog);
+    auto * source_key_edit = new QLineEdit(&dialog);
+    auto * binding_source_key_edit = new QLineEdit(&dialog);
+    auto * store_key_edit = new QLineEdit(QStringLiteral("row_alignment_time"), &dialog);
+    auto * name_prefix_edit = new QLineEdit(&dialog);
+    auto * source_keys_edit = new QLineEdit(&dialog);
+    auto * pre_spin = new QSpinBox(&dialog);
+    auto * post_spin = new QSpinBox(&dialog);
+    auto * window_start_spin = new QDoubleSpinBox(&dialog);
+    auto * window_end_spin = new QDoubleSpinBox(&dialog);
+
+    pre_spin->setRange(0, 1'000'000'000);
+    post_spin->setRange(0, 1'000'000'000);
+    window_start_spin->setRange(-1'000'000'000.0, 1'000'000'000.0);
+    window_end_spin->setRange(-1'000'000'000.0, 1'000'000'000.0);
+    window_start_spin->setDecimals(3);
+    window_end_spin->setDecimals(3);
+    window_end_spin->setValue(15.0);
+
+    form->addRow(QStringLiteral("Output name"), output_name_edit);
+    form->addRow(QStringLiteral("Source key"), source_key_edit);
+    form->addRow(QStringLiteral("Binding source key"), binding_source_key_edit);
+    form->addRow(QStringLiteral("Store key"), store_key_edit);
+    form->addRow(QStringLiteral("Name prefix"), name_prefix_edit);
+    form->addRow(QStringLiteral("Source keys (comma-separated)"), source_keys_edit);
+    form->addRow(QStringLiteral("Pre"), pre_spin);
+    form->addRow(QStringLiteral("Post"), post_spin);
+    form->addRow(QStringLiteral("Window start"), window_start_spin);
+    form->addRow(QStringLiteral("Window end"), window_end_spin);
+
+    auto * hint_label = new QLabel(&dialog);
+    hint_label->setWordWrap(true);
+    form->addRow(QStringLiteral("Used fields"), hint_label);
+
+    layout->addLayout(form);
+
+    auto update_description = [&]() {
+        auto const id = preset_combo->currentData().toString().toStdString();
+        auto const * descriptor = registry.find(id);
+        if (descriptor == nullptr) {
+            description_label->clear();
+            hint_label->clear();
+            return;
+        }
+        description_label->setText(QString::fromStdString(descriptor->description()));
+        hint_label->setText(presetParameterHint(*descriptor));
+    };
+    update_description();
+    connect(preset_combo, &QComboBox::currentIndexChanged, &dialog, update_description);
+
+    auto * buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+    layout->addWidget(buttons);
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    Neuralyzer::TensorDesign::ColumnRecipePresetArgs args;
+    args.output_name = output_name_edit->text().trimmed().toStdString();
+    args.source_key = source_key_edit->text().trimmed().toStdString();
+    args.binding_source_key = binding_source_key_edit->text().trimmed().toStdString();
+    args.store_key = store_key_edit->text().trimmed().toStdString();
+    args.name_prefix = name_prefix_edit->text().trimmed().toStdString();
+    args.source_keys = parseSourceKeys(source_keys_edit->text());
+    args.pre = pre_spin->value();
+    args.post = post_spin->value();
+    args.window_start = window_start_spin->value();
+    args.window_end = window_end_spin->value();
+
+    auto const preset_id = preset_combo->currentData().toString().toStdString();
+    auto expansion = registry.expand(preset_id, args);
+    if (!expansion.has_value()) {
+        QMessageBox::warning(this, QStringLiteral("Preset Expansion Failed"),
+                             QStringLiteral("Required preset parameters are missing or invalid."));
+        return;
+    }
+
+    auto const added_count = expansion->columns.size();
+    for (auto & recipe: expansion->columns) {
+        _column_recipes.push_back(std::move(recipe));
+    }
+    _refreshColumnList();
+    _updateStatus(QStringLiteral("Preset added: %1 columns total (+%2)")
+                          .arg(static_cast<int>(_column_recipes.size()))
+                          .arg(static_cast<int>(added_count)));
 }
 
 void TensorDesigner::_onRemoveColumnClicked() {
@@ -316,9 +665,10 @@ void TensorDesigner::_onEditColumnClicked() {
 
     auto * dialog = new ColumnConfigDialog(_data_manager,
                                            _row_type,
-                                           _column_recipes[row],
+                                           _column_recipes[static_cast<size_t>(row)],
                                            _operation_context,
                                            _pipeline_library_dir,
+                                           _row_source_key,
                                            this);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->setWindowModality(Qt::NonModal);
@@ -420,6 +770,10 @@ void TensorDesigner::_setupUi() {
     _row_type_combo->addItem(QStringLiteral("Timestamp Rows"));
     _row_type_combo->addItem(QStringLiteral("Ordinal Rows"));
     _row_type_combo->addItem(QStringLiteral("Derived from Source"));
+    _row_type_combo->addItem(QStringLiteral("TimeFrame Rows"));
+    for (int i = 0; i < _row_type_combo->count(); ++i) {
+        _row_type_combo->setItemData(i, rowTypeDescription(i), Qt::ToolTipRole);
+    }
     _row_type_combo->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     row_layout->addWidget(_row_type_combo);
 
@@ -428,6 +782,11 @@ void TensorDesigner::_setupUi() {
     row_layout->addWidget(_row_source_combo);
 
     _main_layout->addLayout(row_layout);
+
+    _row_type_description_label = new QLabel(this);
+    _row_type_description_label->setWordWrap(true);
+    _row_type_description_label->setStyleSheet(QStringLiteral("color: gray; font-size: 11px;"));
+    _main_layout->addWidget(_row_type_description_label);
 
     _row_info_label = new QLabel(QStringLiteral("No row source selected"), this);
     _row_info_label->setStyleSheet(QStringLiteral("color: gray; font-size: 11px;"));
@@ -446,10 +805,14 @@ void TensorDesigner::_setupUi() {
     _col_button_layout->setSpacing(4);
 
     _add_col_btn = new QPushButton(QStringLiteral("Add Column"), this);
+    _apply_design_preset_btn = new QPushButton(QStringLiteral("Apply Table Preset..."), this);
+    _add_preset_btn = new QPushButton(QStringLiteral("Add Preset..."), this);
     _edit_col_btn = new QPushButton(QStringLiteral("Edit"), this);
     _remove_col_btn = new QPushButton(QStringLiteral("Remove"), this);
 
     _col_button_layout->addWidget(_add_col_btn);
+    _col_button_layout->addWidget(_apply_design_preset_btn);
+    _col_button_layout->addWidget(_add_preset_btn);
     _col_button_layout->addWidget(_edit_col_btn);
     _col_button_layout->addWidget(_remove_col_btn);
     _col_button_layout->addStretch();
@@ -478,6 +841,8 @@ void TensorDesigner::_setupUi() {
     _main_layout->addWidget(_status_label);
 
     _main_layout->addStretch();
+
+    _updateRowTypeDescription(_row_type_combo->currentIndex());
 }
 
 void TensorDesigner::_connectSignals() {
@@ -487,6 +852,10 @@ void TensorDesigner::_connectSignals() {
             this, &TensorDesigner::_onRowSourceKeyChanged);
     connect(_add_col_btn, &QPushButton::clicked,
             this, &TensorDesigner::_onAddColumnClicked);
+    connect(_apply_design_preset_btn, &QPushButton::clicked,
+            this, &TensorDesigner::_onApplyDesignPresetClicked);
+    connect(_add_preset_btn, &QPushButton::clicked,
+            this, &TensorDesigner::_onAddPresetClicked);
     connect(_edit_col_btn, &QPushButton::clicked,
             this, &TensorDesigner::_onEditColumnClicked);
     connect(_remove_col_btn, &QPushButton::clicked,
@@ -541,6 +910,13 @@ void TensorDesigner::_populateRowSourceKeys() {
                 _row_source_combo->addItem(display, QString::fromStdString(key));
             }
         }
+    } else if (_row_type == DesignerRowType::TimeFrame) {
+        auto time_keys = _data_manager->getTimeFrameKeys();
+        for (auto const & key: time_keys) {
+            auto const key_string = key.str();
+            _row_source_combo->addItem(
+                    QString::fromStdString(key_string), QString::fromStdString(key_string));
+        }
     }
     // For Ordinal, no source key needed
 
@@ -548,7 +924,8 @@ void TensorDesigner::_populateRowSourceKeys() {
 
     _row_source_combo->setVisible(_row_type == DesignerRowType::Interval ||
                                   _row_type == DesignerRowType::Timestamp ||
-                                  _row_type == DesignerRowType::DerivedFromSource);
+                                  _row_type == DesignerRowType::DerivedFromSource ||
+                                  _row_type == DesignerRowType::TimeFrame);
 
     if (_row_source_combo->count() > 0) {
         _onRowSourceKeyChanged(0);
@@ -597,30 +974,73 @@ void TensorDesigner::_buildTensor() {
                               std::chrono::steady_clock::now().time_since_epoch().count());
     }
 
+    // Pin the inspector so SelectionContext / feature-table refreshes during
+    // setData() do not tear down this widget while the build is in flight.
+    _pinInspectorForDialog();
+
     Neuralyzer::TensorDesign::TensorDesignSpec spec;
     spec.tensor_key = _tensor_key;
-    spec.row_source_key = _row_source_key;
     spec.row_type = toTensorDesignRowType(_row_type);
+    if (_row_type == DesignerRowType::TimeFrame) {
+        spec.row_time_key = _row_source_key;
+    } else {
+        spec.row_source_key = _row_source_key;
+    }
     spec.columns = _column_recipes;
 
     auto built = Neuralyzer::TensorDesign::buildTensor(*_data_manager, spec);
     if (!built.has_value()) {
+        _unpinInspectorAfterDialog();
         _updateStatus(QStringLiteral("Build failed. Check row source and column configuration."));
         return;
     }
 
+    auto const output_time_key = Neuralyzer::TensorDesign::resolveOutputTimeKey(*_data_manager, spec);
+    if (!output_time_key.has_value()) {
+        _unpinInspectorAfterDialog();
+        _updateStatus(QStringLiteral(
+                "Build succeeded but registration failed: no valid output TimeKey. "
+                "Ensure the row source is assigned to a TimeFrame."));
+        return;
+    }
+
+    spec.output_time_key = output_time_key->str();
+
     auto const num_rows = built->numRows();
-    _data_manager->setData<TensorData>(
-            _tensor_key,
-            std::make_shared<TensorData>(std::move(built.value())),
-            TimeKey("default"));
+    auto const column_count = _column_recipes.size();
+    auto const tensor_key = _tensor_key;
+    auto tensor_ptr = std::make_shared<TensorData>(std::move(built.value()));
+    auto dm = _data_manager;
+    auto const& time_key = output_time_key.value();
 
-    _updateStatus(QStringLiteral("Tensor built: %1 rows × %2 columns → '%3'")
-                          .arg(static_cast<int>(num_rows))
-                          .arg(static_cast<int>(_column_recipes.size()))
-                          .arg(QString::fromStdString(_tensor_key)));
+    // Defer registration so DataManager observer callbacks (feature table refresh,
+    // inspector deletion checks) do not run while this click handler is unwinding.
+    QPointer<TensorDesigner> const guard(this);
+    QTimer::singleShot(0, this, [guard, dm, tensor_key, tensor_ptr, time_key, num_rows, column_count]() {
+        if (!guard || !dm) {
+            return;
+        }
 
-    emit tensorCreated(QString::fromStdString(_tensor_key));
+        dm->setData<TensorData>(tensor_key, tensor_ptr, time_key);
+
+        auto const registered = dm->getData<TensorData>(tensor_key);
+        if (!registered || dm->getTimeKey(tensor_key).empty()) {
+            guard->_unpinInspectorAfterDialog();
+            guard->_updateStatus(QStringLiteral(
+                                         "Build succeeded but registration failed for '%1'. "
+                                         "Check TimeFrame assignment and duplicate data keys.")
+                                         .arg(QString::fromStdString(tensor_key)));
+            return;
+        }
+
+        guard->_updateStatus(QStringLiteral("Tensor built: %1 rows × %2 columns → '%3'")
+                                     .arg(static_cast<int>(num_rows))
+                                     .arg(static_cast<int>(column_count))
+                                     .arg(QString::fromStdString(tensor_key)));
+
+        emit guard->tensorCreated(QString::fromStdString(tensor_key));
+        guard->_unpinInspectorAfterDialog();
+    });
 }
 
 void TensorDesigner::_updateStatus(QString const & message) {
@@ -634,13 +1054,15 @@ void TensorDesigner::_updateStatus(QString const & message) {
 void TensorDesigner::_onDialogAcceptedAdd() {
     if (!_active_dialog) return;
 
-    auto recipe = _active_dialog->getRecipe();
-    if (recipe.column_name.empty()) {
-        recipe.column_name = "column_" + std::to_string(_column_recipes.size());
+    auto recipes = _active_dialog->getRecipes();
+    for (auto & recipe: recipes) {
+        if (recipe.column_name.empty()) {
+            recipe.column_name = "column_" + std::to_string(_column_recipes.size());
+        }
+        _column_recipes.push_back(std::move(recipe));
     }
-    _column_recipes.push_back(std::move(recipe));
     _refreshColumnList();
-    _updateStatus(QStringLiteral("Column added: %1 columns total")
+    _updateStatus(QStringLiteral("Column(s) added: %1 columns total")
                           .arg(static_cast<int>(_column_recipes.size())));
 }
 
@@ -648,7 +1070,15 @@ void TensorDesigner::_onDialogAcceptedEdit(int row) {
     if (!_active_dialog) return;
     if (row < 0 || row >= static_cast<int>(_column_recipes.size())) return;
 
-    _column_recipes[row] = _active_dialog->getRecipe();
+    auto recipes = _active_dialog->getRecipes();
+    if (recipes.empty()) return;
+
+    _column_recipes[static_cast<size_t>(row)] = std::move(recipes[0]);
+    if (recipes.size() > 1) {
+        _column_recipes.insert(_column_recipes.begin() + row + 1,
+                               std::make_move_iterator(recipes.begin() + 1),
+                               std::make_move_iterator(recipes.end()));
+    }
     _refreshColumnList();
 }
 

@@ -27,6 +27,7 @@
 #include "TransformsV2/core/RangeReductionRegistry.hpp"
 #include "TransformsV2/core/TransformPipeline.hpp"
 #include "TransformsV2/extension/gatherResult/RowGatherGeometry.hpp"
+#include "TransformsV2/io/PipelineLoader.hpp"
 
 #include "TimeFrame/StrongTimeTypes.hpp"
 #include "TimeFrame/TimeFrame.hpp"
@@ -127,6 +128,18 @@ std::shared_ptr<DigitalEventSeries> createEventSeries(
     }
     series->setTimeFrame(createIdentityTimeFrameForMax(max_time));
     return series;
+}
+
+/**
+ * @brief Create a PointData with one point per timestamp.
+ */
+std::shared_ptr<PointData> createPointData(
+        std::vector<std::pair<int64_t, Point2D<float>>> const & points) {
+    auto data = std::make_shared<PointData>();
+    for (auto const & [time, point]: points) {
+        data->addAtTime(TimeFrameIndex(time), point, NotifyObservers::No);
+    }
+    return data;
 }
 
 /**
@@ -303,8 +316,8 @@ TEST_CASE("resolveIntervalGatherWindows returns source intervals for identity",
     REQUIRE(resolved->size() == intervals->size());
 }
 
-TEST_CASE("resolveIntervalGatherWindows rejects non-identity row pipelines",
-          "[TensorColumnBuilders][Phase3]") {
+TEST_CASE("resolveIntervalGatherWindows rejects DigitalEventSeries sample-time row pipelines",
+          "[TensorColumnBuilders][Phase6]") {
     auto intervals = createIntervalSeries({{10, 20}, {50, 60}});
 
     CHECK_THROWS_AS(
@@ -440,8 +453,8 @@ TEST_CASE("buildProviderFromRecipe - interval_property ignores row_pipeline_json
     CHECK_THAT(values[1], WithinAbs(50.0, 0.01));
 }
 
-TEST_CASE("buildProviderFromRecipe - rejects non-identity interval row_pipeline_json",
-          "[TensorColumnBuilders][Phase3]") {
+TEST_CASE("buildProviderFromRecipe - DigitalEventSeries row_pipeline_json samples analog source",
+          "[TensorColumnBuilders][Phase6]") {
     DataManager dm;
     setDefaultIdentityTimeFrame(dm, 1000);
     auto analog = createLinearAnalog(100);
@@ -451,13 +464,70 @@ TEST_CASE("buildProviderFromRecipe - rejects non-identity interval row_pipeline_
     ColumnRecipe const recipe{
             .column_name = "mean_signal",
             .source_key = "analog",
-            .pipeline_json = kMeanValuePipelineJson,
+            .pipeline_json = kIdentityRowPipelineJson,
             .row_pipeline_json = kNonIdentityRowPipelineJson,
     };
 
-    CHECK_THROWS_AS(
-            buildProviderFromRecipe(dm, recipe, {}, intervals),
-            std::runtime_error);
+    auto provider = buildProviderFromRecipe(dm, recipe, {}, intervals);
+    auto const values = provider();
+
+    REQUIRE(values.size() == intervals->size());
+    CHECK_THAT(values[0], WithinAbs(10.0, 0.01));
+    CHECK_THAT(values[1], WithinAbs(50.0, 0.01));
+}
+
+TEST_CASE("buildProviderFromRecipe - shifted DigitalEventSeries row_pipeline_json samples analog source",
+          "[TensorColumnBuilders][Phase6]") {
+    DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
+    auto analog = createLinearAnalog(100);
+    dm.setData<AnalogTimeSeries>("analog", analog, TimeKey("time"));
+    auto intervals = createIntervalSeries({{10, 20}, {50, 60}});
+
+    ColumnRecipe const recipe{
+            .column_name = "signal_at_shifted_start",
+            .source_key = "analog",
+            .pipeline_json = "",
+            .row_pipeline_json = R"({"steps": [{"step_id": "interval_start", "transform_name": "IntervalToEvent", "parameters": {"point": "start"}}, {"step_id": "shift", "transform_name": "ShiftDigitalEventSeries", "parameters": {"offset": 2}}]})",
+    };
+
+    auto provider = buildProviderFromRecipe(dm, recipe, {}, intervals);
+    auto const values = provider();
+
+    REQUIRE(values.size() == intervals->size());
+    CHECK_THAT(values[0], WithinAbs(12.0, 0.01));
+    CHECK_THAT(values[1], WithinAbs(52.0, 0.01));
+}
+
+TEST_CASE("buildProviderFromRecipe - DigitalEventSeries row_pipeline_json samples PointData x at interval start",
+          "[TensorColumnBuilders][Phase6][PointData]") {
+    DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 12);
+    auto points = createPointData({
+            {2, Point2D<float>{1.0f, 2.0f}},
+            {7, Point2D<float>{3.0f, 4.0f}},
+            {9, Point2D<float>{5.0f, 6.0f}},
+    });
+    dm.setData<PointData>("points", points, TimeKey("time"));
+    REQUIRE(dm.getData<PointData>("points")->getTimeFrame() != nullptr);
+    auto intervals = createIntervalSeries({{2, 4}, {7, 8}, {9, 10}});
+
+    ColumnRecipe const recipe{
+            .column_name = "nose_x_at_interval_start",
+            .source_key = "points",
+            .pipeline_json =
+                    R"({"steps": [{"step_id": "x", "transform_name": "PointCoordinate", "parameters": {"coordinate": "X"}}]})",
+            .row_pipeline_json =
+                    R"({"steps": [{"step_id": "interval_start", "transform_name": "IntervalToEvent", "parameters": {"point": "start"}}]})",
+    };
+
+    auto provider = buildProviderFromRecipe(dm, recipe, {}, intervals);
+    auto const values = provider();
+
+    REQUIRE(values.size() == intervals->size());
+    CHECK_THAT(values[0], WithinAbs(1.0, 0.01));
+    CHECK_THAT(values[1], WithinAbs(3.0, 0.01));
+    CHECK_THAT(values[2], WithinAbs(5.0, 0.01));
 }
 
 TEST_CASE("buildProviderFromRecipe - derived row windows gather event counts",
@@ -619,6 +689,149 @@ TEST_CASE("buildIntervalPipelineProvider - Event empty interval returns zero cou
 
     REQUIRE(values.size() == 1);
     CHECK_THAT(values[0], WithinAbs(0.0, 0.01));
+}
+
+TEST_CASE("buildIntervalPipelineProvider - JSON container event normalize before reduction",
+          "[TensorColumnBuilders]") {
+    DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
+    auto events = createEventSeries({95, 105, 112, 190, 205, 220});
+    dm.setData<DigitalEventSeries>("events", events, TimeKey("time"));
+
+    auto intervals = createIntervalSeries({{90, 120}, {180, 230}});
+
+    auto pipeline_result = Neuralyzer::Transforms::V2::Examples::loadPipelineFromJson(R"({
+        "steps": [
+            {
+                "step_id": "1",
+                "transform_name": "NormalizeDigitalEventSeriesRelative",
+                "parameters": {"alignment_time": 100}
+            }
+        ],
+        "range_reduction": {
+            "reduction_name": "EventCountInWindow",
+            "parameters": {"window_start": 0.0, "window_end": 15.0}
+        }
+    })");
+    REQUIRE(pipeline_result);
+
+    auto provider = buildIntervalPipelineProvider(
+            dm, "events", intervals, std::move(*pipeline_result));
+    auto values = provider();
+
+    REQUIRE(values.size() == 2);
+    CHECK_THAT(values[0], WithinAbs(2.0, 0.01));
+    CHECK_THAT(values[1], WithinAbs(0.0, 0.01));
+}
+
+TEST_CASE("buildProviderFromRecipe - direct event binding normalizes gathered events per row",
+          "[TensorColumnBuilders][Phase5]") {
+    DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
+    auto events = createEventSeries({95, 105, 112, 190, 205, 220});
+    auto alignments = createEventSeries({100, 200});
+    dm.setData<DigitalEventSeries>("events", events, TimeKey("time"));
+    dm.setData<DigitalEventSeries>("align", alignments, TimeKey("time"));
+
+    auto intervals = createIntervalSeries({{90, 120}, {180, 230}});
+
+    ColumnRecipe recipe;
+    recipe.column_name = "relative_count";
+    recipe.source_key = "events";
+    recipe.pipeline_json = R"({
+        "steps": [
+            {
+                "step_id": "normalize",
+                "transform_name": "NormalizeDigitalEventSeriesRelative",
+                "parameters": {"alignment_time": 0},
+                "param_bindings": {"alignment_time": "row_alignment_time"}
+            }
+        ],
+        "range_reduction": {
+            "reduction_name": "EventCountInWindow",
+            "parameters": {"window_start": 0.0, "window_end": 15.0}
+        }
+    })";
+    recipe.pipeline_value_bindings.push_back(PipelineValueBindingRecipe{
+            .source_key = "align",
+            .store_key = "row_alignment_time"});
+
+    auto provider = buildProviderFromRecipe(dm, recipe, {}, intervals);
+    auto values = provider();
+
+    REQUIRE(values.size() == 2);
+    CHECK_THAT(values[0], WithinAbs(2.0, 0.01));
+    CHECK_THAT(values[1], WithinAbs(1.0, 0.01));
+}
+
+TEST_CASE("buildProviderFromRecipe - derived event binding normalizes gathered events per row",
+          "[TensorColumnBuilders][Phase5]") {
+    DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
+    auto events = createEventSeries({95, 105, 112, 190, 205, 220});
+    dm.setData<DigitalEventSeries>("events", events, TimeKey("time"));
+
+    auto intervals = createIntervalSeries({{100, 120}, {200, 230}});
+
+    ColumnRecipe recipe;
+    recipe.column_name = "relative_count";
+    recipe.source_key = "events";
+    recipe.pipeline_json = R"({
+        "steps": [
+            {
+                "step_id": "normalize",
+                "transform_name": "NormalizeDigitalEventSeriesRelative",
+                "parameters": {"alignment_time": 0},
+                "param_bindings": {"alignment_time": "row_alignment_time"}
+            }
+        ],
+        "range_reduction": {
+            "reduction_name": "EventCountInWindow",
+            "parameters": {"window_start": 0.0, "window_end": 15.0}
+        }
+    })";
+    recipe.pipeline_value_bindings.push_back(PipelineValueBindingRecipe{
+            .source_key = "intervals",
+            .source_pipeline_json = R"({
+                "steps": [
+                    {
+                        "step_id": "start",
+                        "transform_name": "IntervalToEvent",
+                        "parameters": {"point": "start"}
+                    }
+                ]
+            })",
+            .store_key = "row_alignment_time"});
+    dm.setData<DigitalIntervalSeries>("intervals", intervals, TimeKey("time"));
+
+    auto provider = buildProviderFromRecipe(dm, recipe, {}, intervals);
+    auto values = provider();
+
+    REQUIRE(values.size() == 2);
+    CHECK_THAT(values[0], WithinAbs(2.0, 0.01));
+    CHECK_THAT(values[1], WithinAbs(1.0, 0.01));
+}
+
+TEST_CASE("buildProviderFromRecipe - event binding row-count mismatch throws",
+          "[TensorColumnBuilders][Phase5]") {
+    DataManager dm;
+    setDefaultIdentityTimeFrame(dm, 1000);
+    auto events = createEventSeries({95, 105, 112});
+    auto alignments = createEventSeries({100});
+    dm.setData<DigitalEventSeries>("events", events, TimeKey("time"));
+    dm.setData<DigitalEventSeries>("align", alignments, TimeKey("time"));
+
+    auto intervals = createIntervalSeries({{90, 120}, {180, 230}});
+
+    ColumnRecipe recipe;
+    recipe.column_name = "relative_count";
+    recipe.source_key = "events";
+    recipe.pipeline_json = R"({"steps": [], "range_reduction": {"reduction_name": "EventCount"}})";
+    recipe.pipeline_value_bindings.push_back(PipelineValueBindingRecipe{
+            .source_key = "align",
+            .store_key = "row_alignment_time"});
+
+    CHECK_THROWS_AS(buildProviderFromRecipe(dm, recipe, {}, intervals), std::runtime_error);
 }
 
 // =============================================================================

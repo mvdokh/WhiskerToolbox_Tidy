@@ -11,12 +11,19 @@
 #include "DataManager/DataManager.hpp"
 #include "DataManager/utils/ContainerTypeIndex.hpp"
 #include "DataManager/utils/DataTypeIndexBridge.hpp"
+#include "DigitalTimeSeries/Digital_Event_Series.hpp"
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
+#include "Lines/Line_Data.hpp"
+#include "Masks/Mask_Data.hpp"
+#include "Media/Media_Data.hpp"
+#include "Points/Point_Data.hpp"
 #include "Tensors/TensorData.hpp"
 #include "Tensors/storage/LazyColumnTensorStorage.hpp"
+#include "TimeFrame/TimeFrame.hpp"
 
 #include <cmath>// NAN
 #include <functional>
+#include <set>
 #include <stdexcept>
 #include <utility>
 #include <variant>
@@ -43,6 +50,76 @@ std::vector<std::string> getStepNames(
         names.push_back(pipeline.getStep(i).transform_name);
     }
     return names;
+}
+
+[[nodiscard]] bool isFloatCompatibleReductionOutput(std::type_index output_type) {
+    return output_type == typeid(float) || output_type == typeid(double) ||
+           output_type == typeid(int);
+}
+
+std::vector<Neuralyzer::Transforms::V2::PipelineValueStore> buildPipelineValueRowStores(
+        DataManager & dm,
+        std::vector<PipelineValueBindingRecipe> const & bindings,
+        std::size_t row_count) {
+    using Neuralyzer::Transforms::V2::executePipeline;
+    using Neuralyzer::Transforms::V2::PipelineValueStore;
+
+    std::vector<PipelineValueStore> row_stores(row_count);
+    if (bindings.empty()) {
+        return row_stores;
+    }
+
+    std::set<std::string> store_keys;
+    for (auto const & binding: bindings) {
+        if (binding.store_key.empty()) {
+            throw std::runtime_error("pipeline_value_bindings: store_key must not be empty");
+        }
+        if (!store_keys.insert(binding.store_key).second) {
+            throw std::runtime_error(
+                    "pipeline_value_bindings: duplicate store_key '" + binding.store_key + "'");
+        }
+
+        auto source_variant = dm.getDataVariant(binding.source_key);
+        if (!source_variant) {
+            throw std::runtime_error(
+                    "pipeline_value_bindings: source_key '" + binding.source_key + "' not found");
+        }
+
+        DataTypeVariant binding_variant = *source_variant;
+        if (!binding.source_pipeline_json.empty()) {
+            auto pipeline_result = Neuralyzer::Transforms::V2::Examples::loadPipelineFromJson(
+                    binding.source_pipeline_json);
+            if (!pipeline_result) {
+                auto const error = pipeline_result.error();
+                auto const error_message = error ? std::string(error->what()) : std::string("unknown error");
+                throw std::runtime_error(
+                        "pipeline_value_bindings: failed to load source_pipeline_json for '" +
+                        binding.source_key + "': " + error_message);
+            }
+            binding_variant = executePipeline(binding_variant, *pipeline_result);
+        }
+
+        auto const * events_ptr = std::get_if<std::shared_ptr<DigitalEventSeries>>(&binding_variant);
+        if (!events_ptr || !*events_ptr) {
+            throw std::runtime_error(
+                    "pipeline_value_bindings: source '" + binding.source_key +
+                    "' must resolve to DigitalEventSeries");
+        }
+        auto const & events = **events_ptr;
+        if (events.size() != row_count) {
+            throw std::runtime_error(
+                    "pipeline_value_bindings: source '" + binding.source_key +
+                    "' row count does not match tensor row count");
+        }
+
+        std::size_t row = 0;
+        for (auto const & event: events.view()) {
+            row_stores[row].set(binding.store_key, event.time());
+            ++row;
+        }
+    }
+
+    return row_stores;
 }
 
 /**
@@ -75,7 +152,8 @@ bool pipelineProducesFloat(
     auto const step_names = getStepNames(pipeline);
 
     if (!step_names.empty()) {
-        // Validate the element transform chain
+        // Validate the transform chain. TypeChainResolver supports both
+        // element-level and container-level steps.
         auto chain = resolveTypeChain(
                 source_container_type,
                 std::span<std::string const>{step_names});
@@ -86,9 +164,11 @@ bool pipelineProducesFloat(
         if (auto const & range_reduction = pipeline.getRangeReduction();
             range_reduction.has_value()) {
             // Range reduction follows the element chain —
-            // check the reduction's declared output type.
+            // check the reduction's declared scalar output. Input compatibility
+            // is intentionally left to execution because some reductions consume
+            // API-facing view elements rather than DataTraits element types.
             auto const & red = *range_reduction;
-            return red.output_type == typeid(float) || red.output_type == typeid(double) || red.output_type == typeid(int);
+            return isFloatCompatibleReductionOutput(red.output_type);
         }
 
         // No range reduction: the chain itself must end at float.
@@ -99,7 +179,7 @@ bool pipelineProducesFloat(
         range_reduction.has_value()) {
         // Range-reduction-only (no element steps).
         auto const & red = *range_reduction;
-        return red.output_type == typeid(float) || red.output_type == typeid(double) || red.output_type == typeid(int);
+        return isFloatCompatibleReductionOutput(red.output_type);
     }
 
     // Empty pipeline (identity / passthrough).
@@ -226,6 +306,36 @@ std::vector<float> sampleOutputAtRowTimes(
                       output);
 }
 
+std::vector<TimeFrameIndex> sampleTimesToTimeFrameIndices(
+        DigitalEventSeries const & sample_times,
+        TimeFrame const & target_time_frame) {
+    std::vector<TimeFrameIndex> result;
+    result.reserve(sample_times.size());
+    for (auto const & event: sample_times.view()) {
+        result.push_back(target_time_frame.getIndexAtTime(event.time(), false));
+    }
+    return result;
+}
+
+std::shared_ptr<TimeFrame> getSourceTimeFrameForSampling(
+        DataManager & dm,
+        std::string const & source_key) {
+    auto source_variant = dm.getDataVariant(source_key);
+    if (!source_variant) {
+        throw std::runtime_error(
+                "buildProviderFromRecipe: source_key '" + source_key + "' not found in DataManager");
+    }
+
+    return std::visit([](auto const & ptr) -> std::shared_ptr<TimeFrame> {
+        if constexpr (requires { ptr->getTimeFrame(); }) {
+            return ptr->getTimeFrame();
+        } else {
+            return nullptr;
+        }
+    },
+                      *source_variant);
+}
+
 }// anonymous namespace
 
 ColumnProviderFn buildPipelineColumnProvider(
@@ -307,9 +417,24 @@ ColumnProviderFn buildIntervalPipelineProvider(
         std::string const & source_key,
         std::shared_ptr<DigitalIntervalSeries const> intervals,
         Neuralyzer::Transforms::V2::TransformPipeline pipeline) {
+    return buildIntervalPipelineProvider(
+            dm, source_key, std::move(intervals), std::move(pipeline), {});
+}
+
+ColumnProviderFn buildIntervalPipelineProvider(
+        DataManager & dm,
+        std::string const & source_key,
+        std::shared_ptr<DigitalIntervalSeries const> intervals,
+        Neuralyzer::Transforms::V2::TransformPipeline pipeline,
+        std::vector<Neuralyzer::Transforms::V2::PipelineValueStore> row_stores) {
     if (!intervals) {
         throw std::runtime_error(
                 "buildIntervalPipelineProvider: intervals must not be null");
+    }
+
+    if (!row_stores.empty() && row_stores.size() != intervals->size()) {
+        throw std::runtime_error(
+                "buildIntervalPipelineProvider: row store count must match interval count");
     }
 
     // ── Validate source exists ───────────────────────────────────────────
@@ -341,14 +466,18 @@ ColumnProviderFn buildIntervalPipelineProvider(
     // ── Return closure that delegates to gatherAndExecutePipeline ────────
     return [&dm, key = source_key,
             ivals = std::move(intervals),
-            pipe = std::move(pipeline)]() -> std::vector<float> {
+            pipe = std::move(pipeline),
+            stores = std::move(row_stores)]() -> std::vector<float> {
         auto var = dm.getDataVariant(key);
         if (!var) {
             throw std::runtime_error(
                     "buildIntervalPipelineProvider: source '" + key +
                     "' no longer available");
         }
-        return Neuralyzer::Gather::gatherAndExecutePipeline(*var, ivals, pipe);
+        if (stores.empty()) {
+            return Neuralyzer::Gather::gatherAndExecutePipeline(*var, ivals, pipe);
+        }
+        return Neuralyzer::Gather::gatherAndExecutePipeline(*var, ivals, pipe, stores);
     };
 }
 
@@ -378,26 +507,64 @@ ColumnProviderFn buildProviderFromRecipe(
 
     // 3. Interval-row columns → Pattern B (generic gather + pipeline)
     if (intervals) {
-        if (recipe.pipeline_json.empty()) {
-            throw std::runtime_error(
-                    "buildProviderFromRecipe: interval-row columns require a pipeline "
-                    "with a range reduction (pipeline_json is empty)");
+        Neuralyzer::Transforms::V2::TransformPipeline pipeline;
+        bool const identity_pipeline = Neuralyzer::Gather::isIdentityRowPipelineJson(recipe.pipeline_json);
+        if (!identity_pipeline) {
+            auto pipeline_result = Neuralyzer::Transforms::V2::Examples::loadPipelineFromJson(recipe.pipeline_json);
+            if (!pipeline_result) {
+                auto const error = pipeline_result.error();
+                auto const error_message = error ? std::string(error->what()) : std::string("unknown error");
+                throw std::runtime_error(
+                        "buildProviderFromRecipe: failed to load pipeline from JSON: " +
+                        error_message);
+            }
+            pipeline = std::move(pipeline_result.value());
         }
 
-        auto pipeline_result = Neuralyzer::Transforms::V2::Examples::loadPipelineFromJson(recipe.pipeline_json);
-        if (!pipeline_result) {
-            auto const error = pipeline_result.error();
-            auto const error_message = error ? std::string(error->what()) : std::string("unknown error");
-            throw std::runtime_error(
-                    "buildProviderFromRecipe: failed to load pipeline from JSON: " +
-                    error_message);
-        }
-
-        auto gather_windows = Neuralyzer::Gather::resolveIntervalGatherWindows(
+        auto row_geometry = Neuralyzer::Gather::resolveIntervalRowPipelineGeometry(
                 intervals, recipe.row_pipeline_json, intervals->size());
 
+        if (auto const * sample_times = std::get_if<std::shared_ptr<DigitalEventSeries const>>(&row_geometry)) {
+            if (pipeline.hasRangeReduction()) {
+                throw std::runtime_error(
+                        "buildProviderFromRecipe: DigitalEventSeries row_pipeline_json output "
+                        "selects sample times and cannot be combined with a range reduction");
+            }
+            auto source_time_frame = getSourceTimeFrameForSampling(dm, recipe.source_key);
+            if (!source_time_frame) {
+                throw std::runtime_error(
+                        "buildProviderFromRecipe: source '" + recipe.source_key +
+                        "' has no TimeFrame for sample-time row pipeline output");
+            }
+            return buildPipelineColumnProvider(
+                    dm,
+                    recipe.source_key,
+                    sampleTimesToTimeFrameIndices(**sample_times, *source_time_frame),
+                    std::move(pipeline));
+        }
+
+        auto gather_windows = std::get<std::shared_ptr<DigitalIntervalSeries const>>(std::move(row_geometry));
+
+        if (identity_pipeline) {
+            throw std::runtime_error(
+                    "buildProviderFromRecipe: interval-row gather columns require a pipeline "
+                    "with a range reduction");
+        }
+
+        auto row_stores = buildPipelineValueRowStores(
+                dm, recipe.pipeline_value_bindings, gather_windows->size());
+
+        if (recipe.pipeline_value_bindings.empty()) {
+            return buildIntervalPipelineProvider(
+                    dm, recipe.source_key, std::move(gather_windows), std::move(pipeline));
+        }
+
         return buildIntervalPipelineProvider(
-                dm, recipe.source_key, std::move(gather_windows), std::move(pipeline_result.value()));
+                dm,
+                recipe.source_key,
+                std::move(gather_windows),
+                std::move(pipeline),
+                std::move(row_stores));
     }
 
     // 4. Timestamp-row columns → Pattern A (generic pipeline + sample)
@@ -406,9 +573,9 @@ ColumnProviderFn buildProviderFromRecipe(
                 "buildProviderFromRecipe: timestamp-row column requires non-empty row_times");
     }
 
-    // Load pipeline from JSON (empty JSON = empty pipeline = identity passthrough)
+    // Load pipeline from JSON (empty or explicit identity JSON = passthrough)
     Neuralyzer::Transforms::V2::TransformPipeline pipeline;
-    if (!recipe.pipeline_json.empty()) {
+    if (!Neuralyzer::Gather::isIdentityRowPipelineJson(recipe.pipeline_json)) {
         auto pipeline_result = Neuralyzer::Transforms::V2::Examples::loadPipelineFromJson(recipe.pipeline_json);
         if (!pipeline_result) {
             auto const error = pipeline_result.error();

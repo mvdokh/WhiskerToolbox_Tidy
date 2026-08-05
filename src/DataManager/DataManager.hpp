@@ -211,7 +211,7 @@ public:
     * auto keys = dm.getAllKeys(); // Returns ["media", "points1", "line1"]
     * @endcode
     */
-    [[nodiscard]] std::vector<std::string> getAllKeys();
+    [[nodiscard]] std::vector<std::string> getAllKeys() const;
 
     /**
     * @brief Get all keys associated with a specific data type
@@ -234,7 +234,7 @@ public:
     * @endcode
     */
     template<typename T>
-    [[nodiscard]] std::vector<std::string> getKeys() {
+    [[nodiscard]] std::vector<std::string> getKeys() const {
         std::vector<std::string> keys;
         for (auto const & [key, value]: _data) {
             if (std::holds_alternative<std::shared_ptr<T>>(value)) {
@@ -269,76 +269,14 @@ public:
 
     template<typename T>
     void setData(std::string const & key, TimeKey const & time_key) {
-        commands::warnIfOutsideCommand("setData");
-
-        // If the key already exists, remove old entry and notify so consumers
-        // can detach per-object callbacks before the object is replaced.
-        if (_data.contains(key)) {
-            _time_frames.erase(key);
-            _removeLineageForKey(key);
-            _data.erase(key);
-            _notifyObservers();
-        }
-
-        _data[key] = std::make_shared<T>();
-        setTimeKey(key, time_key);
-
-        //Rebuild the EntityIds
-        if constexpr ((std::is_same_v<T, LineData>) ||
-                      (std::is_same_v<T, PointData>) ||
-                      (std::is_same_v<T, DigitalEventSeries>) ||
-                      (std::is_same_v<T, DigitalIntervalSeries>) ||
-                      (std::is_same_v<T, MaskData>) ) {
-            std::get<std::shared_ptr<T>>(_data[key])->setIdentityContext(key, getEntityRegistry());
-            std::get<std::shared_ptr<T>>(_data[key])->rebuildAllEntityIds();
-        }
-        _notifyObservers();
+        setData(key, std::make_shared<T>(), time_key);
     }
 
     void setData(std::string const & key, DataTypeVariant data, TimeKey const & time_key);
 
     template<typename T>
     void setData(std::string const & key, std::shared_ptr<T> data, TimeKey const & time_key) {
-        commands::warnIfOutsideCommand("setData");
-        // Loop through all _data. If shared_ptr data is already in _data, return
-        for (auto const & [existing_key, existing_variant]: _data) {
-            bool found = std::visit([&data](auto const & existing_ptr) -> bool {
-                using ExistingType = std::decay_t<decltype(*existing_ptr)>;
-                using NewType = std::decay_t<decltype(*data)>;
-                if constexpr (std::is_same_v<ExistingType, NewType>) {
-                    return existing_ptr == data;
-                } else {
-                    return false;
-                }
-            },
-                                    existing_variant);
-            if (found) {
-                return;// Data already exists, do not set again
-            }
-        }
-
-        // If the key already exists with a different data object, remove old
-        // entry and notify so consumers can detach per-object callbacks.
-        if (_data.contains(key)) {
-            _time_frames.erase(key);
-            _removeLineageForKey(key);
-            _data.erase(key);
-            _notifyObservers();
-        }
-
-        _data[key] = data;
-        setTimeKey(key, time_key);
-
-        if constexpr ((std::is_same_v<T, LineData>) ||
-                      (std::is_same_v<T, PointData>) ||
-                      (std::is_same_v<T, DigitalEventSeries>) ||
-                      (std::is_same_v<T, DigitalIntervalSeries>) ||
-                      (std::is_same_v<T, MaskData>) ) {
-            std::get<std::shared_ptr<T>>(_data[key])->setIdentityContext(key, getEntityRegistry());
-            std::get<std::shared_ptr<T>>(_data[key])->rebuildAllEntityIds();
-        }
-
-        _notifyObservers();
+        setData(key, DataTypeVariant{std::move(data)}, time_key);
     }
 
     /**
@@ -492,6 +430,18 @@ private:
  * @return true to continue loading, false to cancel
  */
 using JsonLoadProgressCallback = std::function<bool(int current, int total, std::string const & message)>;
+
+/**
+ * @brief Populate the default @c time TimeFrame when it is still empty after JSON loading.
+ *
+ * Scans all loaded @c MediaData keys with a positive frame count and builds an identity
+ * @c TimeFrame @c [0, N-1] on @c TimeKey("time"). Does nothing if @c time already has samples
+ * or no suitable media exists.
+ *
+ * @param dm DataManager to update.
+ * @return @c true if a new @c time TimeFrame was created.
+ */
+bool ensureDefaultTimeFrameFallback(DataManager & dm);
 
 std::vector<DataInfo> load_data_from_json_config(DataManager *, std::string const & json_filepath);
 std::vector<DataInfo> load_data_from_json_config(DataManager *, std::string const & json_filepath, JsonLoadProgressCallback const & progress_callback);

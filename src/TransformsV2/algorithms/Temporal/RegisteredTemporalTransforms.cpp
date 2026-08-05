@@ -1,11 +1,12 @@
 #include "algorithms/Temporal/RegisteredTemporalTransforms.hpp"
 
 #include "AnalogTimeSeries/Analog_Time_Series.hpp"
+#include "DigitalTimeSeries/Digital_Event_Series.hpp"
 #include "DigitalTimeSeries/EventWithId.hpp"
 #include "TimeFrame/ClockTicks.hpp"
 #include "algorithms/Temporal/NormalizeTime.hpp"
-#include "extension/ParameterBinding.hpp"
 #include "core/ElementRegistry.hpp"
+#include "extension/ParameterBinding.hpp"
 #include "io/PipelineLoader.hpp"
 
 namespace Neuralyzer::Transforms::V2::Temporal {
@@ -33,6 +34,7 @@ static RegisterBindingApplicator<NormalizeTimeParamsV2> const register_binding_a
  */
 bool const init_pipeline_factories = []() {
     registerPipelineStepFactoryFor<NormalizeTimeParamsV2>();
+    registerPipelineStepFactoryFor<ShiftDigitalEventSeriesParams>();
     return true;
 }();
 
@@ -45,7 +47,7 @@ template<typename In, typename Out, typename Params>
 struct RegisterTransform {
     RegisterTransform(
             std::string name,
-            Out (*func)(In const&, Params const&),
+            Out (*func)(In const &, Params const &),
             TransformMetadata metadata) {
         metadata.name = name;
         metadata.input_type = typeid(In);
@@ -129,51 +131,30 @@ auto const register_normalize_event_time_value_v2 = RegisterTransform<
  */
 auto const register_normalize_clock_ticks_value_v2 = RegisterTransform<
         ClockTicks,
-        float,
+        ClockTicks,
         NormalizeTimeParamsV2>(
         "NormalizeClockTicksValueV2",
         normalizeClockTicksValueV2,
         TransformMetadata{
                 .name = "NormalizeClockTicksValueV2",
-                .description = "Compute normalized clock-tick time offset as float (V2 - uses param bindings)",
+                .description = "Compute normalized clock-tick time offset (V2 - uses param bindings)",
                 .category = "Temporal",
                 .input_type = typeid(ClockTicks),
-                .output_type = typeid(float),
+                .output_type = typeid(ClockTicks),
                 .params_type = typeid(NormalizeTimeParamsV2),
                 .lineage_type = TransformLineageType::None,
                 .input_type_name = "ClockTicks",
-                .output_type_name = "float",
+                .output_type_name = "ClockTicks",
                 .params_type_name = "NormalizeTimeParamsV2",
                 .is_expensive = false,
                 .is_deterministic = true,
                 .supports_cancellation = false});
 
-/**
- * @brief Register NormalizeClockTicksWithIdValueV2 transform (value projection with bindings)
- *
- * Convenience transform for ClockTicksWithId that extracts clock-tick time and normalizes.
- * Prefer NormalizeClockTicksValueV2 with bindValueProjectionV2<ClockTicksWithId, float>().
- */
-auto const register_normalize_clock_ticks_with_id_value_v2 = RegisterTransform<
-        ClockTicksWithId,
-        float,
-        NormalizeTimeParamsV2>(
-        "NormalizeClockTicksWithIdValueV2",
-        normalizeClockTicksWithIdValueV2,
-        TransformMetadata{
-                .name = "NormalizeClockTicksWithIdValueV2",
-                .description = "Compute normalized clock-tick event time as float (V2 - uses param bindings)",
-                .category = "Temporal",
-                .input_type = typeid(ClockTicksWithId),
-                .output_type = typeid(float),
-                .params_type = typeid(NormalizeTimeParamsV2),
-                .lineage_type = TransformLineageType::None,
-                .input_type_name = "ClockTicksWithId",
-                .output_type_name = "float",
-                .params_type_name = "NormalizeTimeParamsV2",
-                .is_expensive = false,
-                .is_deterministic = true,
-                .supports_cancellation = false});
+// ClockTicksWithId is intentionally not registered as an Element transform.
+// ElementVariant contains ClockTicks, not ClockTicksWithId; bindValueProjectionV2
+// extracts .time() from ClockTicksWithId view elements before running the
+// TransformPipeline. This preserves EntityId access outside the pipeline while
+// keeping the pipeline's temporal normalize transform focused on ClockTicks.
 
 /**
  * @brief Register NormalizeSampleTimeValueV2 transform (value projection with bindings)
@@ -201,7 +182,53 @@ auto const register_normalize_sample_time_value_v2 = RegisterTransform<
                 .is_deterministic = true,
                 .supports_cancellation = false});
 
-}  // anonymous namespace
+/**
+ * @brief Register NormalizeDigitalEventSeriesRelative container transform.
+ *
+ * This materializes gathered DigitalEventSeries rows into relative ClockTicks
+ * storage before a terminal range reduction is applied.
+ */
+auto const register_normalize_digital_event_series_relative = RegisterContainerTransform<
+        DigitalEventSeries,
+        DigitalEventSeries,
+        NormalizeTimeParamsV2>(
+        "NormalizeDigitalEventSeriesRelative",
+        normalizeDigitalEventSeriesRelative,
+        ContainerTransformMetadata{
+                .name = "NormalizeDigitalEventSeriesRelative",
+                .description = "Normalize a DigitalEventSeries to relative clock-tick event times",
+                .category = "Temporal",
+                .input_container_type = typeid(DigitalEventSeries),
+                .output_container_type = typeid(DigitalEventSeries),
+                .params_type = typeid(NormalizeTimeParamsV2),
+                .input_type_name = "DigitalEventSeries",
+                .output_type_name = "DigitalEventSeries",
+                .params_type_name = "NormalizeTimeParamsV2",
+                .is_expensive = false,
+                .is_deterministic = true,
+                .supports_cancellation = true});
+
+auto const register_shift_digital_event_series = RegisterContainerTransform<
+        DigitalEventSeries,
+        DigitalEventSeries,
+        ShiftDigitalEventSeriesParams>(
+        "ShiftDigitalEventSeries",
+        shiftDigitalEventSeries,
+        ContainerTransformMetadata{
+                .name = "ShiftDigitalEventSeries",
+                .description = "Shift every DigitalEventSeries event by a fixed clock-tick offset",
+                .category = "Temporal",
+                .input_container_type = typeid(DigitalEventSeries),
+                .output_container_type = typeid(DigitalEventSeries),
+                .params_type = typeid(ShiftDigitalEventSeriesParams),
+                .input_type_name = "DigitalEventSeries",
+                .output_type_name = "DigitalEventSeries",
+                .params_type_name = "ShiftDigitalEventSeriesParams",
+                .is_expensive = false,
+                .is_deterministic = true,
+                .supports_cancellation = true});
+
+}// anonymous namespace
 
 // ============================================================================
 // Public Registration Function
@@ -215,15 +242,16 @@ void registerTemporalTransforms() {
     // 3. Forcing the translation unit to be linked
 
     // Force instantiation of static registrations (V1)
-    (void)init_pipeline_factories;
-    
+    (void) init_pipeline_factories;
+
     // Force instantiation of V2 registrations (param bindings)
-    (void)register_normalize_time_value_v2;
-    (void)register_normalize_event_time_value_v2;
-    (void)register_normalize_clock_ticks_value_v2;
-    (void)register_normalize_clock_ticks_with_id_value_v2;
-    (void)register_normalize_sample_time_value_v2;
-    (void)register_binding_applicator_v2;
+    (void) register_normalize_time_value_v2;
+    (void) register_normalize_event_time_value_v2;
+    (void) register_normalize_clock_ticks_value_v2;
+    (void) register_normalize_sample_time_value_v2;
+    (void) register_normalize_digital_event_series_relative;
+    (void) register_shift_digital_event_series;
+    (void) register_binding_applicator_v2;
 }
 
-}  // namespace Neuralyzer::Transforms::V2::Temporal
+}// namespace Neuralyzer::Transforms::V2::Temporal

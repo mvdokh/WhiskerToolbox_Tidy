@@ -5,7 +5,7 @@ format: html
 
 **Status:** Implementation roadmap for [Column Row Pipeline Design](column_row_pipeline.qmd).
 
-Phases 1-4 are implemented. Phase 5 and later remain planned.
+Phases 1-6 and 9a-9g are implemented. Phase 7 and preset-library work (Phase 10) remain planned.
 
 This roadmap breaks the per-column row-pipeline refactor into small, testable steps. The design goal is to let each tensor column derive its own row-aligned gather inputs through TransformPipelines while keeping `GatherResult` a container/direct-gather executor rather than a pipeline runner.
 
@@ -40,16 +40,24 @@ Implemented foundations:
 - `ColumnRecipe::row_pipeline_json` is parsed and serialized.
 - `resolveIntervalGatherWindows()` resolves identity and `DigitalIntervalSeries` row-pipeline output.
 - `buildProviderFromRecipe()` uses row-pipeline windows for interval-row columns.
+- Digital event/interval views expose `ClockTicks`-based API-facing elements.
+- `PipelineValueStore` stores `ClockTicks`, and `NormalizeTimeParamsV2::alignment_time` is `ClockTicks`.
+- `gatherAndExecutePipeline()` executes JSON-loaded pipeline steps, including container steps, on each gathered row before applying the terminal range reduction.
+- `NormalizeDigitalEventSeriesRelative` normalizes a gathered `DigitalEventSeries` into relative `ClockTicks` storage while preserving event `EntityId`s.
+- `ColumnRecipe::pipeline_value_bindings` is parsed, serialized, and used to bind one row-aligned `DigitalEventSeries` value into `PipelineValueStore` per tensor row.
+- Direct binding sources from DataManager keys and derived binding sources using `source_pipeline_json` are supported when they resolve to row-aligned `DigitalEventSeries` objects.
+- Interval-row columns can dispatch `DigitalEventSeries` row-pipeline output as sample times for timestamp-style providers.
+- `ShiftDigitalEventSeries` shifts `DigitalEventSeries` sample times and replaces the temporary top-level `pipeline_json` `"offset"` compatibility path.
+- Angle-at-contact-onset point sampling is tested through TensorDesign JSON in the whisker-contact scenario.
 - Contact-aligned spike presence is tested through TensorDesign JSON in the whisker-contact scenario.
 
 Known gaps:
 
-- Tensor column builders cannot yet bind iterable DataObject elements into `PipelineValueStore` for per-row column TransformPipeline execution.
-- Tensor column builders reject `DigitalEventSeries` sample-time row-pipeline output for interval-row columns; timestamp/sample dispatch is not implemented yet.
-- Point sampling still uses a temporary `pipeline_json` `"offset"` detection path in `TensorDesignBuilder::buildColumnProvider()`.
 - There is no row-pipeline caching.
 - UI does not expose row-pipeline configuration.
-- There is no column recipe preset registry, preset expansion layer, or bundled preset catalog.
+- The Phase 9c column recipe preset registry exists with a compiled preset set and TensorDesigner **Add Preset...** support.
+- The Phase 9d design authoring preset registry exists with a compiled `whisker_contact_feature_table` preset and TensorDesigner **Apply Table Preset...** support.
+- There is no broader preset JSON/file library yet.
 
 ## Phase 1: Baseline Tests — Done
 
@@ -130,23 +138,33 @@ Exit criteria:
 
 ## Phase 5: Iterable PipelineValueStore Bindings
 
+Status: done. The gathered-row execution path supports container-step pipelines
+before terminal range reduction, `NormalizeDigitalEventSeriesRelative` provides
+container-level `DigitalEventSeries -> DigitalEventSeries` normalization, and
+`pipeline_value_bindings` supplies row-specific `ClockTicks` values through
+`PipelineValueStore`.
+
 Goal: supply per-row values to `pipeline_json` transforms through the existing TransformsV2 `PipelineValueStore` mechanism without making `row_pipeline_json` responsible for normalization markers.
 
-Motivating example: gather `Spikes` into one `DigitalEventSeries` per trial/contact interval, then execute a TransformPipeline containing `NormalizeTime` on each gathered row. The normalization time comes from a row-aligned `DigitalEventSeries`, such as `ContactOnset`, or from `Contact -> IntervalToEvent(start)`. The event for row `i` is written into `PipelineValueStore` as a `TimePosition` and bound to the `NormalizeTime` parameter for row `i`.
+Motivating example: gather `Spikes` into one `DigitalEventSeries` per trial/contact interval, then execute a TransformPipeline containing `NormalizeTime` on each gathered row. The normalization time comes from a row-aligned `DigitalEventSeries`, such as `ContactOnset`, or from `Contact -> IntervalToEvent(start)`. The event for row `i` is written into `PipelineValueStore` as `ClockTicks` and bound to the `NormalizeTime` parameter for row `i`.
 
 Tasks:
 
-1. Define a JSON schema for iterable bindings from DataObjects into `PipelineValueStore` keys.
-2. Support direct iterable sources from DataManager keys with implicit identity source pipeline.
-3. Support derived iterable sources from a DataManager key plus `source_pipeline_json`.
-4. Start with `DigitalEventSeries` binding into `PipelineValueStore` as `TimePosition` using the event's `TimeFrameIndex` and the series `TimeFrame`.
-5. Defer `DigitalIntervalSeries` binding. Use `IntervalToEvent` in `source_pipeline_json` for start/end/center selection.
-6. Build one store value per tensor row from the resolved iterable DataObject, constructing the source view once before row iteration.
-7. Merge iterable store values with any base row store from `buildGatherRowStore()` without relying on GatherResult alignment metadata.
-8. Inject the current row's values into `PipelineValueStore` before applying `pipeline_json` parameter bindings.
-9. Verify a normalize-time transform uses the bound store value, not the gather window start.
-10. Add raster/PSTH-style tests where spikes are gathered in trial windows and normalized to a separate event per row.
-11. Add row-count mismatch tests for both direct and derived iterable sources.
+Completed tasks:
+
+1. Allow gathered row execution to run JSON-loaded container steps before terminal range reduction.
+2. Add `NormalizeDigitalEventSeriesRelative` as the container-level normalize transform for gathered `DigitalEventSeries` rows.
+3. Cover container-step-before-reduction behavior with a TensorColumnBuilders test using `EventCountInWindow` after normalization.
+4. Define a JSON schema for iterable bindings from DataObjects into `PipelineValueStore` keys: `pipeline_value_bindings[]` with `source_key`, optional `source_pipeline_json`, and `store_key`.
+5. Support direct iterable sources from DataManager keys with implicit identity source pipeline.
+6. Support derived iterable sources from a DataManager key plus `source_pipeline_json`.
+7. Start with `DigitalEventSeries` binding into `PipelineValueStore` as `ClockTicks` from the event returned by `DigitalEventSeries::view()`.
+8. Defer `DigitalIntervalSeries` binding. Use `IntervalToEvent` in `source_pipeline_json` for start/end/center selection.
+9. Build one store value per tensor row from the resolved iterable DataObject.
+10. Inject the current row's values into `PipelineValueStore` before applying `pipeline_json` parameter bindings.
+11. Verify a normalize-time transform uses the bound store value, not the gather window start.
+12. Add raster/PSTH-style tests where spikes are gathered in trial windows and normalized to a separate event per row.
+13. Add row-count mismatch tests for direct iterable sources.
 
 Exit criteria:
 
@@ -154,21 +172,23 @@ Exit criteria:
 - Trial-relative transforms can consume correct marker times.
 - Iterable binding sources are explicit and row-count checked.
 - Direct-key iterable bindings and key-plus-pipeline iterable bindings are both covered by tests.
-- `NormalizeTime` accepts a `TimePosition` binding and converts using the supplied `TimeFrame`.
-
-Open implementation choices:
-
-- Whether `PipelineValueStore` should store `TimePosition` directly or use `TimeIndexAndFrame` for non-owning contexts.
-- How long to keep legacy `int64_t` absolute-time bindings for `NormalizeTime`.
-- Existing `PipelineValueStore`, parameter bindings, and gather extension helpers should be reused or generalized to bind iterable values per row.
+- `NormalizeTime` accepts a `ClockTicks` binding and subtracts in clock-tick coordinates.
+- Phase 5 tests use the same DataObject `view()` element types that normal TransformPipeline execution uses.
 
 Settled design choices:
 
 - Iterable binding declarations live on `ColumnRecipe`, beside `pipeline_json`.
 - `source_pipeline_json` uses the same `PipelineDescriptor` schema as `row_pipeline_json` and `pipeline_json`.
 - Iterable binding `store_key` values must not overwrite other keys; duplicates are rejected.
+- Temporal iterable values should be bound as `ClockTicks`, not raw `TimeFrameIndex` values.
+- `PipelineValueStore` stores `ClockTicks` directly.
+- `NormalizeTimeParamsV2::alignment_time` is `ClockTicks` and binds through `ClockTicksReflector`.
+- `NormalizeClockTicksValueV2` is the canonical pipeline transform for DigitalEventSeries value projections; `ClockTicksWithId` is reduced to `ClockTicks` by the projection helper before pipeline execution.
+- `NormalizeDigitalEventSeriesRelative` is the canonical container-level transform when the gathered row should remain a `DigitalEventSeries` with relative `ClockTicks` values before reduction or export.
+- Existing `PipelineValueStore`, parameter bindings, and gather extension helpers should be reused or generalized to bind iterable values per row.
+- User-facing presets should hide the distinction between `ClockTicksWithId` and `ClockTicks` normalize transforms whenever possible.
 
-## Phase 6: Timestamp And Point Sampling
+## Phase 6: Timestamp And Point Sampling — Done
 
 Goal: replace the temporary `"offset"` sample-at-offset path with row-pipeline-driven point sampling.
 
@@ -185,6 +205,14 @@ Exit criteria:
 - Point sampling is expressible through row-pipeline JSON.
 - The offset string-search path is gone.
 - Existing sample-at-offset behavior is preserved where intended.
+
+Implemented notes:
+
+- `resolveIntervalRowPipelineGeometry()` resolves interval-row pipelines to either `DigitalIntervalSeries` gather windows or `DigitalEventSeries` sample times.
+- `buildProviderFromRecipe()` routes `DigitalEventSeries` row-pipeline output to timestamp/sample provider behavior when the column pipeline has no terminal range reduction.
+- `ShiftDigitalEventSeries` expresses sample offsets as a regular TransformPipeline step.
+- The old top-level `pipeline_json` `"offset"` detection path has been removed.
+- Tests cover provider-level analog sampling at interval starts, shifted sample times, and TensorDesign JSON replacing the old offset behavior.
 
 ## Phase 7: Optional Additional Row Transforms
 
@@ -209,88 +237,273 @@ Exit criteria:
 - New transforms are generally useful outside TensorDesign.
 - TensorDesign does not gain tensor-specific geometry enums.
 
-## Phase 8: Whisker-Contact Integration
+## Phase 8: Whisker-Contact Integration — Done
 
 Goal: prove the design on the motivating analysis table.
 
-Status: partially implemented. The contact-onset spike-presence column is covered by TensorDesign JSON. Angle-at-onset point sampling and trial-relative raster/PSTH examples remain planned.
+Status: done for the motivating whisker-contact feature table. TensorDesign JSON covers full-contact curvature, full-contact spike count, contact-onset spike presence, and angle-at-onset point sampling. Trial-relative raster/PSTH examples are now tracked as preset/example-library work in later phases rather than as a blocker for this integration phase.
 
 Tasks:
 
 1. ~~Extend the whisker-contact scenario with contact onset features.~~ **Done for onset spike presence.**
 2. ~~Add a full-contact curvature column.~~ **Done.**
 3. ~~Add a spike-in-onset-window column.~~ **Done.**
-4. Add an angle-at-onset column after timestamp/sample row-pipeline dispatch is implemented.
-5. Verify row count, row descriptors, and expected values.
-6. Update scenario documentation with valid JSON.
+4. ~~Add an angle-at-onset column after timestamp/sample row-pipeline dispatch is implemented.~~ **Done.**
+5. ~~Verify row count, row descriptors, and expected values.~~ **Done.**
+6. ~~Update scenario documentation with valid JSON.~~ **Done.**
 
 Exit criteria:
 
 - Contact-aligned spike presence is built through production TensorDesign code.
-- The JSON example in the design document can be promoted from target shape to working example.
+- Angle-at-contact-onset point sampling is built through production TensorDesign code.
+- The JSON example in the whisker-contact scenario documentation is a working example of the motivating feature table.
 
 ## Test Coverage Notes
 
 Current row-pipeline coverage is split across four files:
 
-- `tests/TransformsV2/test_tensor_column_builders.test.cpp` covers the TransformsV2 provider layer and `resolveIntervalGatherWindows()` behavior.
-- `tests/TensorDesign/test_tensor_design_builder.cpp` covers TensorDesign JSON parsing, serialization, and JSON-to-tensor builds.
+- `tests/TransformsV2/test_tensor_column_builders.test.cpp` covers the TransformsV2 provider layer, `resolveIntervalGatherWindows()` behavior, and Phase 5 direct/derived `pipeline_value_bindings` execution.
+- `tests/TensorDesign/test_tensor_design_builder.cpp` covers TensorDesign JSON parsing, serialization, JSON-to-tensor builds, and Phase 5 end-to-end bound normalization through fully specified JSON.
 - `tests/TransformsV2/test_tensor_whisker_contact_scenario.cpp` covers programmatic provider/lazy tensor construction over the whisker-contact fixture.
 - `tests/TensorDesign/test_tensor_whisker_contact_scenario.cpp` covers the TensorDesign JSON path over the same fixture, including contact-aligned spikes.
 
 The two whisker-contact files are not exact duplicates. They exercise different architectural layers. The older TransformsV2 file does not validate `row_pipeline_json`; it remains useful as lower-level integration coverage, though it may be a candidate for reduced assertions if runtime becomes an issue.
 
-Potential stale or missing coverage after Phase 4:
+Potential stale or missing coverage after Phase 8:
 
-- The timestamp offset characterization test is intentionally stale-by-design until Phase 6 replaces it.
 - `DigitalEventSeries` row-pipeline output rejection is covered at the row-geometry/helper layer; add a TensorDesign JSON-level rejection test if error messages become part of the user contract.
 - Add explicit tests for malformed but non-empty `row_pipeline_json` at the TensorDesign JSON build layer if not already covered by provider tests.
+- Add a derived binding row-count mismatch test if direct mismatch coverage is not considered sufficient.
 - Add cache behavior tests when row-pipeline caching is introduced.
 
-## Phase 9: Preset Registry And Expansion
+## Phase 9a: TimeFrame Row Source — Done
 
-Goal: make common row-pipeline workflows discoverable without requiring users to write raw TransformPipeline JSON.
+Goal: allow tensors with one row per index in a named `TimeFrame`, without requiring a synthetic data object.
+
+Status: done. TensorDesign supports `row_type: "timeframe"` with `row_source.time_key`, and TensorDesigner exposes a **TimeFrame Rows** mode populated from `DataManager::getTimeFrameKeys()`.
 
 Tasks:
 
-1. Add a `ColumnRecipePresetRegistry` or equivalent registry in the TensorDesign/TransformsV2 boundary.
-2. Define preset descriptors with name, display name, description, parameter schema, source (`Built-in` or `User`), and expansion function/template.
-3. Add presets for the initial common workflows:
-   - mean over interval
-   - event count over interval
-   - event presence around interval start
-   - analog sample at interval start
-   - raster events relative to interval start
-4. Expand preset JSON into raw `ColumnRecipe` fields before provider construction.
-5. Add tests that preset expansion produces the same tensor values as equivalent raw recipes.
-6. Decide whether saved designs store raw expansion only or preset plus expanded raw JSON.
-7. Decide whether user presets can override bundled preset IDs or whether duplicate IDs are rejected.
+1. Add `RowType::TimeFrame` or equivalent to TensorDesign row source parsing.
+2. Extend row-source JSON with a `time_key` field distinct from `data_key`.
+3. Build row descriptors from every index in the selected `TimeFrame`.
+4. Add TensorDesigner UI support for a **TimeFrame Rows** mode populated from `DataManager::getTimeFrameKeys()`.
+5. Keep **Timestamp Rows** data-object based (`DigitalEventSeries`) and clarify **Derived from Source** as "derive rows from timestamps in a data object".
+6. Add tests for TimeFrame rows sampling analog data.
+7. Add UI tests that TimeFrame row sources appear separately from timestamp-event row sources.
+
+Implemented notes:
+
+- TensorDesign JSON uses `row_source.time_key` for TimeFrame rows.
+- `serializeDesignJson()` omits `data_key` for TimeFrame row sources.
+- Backend tests cover parsing, serialization, and analog sampling over all TimeFrame rows.
+- TensorDesigner load-config tests cover building a tensor from TimeFrame rows.
+
+Exit criteria:
+
+- Users can build frame-aligned tensors directly from a TimeFrame key.
+- TensorDesigner no longer implies that a `DigitalEventSeries` is the only way to create timestamp-like rows.
+- Existing timestamp and derived-from-source behavior is unchanged.
+
+## Phase 9b: Point And Keypoint Column Primitives — Done
+
+Goal: support common keypoint feature tables without tensor-specific geometry enums.
+
+Status: done. `PointCoordinate` converts `PointData` to `RaggedAnalogTimeSeries` using a coordinate parameter, and TensorDesign JSON can build x/y keypoint columns over TimeFrame rows.
+
+Tasks:
+
+1. Add `PointCoordinate` as a parameterized container transform (`PointData -> RaggedAnalogTimeSeries`) with `coordinate = x | y`.
+2. Register the transform with TransformsV2 JSON loading and parameter schema infrastructure.
+3. Add transform tests for point coordinate extraction.
+4. Document timestamp sampling semantics for `RaggedAnalogTimeSeries` output: single-keypoint data uses the first/only value; multi-point-per-time data needs an explicit policy before broad use.
+5. Add TensorDesign tests for `PointData` rows from `DerivedFromSource` producing x/y columns.
+6. Add TensorDesign tests for TimeFrame rows sampling `PointData` into x/y columns after Phase 9a.
+7. Add interval-row tests reducing point coordinate values with a standard range reduction.
+8. Add TensorDesigner UI/load-config tests for a PointData x/y tensor once TimeFrame rows are available.
+
+Implemented notes:
+
+- `PointCoordinate` is implemented as one container transform with `coordinate = X | Y`.
+- TensorDesign tests cover TimeFrame rows sampling one-keypoint-per-time `PointData` into x/y columns.
+- Sparse TimeFrame sampling is covered for analog data and produces `NaN` where no source sample exists.
+- Additional DerivedFromSource, interval-reduction, and TensorDesigner UI tests remain useful follow-up coverage but are not required to prove the primitive path.
+
+Exit criteria:
+
+- A `PointData` keypoint can produce scalar x and y tensor columns through normal TransformPipeline JSON using one parameterized transform.
+- Multiple keypoint tables can be represented by repeating the same primitive column recipes.
+- The primitive transforms remain useful outside TensorDesign.
+
+## Phase 9c: Column Preset Registry And Expansion
+
+Goal: provide friendly recipe generators that expand user-supplied parameters into raw `ColumnRecipe` objects, avoiding manual embedded JSON authoring. Presets are for authoring convenience; saved designs remain expanded raw TensorDesign JSON.
+
+Status: done. `ColumnRecipePresetRegistry` is implemented in `src/TensorDesign` with the Phase 9c compiled preset set. Focused expansion tests cover raw recipe output, TensorDesign JSON tests verify both JSON-authored preset invocations and selected expanded presets through `buildTensorFromDesignJson()`, and TensorDesigner exposes **Add Preset...** to append expanded raw recipes. This phase does not add preset files or user/bundled preset catalogs; those are Phase 10.
+
+Tasks:
+
+1. ~~Add a `ColumnRecipePresetRegistry` or equivalent registry in the TensorDesign/TransformsV2 boundary.~~ **Started with a TensorDesign-side registry.**
+2. ~~Define preset descriptors with name, display name, description, parameter schema, source (`Built-in` or `User`), and expansion function/template.~~ **Started for compiled presets.**
+3. ~~Preset expansion must return a list of `ColumnRecipe`s, not a single recipe, so grouped features can be appended atomically.~~ **Done in the expansion type.**
+4. ~~Add presets for the initial common workflows:~~ **Done.**
+   - ~~mean over interval~~ **Done.**
+   - ~~event count over interval~~ **Done.**
+   - ~~event presence around interval start~~ **Done.**
+   - ~~analog sample at interval start~~ **Done.**
+   - ~~point x/y for one keypoint~~ **Done.**
+   - ~~point x/y for multiple keypoints~~ **Done.**
+   - ~~point x/y sampled at interval start~~ **Done.**
+   - ~~raster events relative to interval start~~ **Done.**
+   - ~~trial-relative event times using NormalizeTime with row-specific `ClockTicks` bindings~~ **Done as `trial_relative_event_count_from_interval_start`.**
+5. ~~Expand preset JSON into raw `ColumnRecipe` fields before provider construction.~~ **Done for compiled built-in presets in `parseDesignJson()`.**
+6. ~~Add tests that preset expansion produces the same tensor values as equivalent raw recipes.~~ **Done through focused expansion tests and TensorDesign JSON build tests.**
+7. ~~Add TensorDesigner UI support for **Add Preset...** that appends all expanded columns.~~ **Done.**
+8. ~~Save expanded raw recipes only after presets are applied; preset invocations are not required for execution.~~ **Done through `TensorDesigner::toJson()` / `serializeDesignJson()`.**
+9. ~~Reject duplicate preset IDs across built-in and user presets for the initial implementation.~~ **Done for registry registration.**
 
 Exit criteria:
 
 - Users can express the whisker-contact examples without raw transform names.
+- Users can add keypoint x/y column groups without manually authoring repeated `PointCoordinate` pipelines.
 - Presets are discoverable from a registry that can be reused by documentation and UI.
 - Raw JSON remains available for advanced workflows.
+- Saved designs remain reproducible expanded TensorDesign JSON and do not depend on the preset registry at load time.
 
-## Phase 10: Preset Library Files
+## Phase 9d: Design Authoring Presets
 
-Goal: distribute Neuralyzer with useful built-in column presets and let users save/import their own presets using a library pattern similar to TransformsV2 `PipelineLibrary`.
+Status: done for the initial compiled design authoring preset registry and motivating whisker-contact table preset.
+
+Goal: support reusable whole-table authoring templates that set row source and add multiple related column groups, while preserving expanded raw TensorDesign JSON as the executable and saved-analysis format.
+
+Design authoring presets are a higher-level convenience layer than Phase 9c column presets. A column preset expands to one or more `ColumnRecipe`s and appends them to the current design. A design authoring preset expands to a row source plus a set of raw `ColumnRecipe`s, producing an ordinary `TensorDesignSpec` immediately after application.
+
+Design preset invocations should not become the single source of truth for reproducible analysis. They are authoring shortcuts only. After applying a design preset, saving should write the expanded `row_source` and `columns` fields, not the preset invocation. Loading and executing a saved design should not require the design preset registry.
 
 Tasks:
 
-1. Add Qt-free helpers for tensor column preset files, modeled after `src/TransformsV2/io/PipelineLibrary.hpp`.
-2. Define default user preset directory, for example `{config_dir}/presets/tensor_design/columns/`.
-3. Define bundled preset lookup, for example `resources/presets/tensor_design/columns/` or another installed resource directory.
-4. Implement catalog listing that merges bundled and user presets with source metadata.
-5. Implement load/save/delete for user preset JSON files.
-6. Add bundled JSON presets for the initial registry entries.
-7. Add tests for path helpers, catalog merge behavior, load/save/delete, duplicate ID policy, and expansion.
+1. ~~Define a `DesignPresetExpansion` shape containing row-source fields plus multiple raw `ColumnRecipe`s.~~ **Done.**
+2. ~~Add a compiled `whisker_contact_feature_table` authoring preset covering curvature, spike count, onset spike presence, angle at onset, and optional keypoint x/y columns.~~ **Done.**
+3. ~~Add tests comparing design preset expansion to the equivalent raw TensorDesign JSON.~~ **Done.**
+4. ~~Prefer compiled expansion functions initially for design presets that need loops or complex defaults.~~ **Done.**
+5. ~~Ensure applying a design preset produces an ordinary `TensorDesignSpec` and that `serializeDesignJson()` writes expanded raw fields only.~~ **Done.**
+6. ~~Add TensorDesigner UI affordance such as **New From Preset...** or **Apply Table Preset...**. Because this changes the row source, the UI should confirm replacement when the current design already has a row source or columns.~~ **Done.**
 
 Exit criteria:
 
-- A fresh Neuralyzer install has useful TensorDesign column presets without user setup.
-- Users can save and import lab-specific presets.
-- The preset library uses a schema distinct from raw `PipelineDescriptor` JSON but follows the existing PipelineLibrary mechanics where practical.
+- A complete motivating analysis table can be authored from one preset plus a small parameter form.
+- Column presets remain useful for incremental table editing.
+- Applying a design preset produces ordinary row-source and column recipe JSON that can be saved and executed independently of the preset registry.
+
+## Phase 9e: Decoupling Row Modifiers and Column Aggregators
+
+Status: done.
+
+Goal: Prevent combinatorial explosion of monolithic presets (e.g., `analog_sample_at_interval_start`, `event_presence_around_interval_start`) by splitting the registry into two composable domains: Row Modifiers and Column Aggregators.
+
+Tasks:
+
+1. ~~Introduce `RowModifierRegistry`. This registry provides descriptors that output `row_pipeline_json` and declare the resulting *Effective Row Type* (e.g., Interval -> Event, Interval -> Interval).~~ **Done. RowModifiers also support emitting `pipeline_value_bindings`.**
+2. ~~Introduce `ColumnAggregatorRegistry`. This registry provides descriptors that output `pipeline_json` and optional `pipeline_value_bindings`. These are filtered based on the Effective Row Type and Target Data Type.~~ **Done.**
+3. ~~Refactor `ColumnRecipePresetRegistry` (or create a UI "Stitcher" equivalent) to seamlessly combine a selected Row Modifier and a Column Aggregator into one or more `ColumnRecipe`s.~~ **Done. Handled natively in `TensorDesignBuilder` json parsing.**
+4. ~~Carefully untangle multi-input presets (like `multi_point_xy_at_interval_start`):~~ **Done.**
+   - ~~The UI Stitcher must handle cases where the Column Aggregator accepts a list of `source_keys` (e.g., multiple keypoints).~~
+   - ~~For each input key, the Stitcher generates a distinct `ColumnRecipe`, applying the *same* `row_pipeline_json` (from the Row Modifier) to each.~~
+5. ~~Create a two-step UX flow in TensorDesigner:~~ (Deferred to UI layer)
+   - ~~**Step A (Optional):** Select a Row Modifier (filtered by top-level row strategy).~~
+   - ~~**Step B (Required):** Select a Target Data Series and Column Aggregator (filtered by the Effective Row Type from Step A).~~
+6. ~~Write tests ensuring that a composed Modifier + Aggregator yields the exact same JSON as the older monolithic presets.~~ **Done.**
+
+Exit criteria:
+
+- Users can independently mix and match row gather geometry (like "Onset Window") with data extraction logic (like "Mean", "Event Count") without requiring a custom C++ preset for every combination.
+- Multi-input workflows (like expanding 5 keypoints at interval onset) remain fully supported and generate the correct Nx2 `ColumnRecipe`s.
+- The UI successfully hides the complexity of building two coordinated JSON pipelines.
+
+## Phase 9f: Two-Step UI Column Stitcher
+
+Status: planned.
+
+Goal: Provide an intuitive UI in TensorDesigner for building modular columns without requiring users to write raw JSON or use monolithic presets. This phase implements the frontend encapsulation of Phase 9e's decoupled backend.
+
+Tasks:
+
+1. **Backend Registry Metadata (UI-Independent)**:
+   - Introduce an `EffectiveRowType` enum (e.g., `Interval`, `Event`) in the C++ backend.
+   - Update `RowModifierDescriptor` to declare its `output_row_type`.
+   - Update `ColumnAggregatorDescriptor` to declare its `supported_row_types` (e.g., Event Rate only supports `Interval`).
+   - Add query methods to the registries (e.g., `ColumnAggregatorRegistry::getAggregatorsFor(AggregatorQueryContext)`) so the UI remains stateless and driven purely by the backend composition rules.
+2. **Create a Two-Step Column Builder Dialog** (replacing or augmenting the existing `ColumnConfigDialog`).
+   - **Step A: Row Modification (Optional)**. Prompt: "Do you want to modify the row before extracting data?"
+     - Populate a dropdown from the `RowModifierRegistry`.
+     - Internally track the *Effective Row Type* resulting from this modifier (queried from the backend descriptor).
+   - **Step B: Data Aggregation (Required)**. Prompt: "What data do you want to extract?"
+     - Populate a dropdown from the `ColumnAggregatorRegistry`, dynamically filtered by querying the backend with the Effective Row Type from Step A.
+3. **The "Custom/Raw" Escape Hatch**:
+   - In Step B (or as a top-level toggle), include an "Advanced / Custom Pipeline" option.
+   - When selected, instead of showing a preset `AutoParamWidget`, the UI embeds the full `TransformPipelineEditor` (or a raw JSON text box).
+   - This allows users to author completely novel aggregations block-by-block without needing a preset to exist.
+4. **Implement the UI Stitcher logic**. When the user confirms the dialog, generate the `ColumnRecipe` by:
+   - Calling `expand()` on the selected descriptors.
+   - Stitching them together into a final set of `ColumnRecipe`s, just as the JSON backend does, and appending them to the `TensorDesigner` column list.
+5. Add frontend tests for the UI Stitcher logic to ensure that selecting specific combinations yields the exact same raw `ColumnRecipe`s as the JSON backend.
+
+Exit criteria:
+
+- Users can mix and match row geometries (Step A) with data extraction logic (Step B) using a guided, wizard-like UI.
+- The UI safely prevents illegal combinations (e.g., Range Reduction on an Event row) by filtering Step B options based on Step A's output.
+- Combinatorial explosion of UI presets is completely eliminated; the UI is highly composable.
+- The `TensorDesigner` list view accurately displays the generated columns.
+
+## Phase 9g: Polymorphic Preset Architecture and JSON DTOs
+
+Status: done.
+
+Goal: Refactor the monolithic `ColumnRecipePresetRegistry` into a modular architecture that separates behavioral execution (the Strategy pattern) from serialization (Flat DTOs for `reflect-cpp`). This allows complex presets to be defined in their own C++ files with custom UI callbacks, while enabling simple presets to be data-driven.
+
+Tasks:
+
+1. **Define Polymorphic Interfaces**:
+   - Create `IRowModifier` and `IColumnAggregator` base classes replacing the `std::function` structs.
+   - Include standard metadata methods (`id()`, `parameters()`, `expand()`).
+   - Include optional UI hook methods (e.g., `virtual std::vector<std::string> getDynamicOptions(std::string const& field_name) const`) to support dynamic `AutoParam` combo boxes without hardcoding UI logic into the registry.
+2. **Refactor Existing Complex Presets**:
+   - Extract complex presets (like `MultiPointXyAggregator`) into their own `.hpp`/`.cpp` files implementing the new interfaces.
+   - Update the registry to store `std::unique_ptr<IColumnAggregator>` and `std::unique_ptr<IRowModifier>`.
+3. **Define Flat DTOs for JSON Presets**:
+   - Create `JsonColumnPresetDto` (and a Row Modifier equivalent) as flat, inheritance-free structs designed specifically for `reflect-cpp` parsing. These structs will hold `id`, `ParameterSchema`, and raw JSON template strings (e.g., `pipeline_json_template`).
+4. **Implement the JSON Preset Strategy**:
+   - Create a `JsonColumnAggregator : public IColumnAggregator` class that accepts a parsed `JsonColumnPresetDto` in its constructor.
+   - Implement `expand()` to perform simple string replacement, injecting user-provided parameters into the DTO's JSON templates.
+
+Exit criteria:
+
+- The registry monolithic file is eliminated; presets are modularized into independent files.
+- `reflect-cpp` serialization boundaries are strictly separated from C++ behavioral polymorphism.
+- Custom C++ presets can provide specialized UI behaviors (like populating data keys) via interface methods.
+- The foundation is laid to load simple presets from JSON files (Phase 10).
+
+## Phase 10: Preset Library Files and User Authoring
+
+Goal: Distribute Neuralyzer with useful built-in JSON recipe generators and let users author, save, and import their own preset definitions using a library pattern.
+
+Tasks:
+
+1. Add Qt-free helpers for tensor column preset files, scanning default directories (`{config_dir}/presets/tensor_design/columns/` for users and `resources/...` for bundled).
+2. Implement catalog initialization that parses JSON files into `JsonColumnPresetDto` via `reflect-cpp`, wraps them in `JsonColumnAggregator` classes (from Phase 9g), and registers them.
+3. Implement load/save/delete for user preset JSON files.
+4. **UI Save Workflow**: Add a "Save as Custom Preset..." action in the TensorDesigner Advanced Pipeline editor.
+5. In the Save dialog, allow users to name the preset and declare simple parameters (e.g., exposing a window offset as an `int`).
+6. Serialize the resulting `JsonColumnPresetDto` to the user's config directory so it appears in the "Add Preset" dialog in future sessions.
+7. Reject duplicate preset IDs across bundled and user entries in the initial implementation.
+8. Add tests for path helpers, catalog merge behavior, load/save/delete, duplicate ID policy, and template expansion.
+
+Exit criteria:
+
+- A fresh Neuralyzer install has useful TensorDesign JSON column presets without user setup.
+- Users can parameterize and save custom JSON pipelines directly from the UI, generating reusable template files.
+- The preset library correctly loads and seamlessly integrates User JSON presets alongside complex C++ Built-in presets.
+- User presets do not silently override bundled presets; lab-specific variants use unique IDs until explicit namespacing is introduced.
 
 ## Phase 11: Documentation And UI Follow-Up
 

@@ -16,8 +16,11 @@
 #include "TransformsV2/io/PipelineLoader.hpp"
 #define slots Q_SLOTS
 
+#include "AutoParamWidget/AutoParamWidget.hpp"
 #include "EditorState/OperationContext.hpp"
 #include "TransformsV2_Widget/UI/PipelineLibraryDialog.hpp"
+#include <QCheckBox>
+
 
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -41,13 +44,17 @@ ColumnConfigDialog::ColumnConfigDialog(
         DesignerRowType row_type,
         EditorLib::OperationContext * operation_context,
         QString pipeline_library_dir,
+        std::string row_source_key,
         QWidget * parent)
     : QDialog(parent),
       _data_manager(std::move(data_manager)),
       _row_type(row_type),
+      _row_source_key(std::move(row_source_key)),
       _operation_context(operation_context),
       _requester_id(EditorLib::EditorInstanceId::generate().toString()),
       _pipeline_library_dir(std::move(pipeline_library_dir)) {
+    _modifier_registry = Neuralyzer::TensorDesign::createBuiltInRowModifierRegistry();
+    _aggregator_registry = Neuralyzer::TensorDesign::createBuiltInColumnAggregatorRegistry();
     _setupUi();
     _connectSignals();
     _populateSourceKeys();
@@ -59,13 +66,17 @@ ColumnConfigDialog::ColumnConfigDialog(
         ColumnRecipe const & recipe,
         EditorLib::OperationContext * operation_context,
         QString pipeline_library_dir,
+        std::string row_source_key,
         QWidget * parent)
     : QDialog(parent),
       _data_manager(std::move(data_manager)),
       _row_type(row_type),
+      _row_source_key(std::move(row_source_key)),
       _operation_context(operation_context),
       _requester_id(EditorLib::EditorInstanceId::generate().toString()),
       _pipeline_library_dir(std::move(pipeline_library_dir)) {
+    _modifier_registry = Neuralyzer::TensorDesign::createBuiltInRowModifierRegistry();
+    _aggregator_registry = Neuralyzer::TensorDesign::createBuiltInColumnAggregatorRegistry();
     _setupUi();
     _connectSignals();
     _populateSourceKeys();
@@ -80,18 +91,17 @@ ColumnConfigDialog::~ColumnConfigDialog() {
 // Public API
 // =============================================================================
 
-ColumnRecipe ColumnConfigDialog::getRecipe() const {
-    ColumnRecipe recipe;
-    recipe.column_name = _name_edit->text().toStdString();
-
-    // Source key
-    int const source_idx = _source_combo->currentIndex();
-    if (source_idx >= 0) {
-        recipe.source_key = _source_combo->currentData().toString().toStdString();
-    }
-
+std::vector<ColumnRecipe> ColumnConfigDialog::getRecipes() const {
     // Interval property takes priority — no pipeline needed
     if (_interval_property_group && _interval_property_group->isChecked()) {
+        ColumnRecipe recipe;
+        recipe.column_name = _name_edit->text().toStdString();
+        // Source key is optional for interval property, but we can set it if selected
+        int const source_idx = _source_combo->currentIndex();
+        if (source_idx >= 0) {
+            recipe.source_key = _source_combo->currentData().toString().toStdString();
+        }
+
         int const prop_idx = _interval_property_combo->currentIndex();
         switch (prop_idx) {
             case 0:
@@ -107,13 +117,79 @@ ColumnRecipe ColumnConfigDialog::getRecipe() const {
                 break;
         }
         recipe.pipeline_json.clear();
-        return recipe;
+        return {recipe};
+    }
+
+    if (_advanced_mode_check && !_advanced_mode_check->isChecked()) {
+        // Preset mode
+        Neuralyzer::TensorDesign::ColumnRecipePresetArgs args;
+        args.source_key = _source_combo->currentIndex() >= 0 ? _source_combo->currentData().toString().toStdString() : "";
+        args.output_name = _name_edit->text().toStdString();
+
+        std::string row_pipeline_json;
+        std::vector<Neuralyzer::TensorBuilders::PipelineValueBindingRecipe> bindings;
+
+        if (_row_modifier_check->isChecked()) {
+            auto const mod_id = _row_modifier_combo->currentData().toString().toStdString();
+            if (auto const * mod_desc = _modifier_registry.find(mod_id)) {
+                auto params_json = _row_modifier_params->toJson();
+                auto parsed_params = nlohmann::json::parse(params_json);
+                auto mod_args_opt = Neuralyzer::TensorDesign::parseColumnRecipePresetArgs(parsed_params);
+                if (mod_args_opt) {
+                    mod_args_opt->source_key = args.source_key;
+                    mod_args_opt->output_name = args.output_name;
+                    if (mod_id == "bind_interval_start" && !_row_source_key.empty()) {
+                        mod_args_opt->binding_source_key = _row_source_key;
+                    }
+                    if (auto mod_exp = mod_desc->expand(*mod_args_opt)) {
+                        row_pipeline_json = mod_exp->row_pipeline_json;
+                        bindings = mod_exp->pipeline_value_bindings;
+                    }
+                }
+            }
+        }
+
+        auto const agg_id = _aggregator_combo->currentData().toString().toStdString();
+        if (auto const * agg_desc = _aggregator_registry.find(agg_id)) {
+            auto params_json = _aggregator_params->toJson();
+            auto parsed_params = nlohmann::json::parse(params_json);
+            auto agg_args_opt = Neuralyzer::TensorDesign::parseColumnRecipePresetArgs(parsed_params);
+            if (agg_args_opt) {
+                agg_args_opt->source_key = args.source_key;
+                agg_args_opt->output_name = args.output_name;
+                if (!_row_source_key.empty() && agg_args_opt->binding_source_key.empty()) {
+                    agg_args_opt->binding_source_key = _row_source_key;
+                }
+                if (auto agg_exp = agg_desc->expand(*agg_args_opt)) {
+                    auto cols = std::move(agg_exp->columns);
+                    for (auto & col: cols) {
+                        col.row_pipeline_json = row_pipeline_json;
+                        col.pipeline_value_bindings = bindings;
+                    }
+                    return cols;
+                }
+            }
+        }
+
+        return {};
+    }
+
+    // Advanced mode
+    ColumnRecipe recipe;
+    recipe.column_name = _name_edit->text().toStdString();
+
+    // Source key
+    int const source_idx = _source_combo->currentIndex();
+    if (source_idx >= 0) {
+        recipe.source_key = _source_combo->currentData().toString().toStdString();
     }
 
     // Pipeline JSON
     recipe.pipeline_json = _pipeline_json_edit->toPlainText().trimmed().toStdString();
 
-    return recipe;
+    return {recipe};
+
+    return {recipe};
 }
 
 // =============================================================================
@@ -132,6 +208,7 @@ void ColumnConfigDialog::_onSourceKeyChanged(int /*index*/) {
         _source_type_label->clear();
     }
     _updateAutoName();
+    _updateAggregatorOptions();
 }
 
 void ColumnConfigDialog::_onColumnNameEdited(QString const & /*text*/) {
@@ -144,9 +221,13 @@ void ColumnConfigDialog::_updateAutoName() {
     }
 
     QString name;
-    int const source_idx = _source_combo->currentIndex();
-    if (source_idx >= 0) {
-        name = _source_combo->currentData().toString();
+    if (_interval_property_group && _interval_property_group->isChecked()) {
+        name = QString::fromStdString(_row_source_key);
+    } else {
+        int const source_idx = _source_combo->currentIndex();
+        if (source_idx >= 0) {
+            name = _source_combo->currentData().toString();
+        }
     }
 
     // If interval property is active, append property name
@@ -162,10 +243,118 @@ void ColumnConfigDialog::_updateAutoName() {
     _name_edit->blockSignals(false);
 }
 
+
+Neuralyzer::TensorDesign::EffectiveRowType ColumnConfigDialog::_getBaseEffectiveRowType() const {
+    if (_row_type == DesignerRowType::Interval) return Neuralyzer::TensorDesign::EffectiveRowType::Interval;
+    if (_row_type == DesignerRowType::Timestamp || _row_type == DesignerRowType::DerivedFromSource || _row_type == DesignerRowType::TimeFrame) return Neuralyzer::TensorDesign::EffectiveRowType::Timestamp;
+    return Neuralyzer::TensorDesign::EffectiveRowType::Unchanged;
+}
+
+void ColumnConfigDialog::_updateAggregatorOptions() {
+    _aggregator_combo->blockSignals(true);
+    _aggregator_combo->clear();
+
+    auto eff_row_type = _getBaseEffectiveRowType();
+    Neuralyzer::TensorDesign::IRowModifier const * selected_modifier = nullptr;
+    if (_row_modifier_check->isChecked()) {
+        auto const mod_id = _row_modifier_combo->currentData().toString().toStdString();
+        selected_modifier = _modifier_registry.find(mod_id);
+        if (selected_modifier != nullptr &&
+            selected_modifier->output_row_type() != Neuralyzer::TensorDesign::EffectiveRowType::Unchanged) {
+            eff_row_type = selected_modifier->output_row_type();
+        }
+    }
+
+    DM_DataType source_type = DM_DataType::Unknown;
+    int const source_idx = _source_combo->currentIndex();
+    if (source_idx >= 0 && _data_manager) {
+        source_type = _data_manager->getType(_source_combo->currentData().toString().toStdString());
+    }
+
+    Neuralyzer::TensorDesign::AggregatorQueryContext const query_ctx{
+            .effective_row_type = eff_row_type,
+            .selected_modifier = selected_modifier,
+            .tensor_column_only = true,
+            .source_type = source_type};
+    auto aggregators = _aggregator_registry.getAggregatorsFor(query_ctx);
+    for (auto const * agg: aggregators) {
+        _aggregator_combo->addItem(QString::fromStdString(agg->display_name()), QString::fromStdString(agg->id()));
+        _aggregator_combo->setItemData(_aggregator_combo->count() - 1, QString::fromStdString(agg->description()), Qt::ToolTipRole);
+    }
+    _aggregator_combo->blockSignals(false);
+
+    if (_aggregator_combo->count() > 0) {
+        _aggregator_combo->setCurrentIndex(0);
+        _onAggregatorChanged(0);
+    } else {
+        _aggregator_params->clear();
+    }
+}
+
+void ColumnConfigDialog::_onAdvancedModeToggled(bool checked) {
+    _preset_group->setVisible(!checked);
+    _pipeline_group->setVisible(checked);
+}
+
+void ColumnConfigDialog::_onRowModifierToggled(bool checked) {
+    _row_modifier_combo->setEnabled(checked);
+    _row_modifier_params->setEnabled(checked);
+    _updateAggregatorOptions();
+}
+
+void ColumnConfigDialog::_onRowModifierChanged(int index) {
+    if (index >= 0) {
+        auto const mod_id = _row_modifier_combo->currentData().toString().toStdString();
+        if (auto const * mod_desc = _modifier_registry.find(mod_id)) {
+            auto filtered_schema = mod_desc->parameters();
+            std::erase_if(filtered_schema.fields, [](auto const & field) {
+                return field.name == "source_key" || field.name == "output_name";
+            });
+            _row_modifier_params->setSchema(filtered_schema);
+            if (_data_manager) {
+                auto const keys = _data_manager->getAllKeys();
+                for (auto const & field : filtered_schema.fields) {
+                    if (field.type_name == "data_key") {
+                        _row_modifier_params->updateAllowedValues(field.name, keys);
+                    } else if (field.dynamic_combo) {
+                        _row_modifier_params->updateAllowedValues(field.name, mod_desc->getDynamicOptions(field.name, _data_manager.get()));
+                    }
+                }
+            }
+        }
+    }
+    _updateAggregatorOptions();
+}
+
+void ColumnConfigDialog::_onAggregatorChanged(int index) {
+    if (index >= 0) {
+        auto const agg_id = _aggregator_combo->currentData().toString().toStdString();
+        if (auto const * agg_desc = _aggregator_registry.find(agg_id)) {
+            auto filtered_schema = agg_desc->parameters();
+            std::erase_if(filtered_schema.fields, [](auto const & field) {
+                return field.name == "source_key" || field.name == "output_name";
+            });
+            _aggregator_params->setSchema(filtered_schema);
+            if (_data_manager) {
+                auto const keys = _data_manager->getAllKeys();
+                for (auto const & field : filtered_schema.fields) {
+                    if (field.type_name == "data_key") {
+                        _aggregator_params->updateAllowedValues(field.name, keys);
+                    } else if (field.dynamic_combo) {
+                        _aggregator_params->updateAllowedValues(field.name, agg_desc->getDynamicOptions(field.name, _data_manager.get()));
+                    }
+                }
+            }
+        }
+    }
+}
+
 void ColumnConfigDialog::_onIntervalPropertyToggled(bool checked) {
     // When interval property is checked, the source/pipeline sections
     // become irrelevant (but remain visible for context)
     _source_combo->setEnabled(!checked);
+    _preset_group->setEnabled(!checked);
+    _advanced_mode_check->setEnabled(!checked);
     _pipeline_json_edit->setEnabled(!checked);
     _validate_btn->setEnabled(!checked);
     if (_load_from_library_btn) {
@@ -202,8 +391,47 @@ void ColumnConfigDialog::_setupUi() {
 
     _layout->addWidget(source_group);
 
+    // --- Preset Mode (Two-Step Builder) ---
+    _preset_group = new QGroupBox(QStringLiteral("Presets (Recommended)"), this);
+    auto * preset_layout = new QVBoxLayout(_preset_group);
+
+    auto * modifier_layout = new QHBoxLayout();
+    _row_modifier_check = new QCheckBox(QStringLiteral("Row Modifier (Optional)"));
+    _row_modifier_combo = new QComboBox();
+    auto const base_type = _getBaseEffectiveRowType();
+    auto const valid_modifiers = _modifier_registry.getModifiersFor(base_type);
+    for (auto const * mod: valid_modifiers) {
+        _row_modifier_combo->addItem(QString::fromStdString(mod->display_name()), QString::fromStdString(mod->id()));
+        _row_modifier_combo->setItemData(_row_modifier_combo->count() - 1, QString::fromStdString(mod->description()), Qt::ToolTipRole);
+    }
+    if (valid_modifiers.empty()) {
+        _row_modifier_check->setEnabled(false);
+    }
+    modifier_layout->addWidget(_row_modifier_check);
+    modifier_layout->addWidget(_row_modifier_combo);
+    preset_layout->addLayout(modifier_layout);
+
+    _row_modifier_params = new AutoParamWidget();
+    preset_layout->addWidget(_row_modifier_params);
+
+    auto * agg_layout = new QHBoxLayout();
+    agg_layout->addWidget(new QLabel(QStringLiteral("Data Aggregator:")));
+    _aggregator_combo = new QComboBox();
+    agg_layout->addWidget(_aggregator_combo);
+    preset_layout->addLayout(agg_layout);
+
+    _aggregator_params = new AutoParamWidget();
+    preset_layout->addWidget(_aggregator_params);
+
+    _layout->addWidget(_preset_group);
+
+    // --- Advanced Mode Toggle ---
+    _advanced_mode_check = new QCheckBox(QStringLiteral("Advanced Mode (Raw Pipeline JSON)"), this);
+    _layout->addWidget(_advanced_mode_check);
+
     // --- Pipeline JSON (primary column configuration) ---
-    auto * pipeline_group = new QGroupBox(QStringLiteral("Pipeline"), this);
+    auto * pipeline_group = new QGroupBox(QStringLiteral("Advanced Pipeline"), this);
+    _pipeline_group = pipeline_group;
     auto * pipeline_layout = new QVBoxLayout(pipeline_group);
 
     _pipeline_json_edit = new QTextEdit(pipeline_group);
@@ -324,10 +552,28 @@ void ColumnConfigDialog::_connectSignals() {
                 has_text && no_pending && _operation_context != nullptr);
     });
 
+    connect(_advanced_mode_check, &QCheckBox::toggled, this, &ColumnConfigDialog::_onAdvancedModeToggled);
+    connect(_row_modifier_check, &QCheckBox::toggled, this, &ColumnConfigDialog::_onRowModifierToggled);
+    connect(_row_modifier_combo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ColumnConfigDialog::_onRowModifierChanged);
+    connect(_aggregator_combo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ColumnConfigDialog::_onAggregatorChanged);
+
+    // Initial state
+    _advanced_mode_check->setChecked(false);
+    _onAdvancedModeToggled(false);
+    _row_modifier_check->setChecked(false);
+    _onRowModifierToggled(false);
+
+    if (_row_modifier_combo->count() > 0) {
+        _row_modifier_combo->setCurrentIndex(0);
+        _onRowModifierChanged(0);
+    }
+
     // Interval property
     if (_interval_property_group) {
         connect(_interval_property_group, &QGroupBox::toggled,
                 this, &ColumnConfigDialog::_onIntervalPropertyToggled);
+        connect(_interval_property_combo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+                this, &ColumnConfigDialog::_updateAutoName);
     }
 
     // OperationContext delivery and close signals
@@ -354,8 +600,8 @@ void ColumnConfigDialog::_populateSourceKeys() {
 
         // Show all concrete data types that are valid column sources.
         bool const compatible = (type != DM_DataType::Unknown &&
-                           type != DM_DataType::Time &&
-                           type != DM_DataType::Tensor);
+                                 type != DM_DataType::Time &&
+                                 type != DM_DataType::Tensor);
 
         if (compatible) {
             auto type_str = QString::fromStdString(convert_data_type_to_string(type));
@@ -393,6 +639,11 @@ void ColumnConfigDialog::_applyRecipe(ColumnRecipe const & recipe) {
             _pipeline_json_edit->setPlainText(
                     QString::fromStdString(recipe.pipeline_json));
         }
+    }
+
+
+    if (!recipe.pipeline_json.empty() || !recipe.row_pipeline_json.empty()) {
+        _advanced_mode_check->setChecked(true);
     }
 
     // Set interval property

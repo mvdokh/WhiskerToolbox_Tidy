@@ -9,6 +9,9 @@
             "name": "eigen3"
         },
         {
+            "name": "fmt"
+        },
+        {
             "name": "glm"
         },
         {
@@ -185,6 +188,10 @@
             "version": "2023-06-10"
         },
         {
+            "name": "libaec",
+            "version": "1.1.7#1"
+        },
+        {
             "name": "libffi",
             "version": "3.4.7"
         },
@@ -195,10 +202,6 @@
         {
             "name": "nlohmann-json",
             "version": "3.11.3"
-        },
-        {
-            "name": "openblas",
-            "version": "0.3.27"
         },
         {
             "name": "opencv4",

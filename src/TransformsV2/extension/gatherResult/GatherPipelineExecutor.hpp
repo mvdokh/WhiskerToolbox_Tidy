@@ -37,6 +37,7 @@
  */
 
 #include "DataManager/DataManagerTypes.hpp"// DataTypeVariant
+#include "TransformsV2/PipelineValueStore/PipelineValueStore.hpp"
 
 #include <memory>
 #include <vector>
@@ -76,16 +77,17 @@ namespace Neuralyzer::Gather {
  * For each interval i the function:
  *   1. Creates a GatherResult view/copy of the source data within
  *      [intervals[i].start, intervals[i].end].
- *   2. Executes @p pipeline on that gathered view (T → DataTypeVariant).
- *   3. Calls extractSingleFloat() on the result.
+ *   2. Executes @p pipeline steps on that gathered view (T → DataTypeVariant),
+ *      including JSON-loaded container steps.
+ *   3. Applies the terminal range reduction to the step output.
  *
  * If the source data and @p intervals use different TimeFrames, GatherResult
  * converts interval boundaries to the source coordinate system when each view
  * is created.
  *
  * Dispatch is fully type-erased: the function visits the DataTypeVariant and
- * uses GatherResult<T>::create() + pipeline.execute<T>() for each concrete
- * contained type that satisfies TypeTraits::HasDataTraits<T>.
+ * uses GatherResult<T>::create() + executePipeline() for each concrete
+ * contained type that supports gather.
  *
  * @param source    Source data wrapped in a DataTypeVariant
  * @param intervals DigitalIntervalSeries defining the row intervals
@@ -101,6 +103,18 @@ namespace Neuralyzer::Gather {
         DataTypeVariant const & source,
         std::shared_ptr<DigitalIntervalSeries const> intervals,
         Neuralyzer::Transforms::V2::TransformPipeline const & pipeline);
+
+/**
+ * @brief Gather source data over intervals and execute a pipeline with one
+ *        PipelineValueStore per gathered row.
+ *
+ * @pre @p row_stores must have the same size as @p intervals.
+ */
+[[nodiscard]] std::vector<float> gatherAndExecutePipeline(
+        DataTypeVariant const & source,
+        std::shared_ptr<DigitalIntervalSeries const> intervals,
+        Neuralyzer::Transforms::V2::TransformPipeline const & pipeline,
+        std::vector<Neuralyzer::Transforms::V2::PipelineValueStore> const & row_stores);
 
 }// namespace Neuralyzer::Gather
 

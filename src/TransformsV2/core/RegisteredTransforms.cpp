@@ -23,10 +23,13 @@
 #include "algorithms/MaskMedianFilter/MaskMedianFilter.hpp"
 #include "algorithms/MaskSkeletonize/MaskSkeletonize.hpp"
 #include "algorithms/MaskToLine/MaskToLine.hpp"
+#include "algorithms/PointCoordinate/PointCoordinate.hpp"
+#include "algorithms/PointCoordinateReduction/PointCoordinateReduction.hpp"
 #include "algorithms/PruneOverlappingIntervals/PruneOverlappingIntervals.hpp"
 #include "algorithms/RemoveLineOutliers/RemoveLineOutliers.hpp"
 #include "algorithms/SincInterpolation/SincInterpolation.hpp"
 #include "algorithms/SumReduction/SumReduction.hpp"
+#include "algorithms/Temporal/NormalizeTime.hpp"
 #include "algorithms/TensorCAR/TensorCAR.hpp"
 #include "algorithms/TensorCentralDifference/TensorCentralDifference.hpp"
 #include "algorithms/TensorICA/TensorICA.hpp"
@@ -46,6 +49,7 @@
 #include "CoreGeometry/points.hpp"
 #include "DigitalTimeSeries/Digital_Event_Series.hpp"
 #include "DigitalTimeSeries/Digital_Interval_Series.hpp"
+#include "Points/Point_Data.hpp"
 #include "Tensors/TensorData.hpp"
 
 namespace Neuralyzer::Transforms::V2::Examples {
@@ -89,10 +93,14 @@ bool const init_pipeline_factories = []() {
     registerPipelineStepFactoryFor<EventToIntervalParams>();
     registerPipelineStepFactoryFor<IntervalToEventParams>();
     registerPipelineStepFactoryFor<PruneOverlappingIntervalsParams>();
+    registerPipelineStepFactoryFor<PointCoordinateParams>();
+    registerPipelineStepFactoryFor<PointCoordinateReductionParams>();
     registerPipelineStepFactoryFor<IntervalReductionParams>();
     registerPipelineStepFactoryFor<ZScoreNormalizationParamsV2>();
     registerPipelineStepFactoryFor<AnalogDifferenceParams>();
     registerPipelineStepFactoryFor<SincInterpolationParams>();
+    registerPipelineStepFactoryFor<NormalizeTimeParamsV2>();
+    registerPipelineStepFactoryFor<ShiftDigitalEventSeriesParams>();
     registerPipelineStepFactoryFor<TensorPCAParams>();
     registerPipelineStepFactoryFor<TensorICAParams>();
     registerPipelineStepFactoryFor<TensorRobustPCAParams>();
@@ -969,6 +977,34 @@ auto const register_sinc_interpolation = RegisterContainerTransform<
                 .output_type_name = "AnalogTimeSeries",
                 .params_type_name = "SincInterpolationParams",
                 .is_expensive = true,
+                .is_deterministic = true,
+                .supports_cancellation = true});
+
+auto const register_point_coordinate = RegisterContainerTransform<
+        PointData, RaggedAnalogTimeSeries, PointCoordinateParams>(
+        "PointCoordinate",
+        pointCoordinate,
+        ContainerTransformMetadata{
+                .description = "Extract X or Y coordinate from points",
+                .category = "Geometry",
+                .input_type_name = "PointData",
+                .output_type_name = "RaggedAnalogTimeSeries",
+                .params_type_name = "PointCoordinateParams",
+                .is_expensive = false,
+                .is_deterministic = true,
+                .supports_cancellation = true});
+
+auto const register_point_coordinate_reduction = RegisterContainerTransform<
+        PointData, AnalogTimeSeries, PointCoordinateReductionParams>(
+        "PointCoordinateReduction",
+        pointCoordinateReduction,
+        ContainerTransformMetadata{
+                .description = "Extract X or Y coordinate from points and reduce ragged dimensions",
+                .category = "Geometry",
+                .input_type_name = "PointData",
+                .output_type_name = "AnalogTimeSeries",
+                .params_type_name = "PointCoordinateReductionParams",
+                .is_expensive = false,
                 .is_deterministic = true,
                 .supports_cancellation = true});
 

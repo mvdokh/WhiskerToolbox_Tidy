@@ -9,6 +9,8 @@ if (WIN32)
 endif()
 
 add_executable(test_tensor_design
+    test_column_recipe_preset_registry.cpp
+    test_design_preset_registry.cpp
     test_tensor_design_builder.cpp
     test_tensor_whisker_contact_scenario.cpp
 )
@@ -40,3 +42,18 @@ endif()
 
 set_target_compiler_warnings(test_tensor_design)
 enable_whiskertoolbox_shared_test_pch(test_tensor_design)
+
+add_executable(profile_add_keypoints profile_add_keypoints.cpp)
+target_include_directories(profile_add_keypoints PRIVATE
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>"
+    "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/tests/DataManager>"
+)
+target_link_libraries(profile_add_keypoints PRIVATE TensorDesign DataManager WhiskerToolbox::TensorData)
+if(APPLE)
+    target_link_libraries(profile_add_keypoints PRIVATE -Wl,-force_load,$<TARGET_FILE:TransformsV2>)
+elseif(MSVC)
+    target_link_options(profile_add_keypoints PRIVATE /WHOLEARCHIVE:TransformsV2)
+    target_link_libraries(profile_add_keypoints PRIVATE TransformsV2)
+else()
+    target_link_libraries(profile_add_keypoints PRIVATE -Wl,--whole-archive TransformsV2 -Wl,--no-whole-archive)
+endif()

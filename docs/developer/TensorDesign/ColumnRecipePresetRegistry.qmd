@@ -1,0 +1,302 @@
+---
+title: "Column Recipe Preset Registry"
+format: html
+---
+
+**Status:** Phase 9c implemented. The registry exists with the Phase 9c compiled preset set: `mean_over_interval`, `event_count_over_interval`, `analog_sample_at_interval_start`, `event_presence_around_interval_start`, `point_xy`, `multi_point_xy`, `point_xy_at_interval_start`, `raster_events_relative_to_interval_start`, and `trial_relative_event_count_from_interval_start`. TensorDesign JSON can use preset invocations, and TensorDesigner can append expanded preset columns through **Add Preset...**. Preset JSON files and the broader bundled/user preset catalog remain planned for Phase 10.
+
+## Purpose
+
+`ColumnRecipePresetRegistry` provides Qt-free TensorDesign column preset discovery and expansion. A preset is an authoring helper: it accepts friendly parameters and expands to one or more raw `ColumnRecipe` objects.
+
+TensorDesign JSON can contain preset invocations. `parseDesignJson()` expands those invocations before constructing the executable `TensorDesignSpec`, and `buildTensorFromDesignJson()` therefore accepts both raw columns and preset-authored columns. `serializeDesignJson()` still emits expanded raw recipes, not preset invocations, so saved executable designs remain reproducible without depending on future preset changes.
+
+## Current API
+
+The initial registry lives in `src/TensorDesign/ColumnRecipePresetRegistry.hpp` and exposes:
+
+- `ColumnRecipePresetDescriptor`: preset id, display name, description, parameter schema, source, and expansion function.
+- `ColumnRecipePresetArgs`: currently a small shared argument struct with fields used by the initial compiled presets: `output_name`, `source_key`, `name_prefix`, `source_keys`, `pre`, and `post`.
+- `ColumnRecipePresetExpansion`: a vector of raw `TensorBuilders::ColumnRecipe` objects.
+- `ColumnRecipePresetRegistry`: register, find, list, and expand operations.
+- `createBuiltInColumnRecipePresetRegistry()`: constructs a registry containing scalar tensor column presets (`ColumnOutputKind::ScalarFloat` aggregators only).
+
+Phase 9f also decouples row modifiers and column aggregators:
+
+- `ColumnOutputKind`: `ScalarFloat` (terminal `TensorData` column) vs `GatheredDataObject` (per-row gather transform fragment).
+- `AggregatorCompositionRules`: per-aggregator metadata (`output_kind`, `gathered_output_type`, `requires_pipeline_value_bindings`, `required_row_geometry`, `compatible_modifier_ids`).
+- `AggregatorQueryContext`: filters aggregators by effective row type, selected modifier, and `tensor_column_only`.
+- `ColumnAggregatorRegistry::getAggregatorsFor(AggregatorQueryContext)` and `isCompatibleComposition()`: replace naive `supported_row_types` Cartesian filtering.
+
+`raster_events_relative` is registered as `GatheredDataObject` and is **not** exposed through `createBuiltInColumnRecipePresetRegistry()`. Use `trial_relative_event_count` for a scalar tensor column that composes the same normalize step with `EventCountInWindow`.
+
+Duplicate preset ids are rejected by `registerPreset()`. This matches the initial policy in the row-pipeline design: user presets should not silently override built-in presets.
+
+## JSON Authoring
+
+A column entry can be a preset invocation:
+
+```json
+{
+  "preset": "point_xy",
+  "parameters": {
+    "source_key": "Nose",
+    "name_prefix": "nose"
+  }
+}
+```
+
+During parsing, this expands to ordinary raw columns:
+
+```json
+[
+  {
+    "name": "nose_x",
+    "source_key": "Nose",
+    "pipeline_json": "{\"steps\": [{\"step_id\": \"x\", \"transform_name\": \"PointCoordinate\", \"parameters\": {\"coordinate\": \"X\"}}]}"
+  },
+  {
+    "name": "nose_y",
+    "source_key": "Nose",
+    "pipeline_json": "{\"steps\": [{\"step_id\": \"y\", \"transform_name\": \"PointCoordinate\", \"parameters\": {\"coordinate\": \"Y\"}}]}"
+  }
+]
+```
+
+Preset-authored JSON and raw-column JSON can be mixed in the same `columns` array. Expansion preserves order: a multi-column preset contributes its expanded columns at the location of the preset invocation.
+
+The current JSON parameter parser maps the shared `ColumnRecipePresetArgs` fields from `parameters`: `output_name`, `name`, `source_key`, `binding_source_key`, `store_key`, `name_prefix`, `source_keys`, `pre`, `post`, `window_start`, and `window_end`. `name` is accepted as an alias for `output_name` for simple single-output presets.
+
+## Built-In Presets
+
+### `mean_over_interval`
+
+Parameters:
+
+| Field | Meaning |
+|---|---|
+| `output_name` | Generated column name. |
+| `source_key` | DataManager key for the analog-like source to reduce. |
+
+Expansion:
+
+```json
+{
+  "name": "${output_name}",
+  "source_key": "${source_key}",
+  "pipeline_json": "{\"steps\": [], \"range_reduction\": {\"reduction_name\": \"MeanValue\"}}"
+}
+```
+
+The preset leaves `row_pipeline_json` empty, so interval-row tensors use the identity/full-row interval gather behavior.
+
+### `event_count_over_interval`
+
+Parameters:
+
+| Field | Meaning |
+|---|---|
+| `output_name` | Generated column name. |
+| `source_key` | DataManager key for the event source to count. |
+
+Expansion:
+
+```json
+{
+  "name": "${output_name}",
+  "source_key": "${source_key}",
+  "pipeline_json": "{\"steps\": [], \"range_reduction\": {\"reduction_name\": \"EventCount\"}}"
+}
+```
+
+The preset leaves `row_pipeline_json` empty, so interval-row tensors count over each full row interval.
+
+### `analog_sample_at_interval_start`
+
+Parameters:
+
+| Field | Meaning |
+|---|---|
+| `output_name` | Generated column name. |
+| `source_key` | DataManager key for the analog-like source to sample. |
+
+Expansion:
+
+```json
+{
+  "name": "${output_name}",
+  "source_key": "${source_key}",
+  "row_pipeline_json": "{\"steps\": [{\"step_id\": \"interval_start\", \"transform_name\": \"IntervalToEvent\", \"parameters\": {\"point\": \"start\"}}]}",
+  "pipeline_json": "{\"steps\": []}"
+}
+```
+
+This preset samples the source at each row interval start. The empty `pipeline_json` routes the row-pipeline sample times to timestamp/sample provider behavior rather than interval reduction.
+
+### `event_presence_around_interval_start`
+
+Parameters:
+
+| Field | Meaning |
+|---|---|
+| `output_name` | Generated column name. |
+| `source_key` | DataManager key for the event source to query. |
+| `pre` | Clock ticks before row interval start. |
+| `post` | Clock ticks after row interval start. |
+
+Expansion:
+
+```json
+{
+  "name": "${output_name}",
+  "source_key": "${source_key}",
+  "row_pipeline_json": "{\"steps\": [{\"step_id\": \"interval_start\", \"transform_name\": \"IntervalToEvent\", \"parameters\": {\"point\": \"start\"}}, {\"step_id\": \"window\", \"transform_name\": \"EventToInterval\", \"parameters\": {\"pre_expansion\": ${pre}, \"post_expansion\": ${post}}}]}",
+  "pipeline_json": "{\"steps\": [], \"range_reduction\": {\"reduction_name\": \"EventPresence\"}}"
+}
+```
+
+This preset demonstrates that preset inputs can expand into both row geometry (`row_pipeline_json`) and the value-producing column pipeline (`pipeline_json`).
+
+### `point_xy`
+
+Parameters:
+
+| Field | Meaning |
+|---|---|
+| `source_key` | DataManager key for one `PointData` source. |
+| `name_prefix` | Prefix for generated column names. |
+
+Expansion:
+
+```json
+[
+  {
+    "name": "${name_prefix}_x",
+    "source_key": "${source_key}",
+    "pipeline_json": "{\"steps\": [{\"step_id\": \"x\", \"transform_name\": \"PointCoordinate\", \"parameters\": {\"coordinate\": \"X\"}}]}"
+  },
+  {
+    "name": "${name_prefix}_y",
+    "source_key": "${source_key}",
+    "pipeline_json": "{\"steps\": [{\"step_id\": \"y\", \"transform_name\": \"PointCoordinate\", \"parameters\": {\"coordinate\": \"Y\"}}]}"
+  }
+]
+```
+
+This preset demonstrates multi-column expansion. Applying the preset appends two ordinary `ColumnRecipe` entries to the tensor design.
+
+### `multi_point_xy`
+
+Parameters:
+
+| Field | Meaning |
+|---|---|
+| `source_keys` | PointData keys to expand. |
+
+Expansion for `source_keys = ["Nose", "Paw"]`:
+
+```json
+[
+  {"name": "Nose_x", "source_key": "Nose", "pipeline_json": "... PointCoordinate X ..."},
+  {"name": "Nose_y", "source_key": "Nose", "pipeline_json": "... PointCoordinate Y ..."},
+  {"name": "Paw_x", "source_key": "Paw", "pipeline_json": "... PointCoordinate X ..."},
+  {"name": "Paw_y", "source_key": "Paw", "pipeline_json": "... PointCoordinate Y ..."}
+]
+```
+
+This preset is a convenience wrapper around repeated `point_xy` expansion. Column names use the source key as the prefix.
+
+### `point_xy_at_interval_start`
+
+Parameters:
+
+| Field | Meaning |
+|---|---|
+| `source_key` | DataManager key for one `PointData` source. |
+| `name_prefix` | Prefix for generated column names. |
+
+Expansion:
+
+```json
+[
+  {
+    "name": "${name_prefix}_x_at_interval_start",
+    "source_key": "${source_key}",
+    "row_pipeline_json": "{\"steps\": [{\"step_id\": \"interval_start\", \"transform_name\": \"IntervalToEvent\", \"parameters\": {\"point\": \"start\"}}]}",
+    "pipeline_json": "{\"steps\": [{\"step_id\": \"x\", \"transform_name\": \"PointCoordinate\", \"parameters\": {\"coordinate\": \"X\"}}]}"
+  },
+  {
+    "name": "${name_prefix}_y_at_interval_start",
+    "source_key": "${source_key}",
+    "row_pipeline_json": "{\"steps\": [{\"step_id\": \"interval_start\", \"transform_name\": \"IntervalToEvent\", \"parameters\": {\"point\": \"start\"}}]}",
+    "pipeline_json": "{\"steps\": [{\"step_id\": \"y\", \"transform_name\": \"PointCoordinate\", \"parameters\": {\"coordinate\": \"Y\"}}]}"
+  }
+]
+```
+
+This preset combines interval-row sample geometry with point coordinate projection.
+
+### `raster_events_relative` (gather fragment, not a tensor preset)
+
+Parameters:
+
+| Field | Meaning |
+|---|---|
+| `output_name` | Generated column name. |
+| `source_key` | Event source gathered over each row interval. |
+| `binding_source_key` | Interval source used to derive one interval-start alignment event per row. |
+| `store_key` | Optional `PipelineValueStore` key. Defaults to `row_alignment_time`. |
+
+Expansion:
+
+- Requires `bind_interval_start` row modifier for `pipeline_value_bindings`.
+- Runs `NormalizeDigitalEventSeriesRelative` with `alignment_time` bound from the row store.
+- Produces per-row `DigitalEventSeries` relative event times **without** a terminal range reduction.
+
+This is a gather-layer transform fragment (`ColumnOutputKind::GatheredDataObject`). It is not registered in `createBuiltInColumnRecipePresetRegistry()` because `TensorData` columns are scalar floats only.
+
+### `trial_relative_event_count`
+
+Parameters:
+
+| Field | Meaning |
+|---|---|
+| `output_name` | Generated column name. |
+| `source_key` | Event source gathered over each row interval. |
+| `binding_source_key` | Interval source used to derive one interval-start alignment event per row. |
+| `store_key` | Optional `PipelineValueStore` key. Defaults to `row_alignment_time`. |
+| `window_start` | Relative event-count window start. |
+| `window_end` | Relative event-count window end. |
+
+Expansion is the same normalize step as `raster_events_relative`, plus an `EventCountInWindow` terminal range reduction over `[window_start, window_end]`. Pair with the `bind_interval_start` row modifier.
+
+## Test Coverage
+
+`tests/TensorDesign/test_column_recipe_preset_registry.cpp` verifies that:
+
+- The built-in registry exposes `mean_over_interval` metadata and parameter schema fields.
+- Expanding each initial built-in preset produces the expected raw `ColumnRecipe` fields.
+- Duplicate preset ids are rejected.
+
+`tests/TensorDesign/test_tensor_design_builder.cpp` includes end-to-end checks that expanded preset recipes can be serialized as ordinary TensorDesign JSON and then executed through `buildTensorFromDesignJson()`.
+
+It also verifies direct preset-authored JSON, such as `columns[].preset = "point_xy"`, through both `parseDesignJson()` and `buildTensorFromDesignJson()`.
+
+`tests/fuzz/integration/TensorDesign/fuzz_tensor_design_registry.cpp` adds an allowlisted scalar-composition fuzz target. Each fuzz input selects one explicit `(row_modifier, column_aggregator)` pair from a curated table rather than the full registry Cartesian product. The allowlist is organized in tiers that mirror the former monolithic presets:
+
+- **Tier 0:** no modifier + `mean_value`, `event_count`, or `event_presence` over full row intervals.
+- **Tier 1:** `interval_start` + `analog_sample`, `point_xy`, or `multi_point_xy`.
+- **Tier 2:** `window_around_interval_start` + interval reducers, with fuzzed `pre`/`post`.
+- **Tier 3:** `bind_interval_start` + `trial_relative_event_count`.
+
+`raster_events_relative` is intentionally excluded because it produces per-row `DigitalEventSeries` output (relative spike times) rather than scalar float tensor columns. Add new allowlist entries incrementally as deterministic Catch2 coverage lands for each composition.
+
+## TensorDesigner UI
+
+TensorDesigner exposes **Add Preset...** next to **Add Column**. The dialog lists built-in registry presets, shows each preset description and parameter field names, collects the shared preset parameters, expands the selected preset through `ColumnRecipePresetRegistry`, and appends all generated raw `ColumnRecipe`s to the current design.
+
+Saving from TensorDesigner uses `serializeDesignJson()` on the expanded recipes. The saved JSON contains ordinary `columns[]` entries and does not require the preset registry for execution.
+
+## Planned Follow-Up
+
+Phase 10 should add preset file/library support, including bundled and user preset catalogs. Later UI refinements may replace the shared-argument form with per-preset generated forms, but the Phase 9c path is functional and saves expanded raw recipes.
