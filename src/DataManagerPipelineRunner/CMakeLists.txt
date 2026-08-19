@@ -5,6 +5,7 @@ add_executable(DataManagerPipelineRunner
 target_link_libraries(DataManagerPipelineRunner PRIVATE DataManager)
 target_link_libraries(DataManagerPipelineRunner PRIVATE Commands)
 target_link_libraries(DataManagerPipelineRunner PRIVATE DeepLearning)
+target_link_libraries(DataManagerPipelineRunner PRIVATE WhiskerToolbox::PythonRuntime)
 
 # MediaData, DataSynthesizer, and TransformsV2 use file-scope registration objects.
 # Force whole-archive linking so headless JSON workflows see the same registrations
@@ -32,4 +33,15 @@ else()
     )
 endif()
 
+if(ENABLE_SPIKE2_SONPY)
+    target_link_libraries(DataManagerPipelineRunner PRIVATE DataManagerIO_Spike2SonPy)
+    target_compile_definitions(DataManagerPipelineRunner PRIVATE ENABLE_SPIKE2_SONPY)
+endif()
+
 set_target_compiler_warnings(DataManagerPipelineRunner)
+
+add_custom_command(TARGET DataManagerPipelineRunner POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/resources
+        $<TARGET_FILE_DIR:DataManagerPipelineRunner>/resources
+    )

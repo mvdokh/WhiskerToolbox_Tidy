@@ -187,7 +187,7 @@ std::string CSVLoader::getLoaderName() const {
 LoadResult CSVLoader::loadLineDataCSV(std::string const & filepath,
                                       nlohmann::json const & config) {
     try {
-        std::map<TimeFrameIndex, std::vector<Line2D>> line_map;
+        std::vector<std::pair<TimeFrameIndex, Line2D>> line_map;
 
         if (config.contains("multi_file") && config["multi_file"] == true) {
             // Multi-file CSV loading
@@ -241,8 +241,8 @@ LoadResult CSVLoader::loadLineDataCSV(std::string const & filepath,
             line_map = ::load(opts);
         }
 
-        // Create LineData directly
-        auto line_data = std::make_shared<LineData>(line_map);
+        // Create LineData directly using the range constructor
+        auto line_data = std::make_shared<LineData>(std::move(line_map));
 
         // Apply image size if specified in config
         // Check new-style height/width fields first, fall back to legacy image_width/image_height
@@ -604,6 +604,43 @@ LoadResult CSVLoader::loadDigitalEventCSV(std::string const & filepath,
 BatchLoadResult CSVLoader::loadDigitalEventCSVBatch(std::string const & filepath,
                                                     nlohmann::json const & config) {
     try {
+        if (config.value("multi_file", false)) {
+            CSVEventMultiFileLoaderOptions opts;
+            opts.parent_dir = filepath;
+
+            if (config.contains("delimiter")) opts.delimiter = config["delimiter"];
+            if (config.contains("has_header")) opts.has_header = config["has_header"];
+            if (config.contains("event_column")) opts.event_column = config["event_column"];
+            if (config.contains("base_name")) opts.base_name = config["base_name"];
+            if (config.contains("file_pattern")) opts.file_pattern = config["file_pattern"];
+            if (config.contains("scale")) opts.scale = config["scale"];
+            if (config.contains("scale_divide")) opts.scale_divide = config["scale_divide"];
+
+            auto loaded_entries = ::load(opts);
+
+            if (loaded_entries.empty()) {
+                return BatchLoadResult::error("No data loaded from directory: " + filepath);
+            }
+
+            bool const append_filename = config.value("append_filename", false);
+
+            std::vector<LoadResult> results;
+            results.reserve(loaded_entries.size());
+
+            for (auto & entry: loaded_entries) {
+                LoadResult load_result(std::move(entry.series));
+                if (append_filename) {
+                    load_result.name = entry.file_stem;
+                }
+                results.emplace_back(std::move(load_result));
+            }
+
+            std::cout << "CSVLoader: Batch loaded " << results.size()
+                      << " digital event series from directory " << filepath << std::endl;
+
+            return BatchLoadResult::fromVector(std::move(results));
+        }
+
         CSVEventLoaderOptions opts;
         opts.filepath = filepath;
 

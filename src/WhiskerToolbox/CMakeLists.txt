@@ -100,6 +100,7 @@ add_subdirectory(TriageSession_Widget)
 add_subdirectory(Plots/Common/PlotAlignmentWidget)
 
 # Qt, CorePlotting - Shared relative time axis widget
+add_subdirectory(Plots/Common/PlotZoomProfile)
 add_subdirectory(Plots/Common/RelativeTimeAxisWidget)
 add_subdirectory(Plots/Common/VerticalAxisWidget)
 add_subdirectory(Plots/Common/MultiLaneVerticalAxisWidget)
@@ -173,6 +174,10 @@ set(PROJECT_SOURCES
         whiskertoolbox.qrc
         my_stylesheet.qss
         color_scheme.hpp
+        PythonRuntimeService.hpp
+        PythonRuntimeService.cpp
+        Spike2LoaderRegistration.hpp
+        Spike2LoaderRegistration.cpp
 
         BatchProcessing_Widget/BatchProcessing_Widget.hpp
         BatchProcessing_Widget/BatchProcessing_Widget.cpp
@@ -283,6 +288,7 @@ target_link_libraries(WhiskerToolbox PRIVATE DataManager_Widget)
 target_link_libraries(WhiskerToolbox PRIVATE DataInspector_Widget)
 target_link_libraries(WhiskerToolbox PRIVATE Terminal_Widget)
 target_link_libraries(WhiskerToolbox PRIVATE Python_Widget)
+target_link_libraries(WhiskerToolbox PRIVATE WhiskerToolbox::PythonRuntime)
 target_link_libraries(WhiskerToolbox PRIVATE ZoneManager)
 target_link_libraries(WhiskerToolbox PRIVATE StateManagement)
 target_link_libraries(WhiskerToolbox PRIVATE AutoParamWidget)
@@ -326,6 +332,11 @@ if(ENABLE_HDF5)
     target_link_libraries(WhiskerToolbox PRIVATE DataManagerHDF5)
     target_link_libraries(WhiskerToolbox PRIVATE HDF5Explorer_Widget)
     target_compile_definitions(WhiskerToolbox PRIVATE ENABLE_HDF5)
+endif()
+
+if(ENABLE_SPIKE2_SONPY)
+    target_link_libraries(WhiskerToolbox PRIVATE DataManagerIO_Spike2SonPy)
+    target_compile_definitions(WhiskerToolbox PRIVATE ENABLE_SPIKE2_SONPY)
 endif()
 
 # File format explorer widgets
