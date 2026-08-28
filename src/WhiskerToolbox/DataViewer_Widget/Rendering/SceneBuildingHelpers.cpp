@@ -15,6 +15,7 @@
 #include <spdlog/spdlog.h>
 
 #include <algorithm>
+#include <bit>
 #include <cmath>
 #include <cstdint>
 
@@ -39,14 +40,15 @@ namespace {
 /**
  * @brief Return the physical-time scalar for a sample index in the data object's time frame.
  *
- * @pre @p query_time_frame is the coordinate system used for the range query.
- * @post Returns an integer physical time comparable with @p query_time_frame coordinates.
+ * When @p data_time_frame is set, returns its time directly so that cross-TimeFrame mappings
+ * express polyline X coordinates in the data object's own time scale rather than looking up
+ * the same index into the master time frame.
  */
 [[nodiscard]] ClockTicks physicalTimeAtDataIndex(
         TimeFrame const * data_time_frame,
         TimeFrame const & query_time_frame,
-        TimeFrameIndex const index_into_data_frame) {
-    if (data_time_frame != nullptr) {
+        TimeFrameIndex index_into_data_frame) {
+    if (data_time_frame) {
         return data_time_frame->getTimeAtIndex(index_into_data_frame);
     }
     return query_time_frame.getTimeAtIndex(index_into_data_frame);
@@ -68,17 +70,16 @@ CorePlotting::RenderablePolyLineBatch buildAnalogSeriesBatchSimplified(
     batch.global_color = params.color;
     batch.thickness = params.thickness;
     batch.model_matrix = model_matrix;
+    batch.is_integer_time = true;
+    batch.view_start_time = static_cast<int32_t>(params.x_origin_master_absolute_time.getValue());
 
     if (!master_time_frame) {
         return batch;
     }
 
-    // Use local-space layout (Y=raw value, model matrix handles positioning)
-    auto const local_layout = makeLocalSpaceLayout();
-
-    // Use range-based mapper with indices for gap detection
-    auto mapped_range = CorePlotting::TimeSeriesMapper::mapAnalogSeriesWithIndices(
-            series, local_layout, *master_time_frame, 1.0f, params.start_time, params.end_time, params.x_origin_master_absolute_time);
+    auto const * series_tf = series.getTimeFrame().get();
+    auto mapped_range = series.getTimeValueRangeInTimeFrameIndexRange(
+            params.start_time, params.end_time, *master_time_frame);
 
     if (params.detect_gaps) {
         // Use GapDetector for segmented rendering
@@ -88,23 +89,37 @@ CorePlotting::RenderablePolyLineBatch buildAnalogSeriesBatchSimplified(
 
         // Materialize range and segment by gaps
         std::vector<CorePlotting::MappedAnalogVertex> vertices;
-        for (auto const & v: mapped_range) {
-            vertices.push_back(v);
+        for (auto const & point: mapped_range) {
+            int64_t const physical_x = physicalTimeAtDataIndex(series_tf, *master_time_frame, point.time_frame_index).getValue();
+            vertices.emplace_back(
+                    static_cast<float>(physical_x),
+                    point.value(),
+                    point.time_frame_index.getValue());
         }
 
         batch = CorePlotting::GapDetector::segmentByGaps(vertices, gap_config);
+
+        // Convert the vertices in batch to integer bit_cast format
+        for (size_t i = 0; i < batch.vertices.size(); i += 2) {
+            auto const t_val = static_cast<int32_t>(batch.vertices[i]);
+            batch.vertices[i] = std::bit_cast<float>(t_val);
+        }
 
         // Restore batch properties that segmentByGaps doesn't set
         batch.global_color = params.color;
         batch.thickness = params.thickness;
         batch.model_matrix = model_matrix;
+        batch.is_integer_time = true;
+        batch.view_start_time = static_cast<int32_t>(params.x_origin_master_absolute_time.getValue());
     } else {
         // No gap detection - single continuous line
         std::vector<float> all_vertices;
 
-        for (auto const & vertex: mapped_range) {
-            all_vertices.push_back(vertex.x);
-            all_vertices.push_back(vertex.y);
+        for (auto const & point: mapped_range) {
+            int32_t const physical_x = static_cast<int32_t>(
+                    physicalTimeAtDataIndex(series_tf, *master_time_frame, point.time_frame_index).getValue());
+            all_vertices.push_back(std::bit_cast<float>(physical_x));
+            all_vertices.push_back(point.value());
         }
 
         if (all_vertices.size() >= 4) {// At least 2 vertices
@@ -292,12 +307,15 @@ CorePlotting::RenderablePolyLineBatch buildAnalogSeriesBatchCached(
         std::shared_ptr<TimeFrame> const & master_time_frame,
         AnalogBatchParams const & params,
         glm::mat4 const & model_matrix,
-        DataViewer::AnalogVertexCache & cache) {
+        DataViewer::AnalogVertexCache & cache,
+        std::vector<float> * scratch_buffer) {
 
     CorePlotting::RenderablePolyLineBatch batch;
     batch.global_color = params.color;
     batch.thickness = params.thickness;
     batch.model_matrix = model_matrix;
+    batch.is_integer_time = true;
+    batch.view_start_time = static_cast<int32_t>(params.x_origin_master_absolute_time.getValue());
 
     if (!master_time_frame) {
         return batch;
@@ -333,9 +351,9 @@ CorePlotting::RenderablePolyLineBatch buildAnalogSeriesBatchCached(
     if (cache.needsUpdate(cache_start, cache_end)) {
         auto missing_ranges = cache.getMissingRanges(cache_start, cache_end);
 
-        if (missing_ranges.size() == 1 &&
-            missing_ranges[0].start == cache_start &&
-            missing_ranges[0].end == cache_end) {
+        // If complete cache miss or too many missing ranges, do full refresh
+        if (missing_ranges.size() == 1 && !missing_ranges[0].prepend &&
+            missing_ranges[0].start == cache_start && missing_ranges[0].end == cache_end) {
 
             spdlog::debug("AnalogVertexCache: Complete cache miss for range [{}, {}]", cache_start.getValue(), cache_end.getValue());
 
@@ -372,22 +390,28 @@ CorePlotting::RenderablePolyLineBatch buildAnalogSeriesBatchCached(
     // AnalogTimeSeries / TimeSeriesMapper treat the batch end index as inclusive, while
     // AnalogVertexCache::getVerticesForRange uses a half-open upper bound.
     TimeFrameIndex const extract_end_exclusive = cache_end + TimeFrameIndex{1};
-    auto flat_vertices = cache.getVerticesForRange(
-            cache_start, extract_end_exclusive, params.x_origin_master_absolute_time);
+    if (scratch_buffer) {
+        batch.vertices = std::move(*scratch_buffer);
+    }
+    if (params.min_max_decimation_bucket_count > 0) {
+        cache.extractVerticesForRangeDecimated(
+                cache_start, extract_end_exclusive,
+                params.min_max_decimation_bucket_count,
+                params.x_origin_master_absolute_time,
+                batch.vertices);
+    } else {
+        cache.extractVerticesForRange(
+                cache_start, extract_end_exclusive,
+                params.x_origin_master_absolute_time,
+                batch.vertices);
+    }
 
     // Gap detection is currently not supported with caching
     // (would require tracking original indices in the cache)
-    if (!flat_vertices.empty() && flat_vertices.size() >= 4) {
-        int const vertex_count = static_cast<int>(flat_vertices.size()) / 2;
+    if (!batch.vertices.empty() && batch.vertices.size() >= 4) {
+        int const vertex_count = static_cast<int>(batch.vertices.size()) / 2;
         batch.line_start_indices.push_back(0);
         batch.line_vertex_counts.push_back(vertex_count);
-        batch.vertices = std::move(flat_vertices);
-    }
-
-    if (params.min_max_decimation_bucket_count > 0 && !batch.vertices.empty()) {
-        batch = CorePlotting::decimatePolyLineBatchMinMax(
-                batch,
-                CorePlotting::MinMaxDecimationParams{params.min_max_decimation_bucket_count});
     }
 
     return batch;
