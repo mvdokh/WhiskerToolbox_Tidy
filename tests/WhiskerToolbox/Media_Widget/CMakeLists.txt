@@ -22,6 +22,12 @@ add_executable(test_media_widget
     ${CMAKE_SOURCE_DIR}/src/WhiskerToolbox/Media_Widget/Core/MediaWidgetStateData.test.cpp
     ${CMAKE_SOURCE_DIR}/src/WhiskerToolbox/Media_Widget/UI/Media_Widget.test.cpp
     ${CMAKE_SOURCE_DIR}/src/WhiskerToolbox/Media_Widget/UI/MediaPropertiesWidget.test.cpp
+    ${CMAKE_SOURCE_DIR}/tests/WhiskerToolbox/Media_Widget/MediaRulerViewport.test.cpp
+    ${CMAKE_SOURCE_DIR}/tests/WhiskerToolbox/Media_Widget/MediaToolStrip_Widget.test.cpp
+    ${CMAKE_SOURCE_DIR}/tests/WhiskerToolbox/Media_Widget/SelectToolOptions_Widget.test.cpp
+    ${CMAKE_SOURCE_DIR}/tests/WhiskerToolbox/Media_Widget/PenToolOptions_Widget.test.cpp
+    ${CMAKE_SOURCE_DIR}/tests/WhiskerToolbox/Media_Widget/EraserToolOptions_Widget.test.cpp
+    ${CMAKE_SOURCE_DIR}/tests/WhiskerToolbox/Media_Widget/MediaSelectionHit.test.cpp
 )
 
 target_link_libraries(test_media_widget PRIVATE 
@@ -31,7 +37,9 @@ target_link_libraries(test_media_widget PRIVATE
     Qt6::Widgets
     Qt6::Core
     Qt6::Test
+    WhiskerToolbox::LineData
     WhiskerToolbox::MaskData
+    WhiskerToolbox::PointData
 )
 
 target_include_directories(test_media_widget PRIVATE

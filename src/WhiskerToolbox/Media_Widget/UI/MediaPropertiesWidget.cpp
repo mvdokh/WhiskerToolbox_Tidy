@@ -11,8 +11,9 @@
 #include "Media_Widget/UI/SubWidgets/MediaTensor_Widget/MediaTensor_Widget.hpp"
 #include "Media_Widget/UI/SubWidgets/MediaText_Widget/MediaText_Widget.hpp"
 #include "Rendering/Media_Window/Media_Window.hpp"
+#include "Rulers/MediaRuler_Widget.hpp"
 
-#include "Collapsible_Widget/Section.hpp"
+#include "Common/Collapsible_Widget/Section.hpp"
 #include "DataManager/DataManager.hpp"
 
 #include <QResizeEvent>
@@ -40,6 +41,7 @@ MediaPropertiesWidget::MediaPropertiesWidget(std::shared_ptr<MediaWidgetState> s
 
     _setupTextOverlays();
     _setupCanvasCoordSection();
+    _setupRulerSection();
     _setupFeatureTable();
     _createStackedWidgets();
     _connectTextWidgetToScene();
@@ -121,6 +123,20 @@ void MediaPropertiesWidget::_setupCanvasCoordSection() {
 
     // Insert after text overlays section (index 1)
     ui->contentLayout->insertWidget(1, _canvas_coord_section);
+}
+
+void MediaPropertiesWidget::_setupRulerSection() {
+    _ruler_section = new Section(this, "Rulers");
+    _ruler_widget = new MediaRuler_Widget(this);
+    _ruler_section->setContentLayout(*new QVBoxLayout());
+    _ruler_section->layout()->addWidget(_ruler_widget);
+    _ruler_section->autoSetContentLayout();
+
+    if (_state) {
+        _ruler_widget->setState(_state.get());
+    }
+
+    ui->contentLayout->insertWidget(2, _ruler_section);
 }
 
 void MediaPropertiesWidget::_connectTextWidgetToScene() {
@@ -205,7 +221,7 @@ void MediaPropertiesWidget::_createStackedWidgets() {
     _updateChildWidths();
 }
 
-void MediaPropertiesWidget::_featureSelected(QString const & feature) {
+void MediaPropertiesWidget::_applyFeatureSelection(QString const & feature) {
     if (!_data_manager) {
         ui->stackedWidget->setCurrentIndex(0);
         return;
@@ -213,15 +229,6 @@ void MediaPropertiesWidget::_featureSelected(QString const & feature) {
 
     auto const type = _data_manager->getType(feature.toStdString());
     auto key = feature.toStdString();
-
-    // Stacked widget indices:
-    // 0 = empty placeholder page
-    // 1 = MediaPoint_Widget
-    // 2 = MediaLine_Widget
-    // 3 = MediaMask_Widget
-    // 4 = MediaInterval_Widget
-    // 5 = MediaTensor_Widget
-    // 6 = MediaProcessing_Widget
 
     if (type == DM_DataType::Points) {
         int const stacked_widget_index = 1;
@@ -275,12 +282,31 @@ void MediaPropertiesWidget::_featureSelected(QString const & feature) {
         ui->stackedWidget->setCurrentIndex(0);
         std::cout << "Unsupported feature type" << std::endl;
     }
+}
 
-    // Update state and emit signal
+void MediaPropertiesWidget::_syncToDisplayedKey(QString const & key) {
+    if (_syncing_from_table) {
+        return;
+    }
+
+    if (key.isEmpty()) {
+        return;
+    }
+
+    ui->feature_table_widget->selectFeature(key);
+    _applyFeatureSelection(key);
+}
+
+void MediaPropertiesWidget::_featureSelected(QString const & feature) {
+    _syncing_from_table = true;
+    _applyFeatureSelection(feature);
+
     if (_state) {
         _state->setDisplayedDataKey(feature);
     }
+
     emit featureSelected(feature);
+    _syncing_from_table = false;
 }
 
 void MediaPropertiesWidget::_addFeatureToDisplay(QString const & feature, bool enabled) {
@@ -295,10 +321,6 @@ void MediaPropertiesWidget::_connectStateSignals() {
     // Listen for external state changes (e.g., from workspace restore)
     // and update UI accordingly
 
-    // Connect to displayedDataKeyChanged to sync feature table selection
     connect(_state.get(), &MediaWidgetState::displayedDataKeyChanged,
-            this, [this](QString const & key) {
-                // Could highlight the feature in the table if needed
-                // For now, the table manages its own selection
-            });
+            this, &MediaPropertiesWidget::_syncToDisplayedKey);
 }

@@ -122,9 +122,15 @@ set(TRANSFORM_V2_SOURCES
         algorithms/TensorWhitening/TensorWhitening.cpp
         algorithms/TensorToAnalog/TensorToAnalog.hpp
         algorithms/TensorToAnalog/TensorToAnalog.cpp
+        algorithms/SwindaleEventDetection/SwindaleEventDetection.hpp
+        algorithms/SwindaleEventDetection/SwindaleEventDetection.cpp
+        algorithms/SpikeWaveformExtraction/SpikeWaveformExtraction.hpp
+        algorithms/SpikeWaveformExtraction/SpikeWaveformExtraction.cpp
         utils/NaNPolicy.hpp
         utils/DimReductionOutputBuilder.hpp
         utils/DimReductionOutputBuilder.cpp
+        utils/MultichannelTemplateRealigner.hpp
+        utils/MultichannelTemplateRealigner.cpp
         algorithms/RangeReductions/EventRangeReductions.hpp
         algorithms/RangeReductions/IntervalRangeReductions.hpp
         algorithms/RangeReductions/ValueRangeReductions.hpp
@@ -182,6 +188,7 @@ target_link_libraries(TransformsV2 PUBLIC WhiskerToolbox::DigitalTimeSeries)
 target_link_libraries(TransformsV2 PUBLIC WhiskerToolbox::PointData)
 
 target_link_libraries(TransformsV2 PUBLIC DataManager) # DataTypeVariant, container type mapping utils
+target_link_libraries(TransformsV2 PUBLIC CoreUtilities)
 target_link_libraries(TransformsV2 PUBLIC Commands)
 target_link_libraries(TransformsV2 PRIVATE MLCore) # TensorPCA → PCAOperation
 

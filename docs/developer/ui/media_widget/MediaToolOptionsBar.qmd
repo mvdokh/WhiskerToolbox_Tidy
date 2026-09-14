@@ -1,0 +1,69 @@
+---
+title: "Media Viewer Tool Options Bar"
+format: html
+---
+
+## Overview
+
+The Media Viewer shows a horizontal **tool options bar** directly above the horizontal pixel ruler. It displays contextual controls for the active tool selected in the left `MediaToolStrip_Widget`.
+
+## Layout
+
+The `Media_Widget` grid uses three rows:
+
+| Col 0 | Col 1 | Col 2 |
+|-------|-------|-------|
+| Tool strip (row span 3) | Tool options bar (col span 2) | |
+| | Ruler corner | Horizontal ruler |
+| | Vertical ruler | Graphics view |
+
+## Components
+
+| Component | Role |
+|-----------|------|
+| `MediaToolOptionsBar_Widget` | Container with `QStackedWidget` (empty placeholder or tool page); fixed height always reserved |
+| `SelectToolOptions_Widget` | Select-tool page: key filter combo and pick radius spinbox |
+| `PenToolOptions_Widget` | Pen-tool page: append-endpoint combo and usage instructions |
+| `EraserToolOptions_Widget` | Eraser-tool page: hover-circle radius slider/spinbox |
+
+## Select Tool Filter
+
+`SelectToolOptions_Widget` reads enabled features from `MediaWidgetState::enabledFeatures()` for **line**, **mask**, and **point** keys only. The combo rebuilds when `featureEnabledChanged` fires (via `DisplayOptionsRegistry::setVisible()` from the feature table). The combo offers:
+
+- **All enabled features** — default (`SelectToolPrefs::filter_to_key == false`)
+- One entry per enabled key — sets `filter_key` and `filter_data_type` in `SelectToolPrefs`
+
+Preferences are stored in `MediaWidgetStateData::select_prefs` and exposed via `selectPrefs()` / `setSelectPrefs()`.
+
+**Pick radius** (`SelectToolPrefs::pick_radius_px`, default 15 px) controls the scene-pixel distance threshold used by `findBestEntityAtPosition()` for all data types.
+
+Canvas left-click selection uses `Media_Window::findBestEntityAtPosition()` when the Select tool is active. The filter restricts candidate keys before closest-hit ranking across enabled line, mask, and point features.
+
+When `DataManager` deletes a key, `Media_Widget::_pruneRemovedFeatures()` removes stale display options (emitting `displayOptionsRemoved`), which triggers a combo rebuild. If the active filter targeted the deleted key, it resets to **All enabled features**.
+
+## Pen Tool
+
+`PenToolOptions_Widget` exposes the append-endpoint policy and usage instructions. When the Pen tool is active:
+
+- Use the **Select** tool first to pick a line entity on the canvas.
+- Choose **Append to:** tip, base, or nearest endpoint (stored in `LineInteractionPrefs::append_endpoint`).
+- **Ctrl+click** appends a point to the selected line at the configured endpoint (`MediaLine_Widget::_addPointToLine`).
+- **Alt+click** deletes the nearest vertex within `SelectToolPrefs::pick_radius_px` (`MediaLine_Widget::_deleteNearestVertexFromLine`).
+- **Right-click** on the selected line opens the line context menu.
+
+## Eraser Tool
+
+`EraserToolOptions_Widget` configures the Eraser hover-circle radius. When the Eraser tool is active:
+
+- **Eraser size** (`EraserToolPrefs::radius_px`, default 10 px, range 1–50) drives `Media_Window::setHoverCircleRadius()`.
+- `Media_Widget::_syncEraserHoverCircle()` enables the hover circle on the canvas.
+- **Lines:** drag on a selected line removes vertices within the circle; remaining vertices stay connected.
+- **Masks:** left-click drag removes pixels within the circle (replacing mask brush right-click erase).
+
+## Wiring
+
+`Media_Widget::_wireToolUi()` connects:
+
+- `MediaToolStrip_Widget::activeToolChanged` → `MediaToolOptionsBar_Widget::setActiveTool`
+- `MediaWidgetState` → tool option widgets via `MediaToolOptionsBar_Widget::setState`
+- `MediaWidgetState::eraserPrefsChanged` → `Media_Widget::_syncEraserHoverCircle`

@@ -2,7 +2,17 @@
 #include "ui_Media_Widget.h"
 
 #include "Core/MediaWidgetState.hpp"
+#include "MediaRulerViewport.hpp"
 #include "Rendering/Media_Window/Media_Window.hpp"
+#include "Rulers/RulerCornerWidget.hpp"
+#include "Selection/MediaSelectToolController.hpp"
+#include "Tools/MediaToolId.hpp"
+#include "Tools/MediaToolOptionsBar_Widget.hpp"
+#include "Tools/MediaToolStrip_Widget.hpp"
+
+#include "Plots/Common/AxisTickLayout.hpp"
+#include "Plots/Common/HorizontalAxisWidget/HorizontalAxisWidget.hpp"
+#include "Plots/Common/VerticalAxisWidget/VerticalAxisWidget.hpp"
 
 #include "CoreGeometry/ImageSize.hpp"
 #include "DataManager/DataManager.hpp"
@@ -21,6 +31,7 @@
 
 #include <QApplication>
 #include <QGraphicsView>
+#include <QGridLayout>
 #include <QMouseEvent>
 #include <QResizeEvent>
 #include <QScrollBar>
@@ -38,6 +49,8 @@ Media_Widget::Media_Widget(EditorRegistry * editor_registry, QWidget * parent)
       _editor_registry{editor_registry} {
     assert(editor_registry != nullptr && "EditorRegistry must not be null");
     ui->setupUi(this);
+
+    _setupRulerLayout();
 
     // Install event filter on graphics view viewport for wheel zoom
     if (ui->graphicsView && ui->graphicsView->viewport()) {
@@ -104,6 +117,7 @@ void Media_Widget::setDataManager(std::shared_ptr<DataManager> data_manager) {
     _createOptions();
 
     _data_manager->addObserver([this]() {
+        _pruneRemovedFeatures();
         _createOptions();
     },
                                "Media_Widget");
@@ -111,6 +125,82 @@ void Media_Widget::setDataManager(std::shared_ptr<DataManager> data_manager) {
     // Wire up the scene to the graphics view immediately so that
     // data overlays render without requiring a separate media load.
     updateMedia();
+}
+
+void Media_Widget::_pruneRemovedFeatures() {
+    if (!_data_manager || !_state || !_scene) {
+        return;
+    }
+
+    auto const dm_keys = _data_manager->getAllKeys();
+    auto key_still_present = [&](std::string const & key) {
+        return std::ranges::find(dm_keys, key) != dm_keys.end();
+    };
+
+    auto remove_callbacks = [&](std::string const & key) {
+        if (_callback_ids.count(key) == 0) {
+            return;
+        }
+        for (auto callback_id: _callback_ids[key]) {
+            _data_manager->removeCallbackFromData(key, callback_id);
+        }
+        _callback_ids.erase(key);
+    };
+
+    for (QString const & key_q: _state->displayOptions().keys<LineDisplayOptions>()) {
+        std::string const key = key_q.toStdString();
+        if (!key_still_present(key) || _data_manager->getType(key) != DM_DataType::Line) {
+            remove_callbacks(key);
+            _scene->removeLineDataFromScene(key);
+        }
+    }
+
+    for (QString const & key_q: _state->displayOptions().keys<MaskDisplayOptions>()) {
+        std::string const key = key_q.toStdString();
+        if (!key_still_present(key) || _data_manager->getType(key) != DM_DataType::Mask) {
+            remove_callbacks(key);
+            _scene->removeMaskDataFromScene(key);
+        }
+    }
+
+    for (QString const & key_q: _state->displayOptions().keys<PointDisplayOptions>()) {
+        std::string const key = key_q.toStdString();
+        if (!key_still_present(key) || _data_manager->getType(key) != DM_DataType::Points) {
+            remove_callbacks(key);
+            _scene->removePointDataFromScene(key);
+        }
+    }
+
+    for (QString const & key_q: _state->displayOptions().keys<DigitalIntervalDisplayOptions>()) {
+        std::string const key = key_q.toStdString();
+        if (!key_still_present(key) || _data_manager->getType(key) != DM_DataType::DigitalInterval) {
+            remove_callbacks(key);
+            _scene->removeDigitalIntervalSeries(key);
+        }
+    }
+
+    for (QString const & key_q: _state->displayOptions().keys<TensorDisplayOptions>()) {
+        std::string const key = key_q.toStdString();
+        if (!key_still_present(key) || _data_manager->getType(key) != DM_DataType::Tensor) {
+            remove_callbacks(key);
+            _scene->removeTensorDataFromScene(key);
+        }
+    }
+
+    for (QString const & key_q: _state->displayOptions().keys<MediaDisplayOptions>()) {
+        std::string const key = key_q.toStdString();
+        if (!key_still_present(key)) {
+            remove_callbacks(key);
+            _scene->removeMediaDataFromScene(key);
+            continue;
+        }
+
+        auto const type = _data_manager->getType(key);
+        if (type != DM_DataType::Video && type != DM_DataType::Images) {
+            remove_callbacks(key);
+            _scene->removeMediaDataFromScene(key);
+        }
+    }
 }
 
 void Media_Widget::_createOptions() {
@@ -171,6 +261,7 @@ void Media_Widget::_createOptions() {
 
 void Media_Widget::resizeEvent(QResizeEvent * event) {
     QWidget::resizeEvent(event);
+    _updateRulers();
     // When user has zoomed, avoid rescaling scene contents destructively; just adjust scene rect
     if (_isUserZoomActive()) {
         if (_scene) {
@@ -213,38 +304,32 @@ void Media_Widget::_addFeatureToDisplay(QString const & feature, bool enabled) {
     QString state_type;// Type string for state synchronization
 
     if (type == DM_DataType::Line) {
-        auto opts = _scene->getLineConfig(feature_key);
-        if (!opts.has_value()) {
-            std::cerr << "Table feature key "
-                      << feature_key
-                      << " not found in Media_Window Display Options"
-                      << std::endl;
-            return;
-        }
-        opts.value()->is_visible() = enabled;
         state_type = QStringLiteral("line");
+        if (!_state->displayOptions().setVisible(feature, state_type, enabled)) {
+            std::cerr << "Table feature key "
+                      << feature_key
+                      << " not found in Media_Window Display Options"
+                      << std::endl;
+            return;
+        }
     } else if (type == DM_DataType::Mask) {
-        auto opts = _scene->getMaskConfig(feature_key);
-        if (!opts.has_value()) {
-            std::cerr << "Table feature key "
-                      << feature_key
-                      << " not found in Media_Window Display Options"
-                      << std::endl;
-            return;
-        }
-        opts.value()->is_visible() = enabled;
         state_type = QStringLiteral("mask");
-    } else if (type == DM_DataType::Points) {
-        auto opts = _scene->getPointConfig(feature_key);
-        if (!opts.has_value()) {
+        if (!_state->displayOptions().setVisible(feature, state_type, enabled)) {
             std::cerr << "Table feature key "
                       << feature_key
                       << " not found in Media_Window Display Options"
                       << std::endl;
             return;
         }
-        opts.value()->is_visible() = enabled;
+    } else if (type == DM_DataType::Points) {
         state_type = QStringLiteral("point");
+        if (!_state->displayOptions().setVisible(feature, state_type, enabled)) {
+            std::cerr << "Table feature key "
+                      << feature_key
+                      << " not found in Media_Window Display Options"
+                      << std::endl;
+            return;
+        }
     } else if (type == DM_DataType::DigitalInterval) {
         auto opts = _scene->getIntervalConfig(feature_key);
         if (!opts.has_value()) {
@@ -304,8 +389,12 @@ void Media_Widget::_addFeatureToDisplay(QString const & feature, bool enabled) {
         std::cout << "Feature type " << convert_data_type_to_string(type) << " not supported" << std::endl;
     }
 
-    // Sync feature enabled state to MediaWidgetState
-    if (!state_type.isEmpty()) {
+    // Line, mask, and point visibility is updated via DisplayOptionsRegistry::setVisible(),
+    // which emits featureEnabledChanged. Other types still sync below.
+    if (!state_type.isEmpty() &&
+        state_type != QStringLiteral("line") &&
+        state_type != QStringLiteral("mask") &&
+        state_type != QStringLiteral("point")) {
         _syncFeatureEnabledToState(feature, state_type, enabled);
     }
 
@@ -406,6 +495,7 @@ void Media_Widget::_applyZoom(double factor, bool anchor_under_mouse) {
     }
     ui->graphicsView->scale(factor, factor);
     _state->setZoom(new_zoom);
+    _updateRulers();
 }
 
 bool Media_Widget::eventFilter(QObject * watched, QEvent * event) {
@@ -446,6 +536,7 @@ bool Media_Widget::eventFilter(QObject * watched, QEvent * event) {
             ui->graphicsView->verticalScrollBar()->setValue(
                     ui->graphicsView->verticalScrollBar()->value() - delta.y());
 
+            _updateRulers();
             mouseEvent->accept();
             return true;// Consume the event
         }
@@ -481,6 +572,10 @@ void Media_Widget::_createMediaWindow() {
         // Connect Media_Window to state for display options synchronization
         if (_state) {
             _scene->setMediaWidgetState(_state.get());
+        }
+
+        if (_select_controller) {
+            _select_controller->setMediaWindow(_scene.get());
         }
 
         connect(_scene.get(), &Media_Window::groupSelectionInteracted, this, [this]() {
@@ -545,6 +640,180 @@ void Media_Widget::_connectStateSignals() {
             this, &Media_Widget::_onStateZoomChanged);
     connect(_state.get(), &MediaWidgetState::panChanged,
             this, &Media_Widget::_onStatePanChanged);
+    connect(_state.get(), &MediaWidgetState::rulerPrefsChanged,
+            this, &Media_Widget::_applyRulerPrefs);
+    connect(_state.get(), &MediaWidgetState::canvasCoordinateSystemChanged,
+            this, &Media_Widget::_updateRulers);
+
+    if (ui->graphicsView) {
+        connect(ui->graphicsView->horizontalScrollBar(), &QScrollBar::valueChanged,
+                this, &Media_Widget::_updateRulers);
+        connect(ui->graphicsView->verticalScrollBar(), &QScrollBar::valueChanged,
+                this, &Media_Widget::_updateRulers);
+    }
+
+    _wireToolUi();
+    _applyRulerPrefs();
+}
+
+void Media_Widget::_syncActiveMediaTool(MediaToolId tool) {
+    if (_tool_strip) {
+        _tool_strip->setActiveTool(tool);
+    }
+    if (_tool_options_bar) {
+        _tool_options_bar->setActiveTool(tool);
+    }
+    if (_select_controller) {
+        _select_controller->setActive(tool == MediaToolId::Select);
+    }
+    _syncEraserHoverCircle();
+}
+
+void Media_Widget::_syncEraserHoverCircle() {
+    if (!_scene || !_state) {
+        return;
+    }
+
+    if (_state->activeMediaTool() == MediaToolId::Eraser) {
+        _scene->setHoverCircleRadius(_state->eraserPrefs().radius_px);
+        _scene->setShowHoverCircle(true);
+        return;
+    }
+
+    _scene->setShowHoverCircle(false);
+}
+
+void Media_Widget::_wireToolUi() {
+    if (!_tool_strip || !_tool_options_bar || !_state) {
+        return;
+    }
+
+    qRegisterMetaType<MediaToolId>("MediaToolId");
+
+    if (!_select_controller) {
+        _select_controller = new MediaSelectToolController(this);
+        _select_controller->setMediaWindow(_scene.get());
+        _select_controller->setState(_state.get());
+    }
+
+    _tool_options_bar->setState(_state.get());
+
+    connect(_tool_strip, &MediaToolStrip_Widget::activeToolChanged,
+            this, [this](MediaToolId tool) {
+                _state->setActiveMediaTool(tool);
+            });
+
+    connect(_state.get(), &MediaWidgetState::activeMediaToolChanged,
+            this, [this](MediaToolId tool) {
+                _syncActiveMediaTool(tool);
+            });
+
+    connect(_state.get(), &MediaWidgetState::eraserPrefsChanged,
+            this, [this]() {
+                _syncEraserHoverCircle();
+            });
+
+    _syncActiveMediaTool(_state->activeMediaTool());
+}
+
+void Media_Widget::_setupRulerLayout() {
+    if (!ui->graphicsView) {
+        return;
+    }
+
+    auto * old_layout = ui->horizontalLayout;
+    if (old_layout) {
+        old_layout->removeWidget(ui->graphicsView);
+    }
+
+    _tool_strip = new MediaToolStrip_Widget(this);
+    _tool_options_bar = new MediaToolOptionsBar_Widget(this);
+    _ruler_corner = new RulerCornerWidget(this);
+    _horizontal_ruler = new HorizontalAxisWidget(this);
+    _vertical_ruler = new VerticalAxisWidget(this);
+
+    _horizontal_ruler->setDisplayMode(Neuralyzer::Plots::AxisDisplayMode::Ruler);
+    _vertical_ruler->setDisplayMode(Neuralyzer::Plots::AxisDisplayMode::Ruler);
+    _vertical_ruler->setInverted(true);
+
+    auto * grid_layout = new QGridLayout();
+    grid_layout->setSpacing(0);
+    grid_layout->setContentsMargins(0, 0, 0, 0);
+    grid_layout->addWidget(_tool_strip, 0, 0, 3, 1);
+    grid_layout->addWidget(_tool_options_bar, 0, 1, 1, 2);
+    grid_layout->addWidget(_ruler_corner, 1, 1);
+    grid_layout->addWidget(_horizontal_ruler, 1, 2);
+    grid_layout->addWidget(_vertical_ruler, 2, 1);
+    grid_layout->addWidget(ui->graphicsView, 2, 2);
+    grid_layout->setColumnStretch(2, 1);
+    grid_layout->setRowStretch(2, 1);
+
+
+    delete old_layout;
+
+    setLayout(grid_layout);
+
+    _horizontal_ruler->setRangeGetter([this]() -> std::pair<double, double> {
+        if (!_scene) {
+            return {0.0, 1.0};
+        }
+        auto const vp = computeVisibleMediaViewport(
+                *ui->graphicsView,
+                _scene->getXAspect(),
+                _scene->getYAspect());
+        return {vp.min_x, vp.max_x};
+    });
+
+    _vertical_ruler->setRangeGetter([this]() -> std::pair<double, double> {
+        if (!_scene) {
+            return {0.0, 1.0};
+        }
+        auto const vp = computeVisibleMediaViewport(
+                *ui->graphicsView,
+                _scene->getXAspect(),
+                _scene->getYAspect());
+        return {vp.min_y, vp.max_y};
+    });
+}
+
+void Media_Widget::_applyRulerPrefs() {
+    if (!_state || !_horizontal_ruler || !_vertical_ruler) {
+        return;
+    }
+
+    RulerPrefs const & prefs = _state->rulerPrefs();
+
+    bool const visible = prefs.enabled;
+    if (_ruler_corner) {
+        _ruler_corner->setVisible(visible);
+    }
+    _horizontal_ruler->setVisible(visible);
+    _vertical_ruler->setVisible(visible);
+
+    Neuralyzer::Plots::AxisTickConfig tick_config;
+    tick_config.mode = prefs.tick_mode == RulerTickMode::Fixed ? Neuralyzer::Plots::AxisTickMode::Fixed
+                                                               : Neuralyzer::Plots::AxisTickMode::Auto;
+    tick_config.fixed_interval = static_cast<double>(prefs.fixed_interval_px);
+    tick_config.target_tick_count = prefs.target_tick_count;
+    tick_config.show_minor_ticks = prefs.show_minor_ticks;
+
+    _horizontal_ruler->setTickConfig(tick_config);
+    _vertical_ruler->setTickConfig(tick_config);
+
+    QColor const negative_color(QString::fromStdString(prefs.negative_color));
+    _horizontal_ruler->setNegativeLabelColor(negative_color);
+    _vertical_ruler->setNegativeLabelColor(negative_color);
+
+    _updateRulers();
+}
+
+void Media_Widget::_updateRulers() {
+    if (_horizontal_ruler) {
+        _horizontal_ruler->update();
+    }
+    if (_vertical_ruler) {
+        _vertical_ruler->update();
+    }
 }
 
 void Media_Widget::_onStateZoomChanged(double zoom) {
@@ -563,6 +832,7 @@ void Media_Widget::_onStateZoomChanged(double zoom) {
         ui->graphicsView->setTransformationAnchor(QGraphicsView::AnchorViewCenter);
         ui->graphicsView->scale(factor, factor);
     }
+    _updateRulers();
 }
 
 void Media_Widget::_onStatePanChanged(double x, double y) {
@@ -576,6 +846,7 @@ void Media_Widget::_onStatePanChanged(double x, double y) {
         ui->graphicsView->horizontalScrollBar()->setValue(static_cast<int>(x));
         ui->graphicsView->verticalScrollBar()->setValue(static_cast<int>(y));
     }
+    _updateRulers();
 }
 
 void Media_Widget::restoreFromState() {
@@ -647,4 +918,6 @@ void Media_Widget::restoreFromState() {
     if (_scene) {
         _scene->UpdateCanvas();
     }
+
+    _applyRulerPrefs();
 }

@@ -6,24 +6,25 @@
  * 1. Points can be added to a line by clicking in the media widget
  */
 
+#include "Media_Widget/UI/SubWidgets/MediaLine_Widget/MediaLine_Widget.hpp"
 #include "Media_Widget/Core/MediaWidgetState.hpp"
 #include "Media_Widget/MediaWidgetRegistration.hpp"
 #include "Media_Widget/Rendering/Media_Window/Media_Window.hpp"
-#include "Media_Widget/UI/Media_Widget.hpp"
 #include "Media_Widget/UI/MediaPropertiesWidget.hpp"
-#include "Media_Widget/UI/SubWidgets/MediaLine_Widget/MediaLine_Widget.hpp"
+#include "Media_Widget/UI/Media_Widget.hpp"
+#include "Media_Widget/UI/Tools/MediaToolId.hpp"
 
 #include "CoreGeometry/ImageSize.hpp"
 #include "CoreGeometry/lines.hpp"
 #include "DataManager/DataManager.hpp"
-#include "Lines/Line_Data.hpp"
 #include "EditorState/EditorRegistry.hpp"
 #include "Feature_Table_Widget/Feature_Table_Widget.hpp"
+#include "Lines/Line_Data.hpp"
 #include "TimeFrame/StrongTimeTypes.hpp"
 #include "TimeFrame/TimeFrame.hpp"
 
-#include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <QApplication>
 #include <QComboBox>
@@ -57,7 +58,7 @@ std::shared_ptr<DataManager> createDataManagerWithLine(
         std::string const & line_key,
         int num_frames,
         ImageSize const & image_size) {
-    
+
     auto dm = std::make_shared<DataManager>();
 
     // Create timeframe
@@ -84,7 +85,7 @@ MediaLine_Widget * selectLineFeature(
         MediaPropertiesWidget & widget,
         std::string const & line_key,
         QApplication * app) {
-    
+
     auto feature_table = widget.findChild<Feature_Table_Widget *>("feature_table_widget");
     if (!feature_table) return nullptr;
 
@@ -137,14 +138,19 @@ MediaLine_Widget * selectLineFeature(
 }
 
 /**
- * @brief Enable "Select Line" mode on a MediaLine_Widget
+ * @brief Activate the Pen toolbar tool for selected-line editing
  */
-void enableSelectLineMode(MediaLine_Widget * line_widget, QApplication * app) {
-    auto combo = line_widget->findChild<QComboBox *>("selection_mode_combo");
-    if (combo) {
-        combo->setCurrentText("Select Line");
-        app->processEvents();
-    }
+void enablePenTool(MediaWidgetState * state) {
+    REQUIRE(state != nullptr);
+    state->setActiveMediaTool(MediaToolId::Pen);
+}
+
+void enableEraserTool(MediaWidgetState * state, int radius_px = 15) {
+    REQUIRE(state != nullptr);
+    EraserToolPrefs prefs = state->eraserPrefs();
+    prefs.radius_px = radius_px;
+    state->setEraserPrefs(prefs);
+    state->setActiveMediaTool(MediaToolId::Eraser);
 }
 
 /**
@@ -161,14 +167,33 @@ void simulateLineClick(MediaLine_Widget * line_widget,
                        Qt::KeyboardModifiers modifiers) {
     if (!line_widget) return;
 
-    QMetaObject::invokeMethod(line_widget, "_clickedInVideoWithModifiers", 
+    QMetaObject::invokeMethod(line_widget, "_clickedInVideoWithModifiers",
                               Qt::DirectConnection,
                               Q_ARG(qreal, x_media),
                               Q_ARG(qreal, y_media),
                               Q_ARG(Qt::KeyboardModifiers, modifiers));
 }
 
-}  // namespace
+void simulateLineEraserStroke(MediaLine_Widget * line_widget,
+                              std::vector<std::pair<qreal, qreal>> const & points) {
+    if (!line_widget || points.empty()) {
+        return;
+    }
+
+    simulateLineClick(line_widget, points.front().first, points.front().second, Qt::NoModifier);
+
+    for (size_t i = 1; i < points.size(); ++i) {
+        QMetaObject::invokeMethod(line_widget,
+                                  "_mouseMovedInVideo",
+                                  Qt::DirectConnection,
+                                  Q_ARG(qreal, points[i].first),
+                                  Q_ARG(qreal, points[i].second));
+    }
+
+    QMetaObject::invokeMethod(line_widget, "_mouseReleasedInVideo", Qt::DirectConnection);
+}
+
+}// namespace
 
 // ============================================================================
 // Line Point Addition Tests
@@ -192,14 +217,12 @@ TEST_CASE("Points can be added to a line by clicking in media widget",
     // Pre-create a line at the target frame so we can select it
     auto line_data = data_manager->getData<LineData>("test_line");
     REQUIRE(line_data != nullptr);
-    
+
     // Create an initial line with a few points
-    Line2D initial_line({
-        Point2D<float>{100.0f, 100.0f},
-        Point2D<float>{120.0f, 120.0f}
-    });
+    Line2D initial_line({Point2D<float>{100.0f, 100.0f},
+                         Point2D<float>{120.0f, 120.0f}});
     line_data->addAtTime(TimeFrameIndex{kTargetFrame}, initial_line, NotifyObservers::No);
-    
+
     // Get the EntityId of the line we just created
     auto entity_ids = line_data->getEntityIdsAtTime(TimeFrameIndex{kTargetFrame});
     REQUIRE_FALSE(entity_ids.empty());
@@ -223,8 +246,8 @@ TEST_CASE("Points can be added to a line by clicking in media widget",
         auto line_widget = selectLineFeature(props_widget, "test_line", app);
         REQUIRE(line_widget != nullptr);
 
-        // Enable "Select Line" mode
-        enableSelectLineMode(line_widget, app);
+        // Activate Pen tool for selected-line editing
+        enablePenTool(state.get());
 
         // Select the line using the scene's selectEntity method
         media_window->selectEntity(line_entity_id, "test_line", "line");
@@ -262,6 +285,126 @@ TEST_CASE("Points can be added to a line by clicking in media widget",
     }
 }
 
+TEST_CASE("Pen tool Ctrl+click can append to the line base",
+          "[MediaWidget][MediaLine_Widget][Integration]") {
+    auto * app = ensureQApplication();
+    REQUIRE(app != nullptr);
+
+    qRegisterMetaType<qreal>("qreal");
+    qRegisterMetaType<Qt::KeyboardModifiers>("Qt::KeyboardModifiers");
+
+    constexpr int kTargetFrame = 50;
+
+    auto data_manager = createDataManagerWithLine("test_line", 100, {640, 480});
+    auto time_frame = data_manager->getTime(TimeKey("time"));
+    REQUIRE(time_frame != nullptr);
+
+    auto line_data = data_manager->getData<LineData>("test_line");
+    REQUIRE(line_data != nullptr);
+
+    Line2D initial_line({Point2D<float>{100.0f, 100.0f},
+                         Point2D<float>{120.0f, 120.0f}});
+    line_data->addAtTime(TimeFrameIndex{kTargetFrame}, initial_line, NotifyObservers::No);
+
+    auto entity_ids = line_data->getEntityIdsAtTime(TimeFrameIndex{kTargetFrame});
+    REQUIRE_FALSE(entity_ids.empty());
+    EntityId line_entity_id = entity_ids[0];
+
+    auto state = std::make_shared<MediaWidgetState>();
+    LineInteractionPrefs prefs = state->linePrefs();
+    prefs.append_endpoint = LineAppendEndpoint::Base;
+    state->setLinePrefs(prefs);
+
+    auto media_window = std::make_unique<Media_Window>(data_manager);
+    TimePosition position(TimeFrameIndex{kTargetFrame}, time_frame);
+    state->current_position = position;
+
+    {
+        MediaPropertiesWidget props_widget(state, data_manager, media_window.get());
+        props_widget.resize(900, 700);
+        props_widget.show();
+        app->processEvents();
+
+        auto line_widget = selectLineFeature(props_widget, "test_line", app);
+        REQUIRE(line_widget != nullptr);
+
+        enablePenTool(state.get());
+        media_window->selectEntity(line_entity_id, "test_line", "line");
+        app->processEvents();
+
+        constexpr qreal kClickX = 80.0;
+        constexpr qreal kClickY = 80.0;
+        simulateLineClick(line_widget, kClickX, kClickY, Qt::ControlModifier);
+        app->processEvents();
+
+        auto line_ref_after = line_data->getDataByEntityId(line_entity_id);
+        REQUIRE(line_ref_after.has_value());
+        auto const & line = line_ref_after.value().get();
+        REQUIRE(line.size() == 3);
+        REQUIRE(line.front().x == Catch::Approx(kClickX));
+        REQUIRE(line.front().y == Catch::Approx(kClickY));
+        REQUIRE(line.back().x == Catch::Approx(120.0f));
+        REQUIRE(line.back().y == Catch::Approx(120.0f));
+    }
+}
+
+TEST_CASE("Eraser tool removes contiguous line vertices within hover radius",
+          "[MediaWidget][MediaLine_Widget][Integration]") {
+    auto * app = ensureQApplication();
+    REQUIRE(app != nullptr);
+
+    qRegisterMetaType<qreal>("qreal");
+    qRegisterMetaType<Qt::KeyboardModifiers>("Qt::KeyboardModifiers");
+
+    constexpr int kTargetFrame = 50;
+
+    auto data_manager = createDataManagerWithLine("test_line", 100, {640, 480});
+    auto time_frame = data_manager->getTime(TimeKey("time"));
+    REQUIRE(time_frame != nullptr);
+
+    auto line_data = data_manager->getData<LineData>("test_line");
+    REQUIRE(line_data != nullptr);
+
+    Line2D initial_line({Point2D<float>{100.0f, 100.0f},
+                         Point2D<float>{110.0f, 100.0f},
+                         Point2D<float>{120.0f, 100.0f},
+                         Point2D<float>{130.0f, 100.0f},
+                         Point2D<float>{140.0f, 100.0f}});
+    line_data->addAtTime(TimeFrameIndex{kTargetFrame}, initial_line, NotifyObservers::No);
+
+    auto entity_ids = line_data->getEntityIdsAtTime(TimeFrameIndex{kTargetFrame});
+    REQUIRE_FALSE(entity_ids.empty());
+    EntityId line_entity_id = entity_ids[0];
+
+    auto state = std::make_shared<MediaWidgetState>();
+    auto media_window = std::make_unique<Media_Window>(data_manager);
+    state->current_position = TimePosition(TimeFrameIndex{kTargetFrame}, time_frame);
+
+    {
+        MediaPropertiesWidget props_widget(state, data_manager, media_window.get());
+        props_widget.resize(900, 700);
+        props_widget.show();
+        app->processEvents();
+
+        auto line_widget = selectLineFeature(props_widget, "test_line", app);
+        REQUIRE(line_widget != nullptr);
+
+        enableEraserTool(state.get(), 15);
+        media_window->selectEntity(line_entity_id, "test_line", "line");
+        app->processEvents();
+
+        simulateLineEraserStroke(line_widget, {{120.0, 100.0}});
+        app->processEvents();
+
+        auto line_ref_after = line_data->getDataByEntityId(line_entity_id);
+        REQUIRE(line_ref_after.has_value());
+        auto const & line = line_ref_after.value().get();
+        REQUIRE(line.size() == 2);
+        REQUIRE(line.front().x == Catch::Approx(100.0f));
+        REQUIRE(line.back().x == Catch::Approx(140.0f));
+    }
+}
+
 TEST_CASE("Multiple points can be added to a line",
           "[MediaWidget][MediaLine_Widget][Integration]") {
     auto * app = ensureQApplication();
@@ -280,13 +423,11 @@ TEST_CASE("Multiple points can be added to a line",
     // Pre-create a line
     auto line_data = data_manager->getData<LineData>("test_line");
     REQUIRE(line_data != nullptr);
-    
-    Line2D initial_line({
-        Point2D<float>{50.0f, 50.0f},
-        Point2D<float>{60.0f, 60.0f}
-    });
+
+    Line2D initial_line({Point2D<float>{50.0f, 50.0f},
+                         Point2D<float>{60.0f, 60.0f}});
     line_data->addAtTime(TimeFrameIndex{kTargetFrame}, initial_line, NotifyObservers::No);
-    
+
     auto entity_ids = line_data->getEntityIdsAtTime(TimeFrameIndex{kTargetFrame});
     REQUIRE_FALSE(entity_ids.empty());
     EntityId line_entity_id = entity_ids[0];
@@ -306,7 +447,7 @@ TEST_CASE("Multiple points can be added to a line",
         auto line_widget = selectLineFeature(props_widget, "test_line", app);
         REQUIRE(line_widget != nullptr);
 
-        enableSelectLineMode(line_widget, app);
+        enablePenTool(state.get());
         media_window->selectEntity(line_entity_id, "test_line", "line");
         app->processEvents();
 
@@ -325,7 +466,7 @@ TEST_CASE("Multiple points can be added to a line",
         // Verify all three points were added
         auto line_ref = line_data->getDataByEntityId(line_entity_id);
         REQUIRE(line_ref.has_value());
-        REQUIRE(line_ref.value().get().size() == 5); // 2 initial + 3 new
+        REQUIRE(line_ref.value().get().size() == 5);// 2 initial + 3 new
     }
 }
 
@@ -348,17 +489,13 @@ TEST_CASE("Adding points to line works at correct time frame",
     // Pre-create lines at different frames
     auto line_data = data_manager->getData<LineData>("test_line");
     REQUIRE(line_data != nullptr);
-    
-    Line2D line1({
-        Point2D<float>{100.0f, 100.0f},
-        Point2D<float>{110.0f, 110.0f}
-    });
+
+    Line2D line1({Point2D<float>{100.0f, 100.0f},
+                  Point2D<float>{110.0f, 110.0f}});
     line_data->addAtTime(TimeFrameIndex{kFrame1}, line1, NotifyObservers::No);
-    
-    Line2D line2({
-        Point2D<float>{200.0f, 200.0f},
-        Point2D<float>{210.0f, 210.0f}
-    });
+
+    Line2D line2({Point2D<float>{200.0f, 200.0f},
+                  Point2D<float>{210.0f, 210.0f}});
     line_data->addAtTime(TimeFrameIndex{kFrame2}, line2, NotifyObservers::No);
 
     auto state = std::make_shared<MediaWidgetState>();
@@ -373,7 +510,7 @@ TEST_CASE("Adding points to line works at correct time frame",
         auto line_widget = selectLineFeature(props_widget, "test_line", app);
         REQUIRE(line_widget != nullptr);
 
-        enableSelectLineMode(line_widget, app);
+        enablePenTool(state.get());
 
         // Add point to line at frame 20
         state->current_position = TimePosition(TimeFrameIndex{kFrame1}, time_frame);
@@ -381,7 +518,7 @@ TEST_CASE("Adding points to line works at correct time frame",
         REQUIRE_FALSE(entity_ids_frame1.empty());
         media_window->selectEntity(entity_ids_frame1[0], "test_line", "line");
         app->processEvents();
-        
+
         simulateLineClick(line_widget, 120.0, 120.0, Qt::ControlModifier);
         app->processEvents();
 
@@ -391,18 +528,18 @@ TEST_CASE("Adding points to line works at correct time frame",
         REQUIRE_FALSE(entity_ids_frame2.empty());
         media_window->selectEntity(entity_ids_frame2[0], "test_line", "line");
         app->processEvents();
-        
+
         simulateLineClick(line_widget, 220.0, 220.0, Qt::ControlModifier);
         app->processEvents();
 
         // Verify both lines have the correct point counts
         auto line1_ref = line_data->getDataByEntityId(entity_ids_frame1[0]);
         REQUIRE(line1_ref.has_value());
-        REQUIRE(line1_ref.value().get().size() == 3); // 2 initial + 1 new
+        REQUIRE(line1_ref.value().get().size() == 3);// 2 initial + 1 new
 
         auto line2_ref = line_data->getDataByEntityId(entity_ids_frame2[0]);
         REQUIRE(line2_ref.has_value());
-        REQUIRE(line2_ref.value().get().size() == 3); // 2 initial + 1 new
+        REQUIRE(line2_ref.value().get().size() == 3);// 2 initial + 1 new
     }
 }
 
@@ -427,13 +564,11 @@ TEST_CASE("Full integration: EditorRegistry creation with line point addition",
     // Pre-create a line
     auto line_data = data_manager->getData<LineData>("test_line");
     REQUIRE(line_data != nullptr);
-    
-    Line2D initial_line({
-        Point2D<float>{150.0f, 150.0f},
-        Point2D<float>{160.0f, 160.0f}
-    });
+
+    Line2D initial_line({Point2D<float>{150.0f, 150.0f},
+                         Point2D<float>{160.0f, 160.0f}});
     line_data->addAtTime(TimeFrameIndex{kTargetFrame}, initial_line, NotifyObservers::No);
-    
+
     auto entity_ids = line_data->getEntityIdsAtTime(TimeFrameIndex{kTargetFrame});
     REQUIRE_FALSE(entity_ids.empty());
     EntityId line_entity_id = entity_ids[0];
@@ -474,12 +609,12 @@ TEST_CASE("Full integration: EditorRegistry creation with line point addition",
     auto line_widget = selectLineFeature(*props, "test_line", app);
     REQUIRE(line_widget != nullptr);
 
-    enableSelectLineMode(line_widget, app);
-    
+    enablePenTool(media_state.get());
+
     // Get Media_Window from the view
     auto * media_window = view->getMediaWindow();
     REQUIRE(media_window != nullptr);
-    
+
     // Select the line
     media_window->selectEntity(line_entity_id, "test_line", "line");
     app->processEvents();
@@ -491,10 +626,67 @@ TEST_CASE("Full integration: EditorRegistry creation with line point addition",
     // Verify point was added at frame 42
     auto line_ref = line_data->getDataByEntityId(line_entity_id);
     REQUIRE(line_ref.has_value());
-    REQUIRE(line_ref.value().get().size() == 3); // 2 initial + 1 new
-    
+    REQUIRE(line_ref.value().get().size() == 3);// 2 initial + 1 new
+
     auto const & line = line_ref.value().get();
     auto const & last_point = line.back();
     REQUIRE(last_point.x == Catch::Approx(170.0f));
     REQUIRE(last_point.y == Catch::Approx(170.0f));
+}
+
+TEST_CASE("Pen tool Alt+click deletes only the nearest vertex",
+          "[MediaWidget][MediaLine_Widget][Integration]") {
+    auto * app = ensureQApplication();
+    REQUIRE(app != nullptr);
+
+    qRegisterMetaType<qreal>("qreal");
+    qRegisterMetaType<Qt::KeyboardModifiers>("Qt::KeyboardModifiers");
+
+    constexpr int kTargetFrame = 10;
+
+    auto data_manager = createDataManagerWithLine("test_line", 50, {640, 480});
+    auto time_frame = data_manager->getTime(TimeKey("time"));
+    REQUIRE(time_frame != nullptr);
+
+    auto line_data = data_manager->getData<LineData>("test_line");
+    REQUIRE(line_data != nullptr);
+
+    Line2D initial_line({Point2D<float>{100.0f, 100.0f},
+                         Point2D<float>{120.0f, 120.0f},
+                         Point2D<float>{140.0f, 140.0f}});
+    line_data->addAtTime(TimeFrameIndex{kTargetFrame}, initial_line, NotifyObservers::No);
+
+    auto entity_ids = line_data->getEntityIdsAtTime(TimeFrameIndex{kTargetFrame});
+    REQUIRE_FALSE(entity_ids.empty());
+    EntityId const line_entity_id = entity_ids[0];
+
+    auto state = std::make_shared<MediaWidgetState>();
+    auto media_window = std::make_unique<Media_Window>(data_manager);
+    state->current_position = TimePosition(TimeFrameIndex{kTargetFrame}, time_frame);
+
+    {
+        MediaPropertiesWidget props_widget(state, data_manager, media_window.get());
+        props_widget.show();
+        app->processEvents();
+
+        auto * line_widget = selectLineFeature(props_widget, "test_line", app);
+        REQUIRE(line_widget != nullptr);
+
+        enablePenTool(state.get());
+        media_window->selectEntity(line_entity_id, "test_line", "line");
+        app->processEvents();
+
+        simulateLineClick(line_widget, 120.0, 120.0, Qt::AltModifier);
+        app->processEvents();
+
+        auto line_ref = line_data->getDataByEntityId(line_entity_id);
+        REQUIRE(line_ref.has_value());
+        REQUIRE(line_ref.value().get().size() == 2);
+
+        auto const & line = line_ref.value().get();
+        REQUIRE(line[0].x == Catch::Approx(100.0f));
+        REQUIRE(line[0].y == Catch::Approx(100.0f));
+        REQUIRE(line[1].x == Catch::Approx(140.0f));
+        REQUIRE(line[1].y == Catch::Approx(140.0f));
+    }
 }

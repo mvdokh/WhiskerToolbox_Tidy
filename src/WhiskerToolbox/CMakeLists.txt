@@ -17,7 +17,7 @@ qt_standard_project_setup()
 
 add_subdirectory(EditorState) # reflectcpp, Qt
 add_subdirectory(KeymapSystem) # Qt, EditorState
-add_subdirectory(Collapsible_Widget) # Qt
+add_subdirectory(Common) # Qt utilities shared across WhiskerToolbox widgets
 add_subdirectory(Terminal_Widget) # Qt, EditorState, reflectcpp
 
 add_subdirectory(GroupManagementWidget) # Qt, DataManager, EditorState
@@ -409,17 +409,7 @@ target_link_libraries(WhiskerToolbox PRIVATE ffmpeg_wrapper::ffmpeg_wrapper)
 target_compile_definitions(WhiskerToolbox PRIVATE _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
 
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(WhiskerToolbox PRIVATE ${CLANG_OPTIONS})
-endif()
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(WhiskerToolbox PRIVATE ${GCC_WARNINGS})
-endif()
-
-if (MSVC)
-    target_compile_options(WhiskerToolbox PRIVATE ${MSVC_WARNINGS})
-endif()
+set_target_compiler_warnings(WhiskerToolbox)
 
 set_target_properties(WhiskerToolbox PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}

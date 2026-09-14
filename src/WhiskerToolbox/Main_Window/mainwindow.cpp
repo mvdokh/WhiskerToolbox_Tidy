@@ -73,6 +73,7 @@
 #include "StateManagement/AppFileDialog.hpp"
 #include "StateManagement/AppPreferences.hpp"
 #include "StateManagement/SessionStore.hpp"
+#include "StateManagement/StartupTrace.hpp"
 #include "StateManagement/StateManager.hpp"
 #include "StateManagement/WorkspaceData.hpp"
 #include "StateManagement/WorkspaceManager.hpp"
@@ -91,6 +92,8 @@
 #include <QCloseEvent>
 #include <QComboBox>
 #include <QDir>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QImage>
@@ -98,14 +101,12 @@
 #include <QLineEdit>
 #include <QMenu>
 #include <QMessageBox>
-#include <QOpenGLWidget>
-#include <QDragEnterEvent>
-#include <QDropEvent>
 #include <QMimeData>
-#include <QUrl>
+#include <QOpenGLWidget>
 #include <QPlainTextEdit>
 #include <QProgressDialog>
 #include <QSplitter>
+#include <QUrl>
 
 
 #include <QCoreApplication>
@@ -128,6 +129,7 @@ MainWindow::MainWindow(QWidget * parent)
 
 {
     ui->setupUi(this);
+    StateManagement::logStartupPhase("MainWindow ctor begin");
     setAcceptDrops(true);
 
     // Load application preferences and session memory (before UI setup)
@@ -138,10 +140,10 @@ MainWindow::MainWindow(QWidget * parent)
 
     AutoParamWidget::setFileDialogOpener(
             [](QWidget * parent,
-               const QString& id,
-               const QString& caption,
-               const QString& filter,
-               const QString& fallback,
+               QString const & id,
+               QString const & caption,
+               QString const & filter,
+               QString const & fallback,
                bool pick_dir) -> QString {
                 if (pick_dir) {
                     return AppFileDialog::getExistingDirectory(
@@ -293,7 +295,9 @@ MainWindow::MainWindow(QWidget * parent)
     _connectProvenanceTracking();
 
     // Restore window geometry from previous session
+    StateManagement::logStartupPhase("before restoreWindowGeometry");
     _state_manager->session()->restoreWindowGeometry(this);
+    StateManagement::logWindowState("after restoreWindowGeometry", this);
 
     // Connect workspace dirty flag to title bar updates
     connect(_state_manager->workspace(), &StateManagement::WorkspaceManager::dirtyChanged,
@@ -301,13 +305,12 @@ MainWindow::MainWindow(QWidget * parent)
     connect(_state_manager->workspace(), &StateManagement::WorkspaceManager::workspacePathChanged,
             this, &MainWindow::_updateTitleBar);
 
-    // Enable crash-recovery auto-save
-    _state_manager->workspace()->enableAutoSave();
-
     _updateTitleBar();
 
-    // Check for crash recovery file from a previous unclean shutdown
-    _checkCrashRecovery();
+    // Defer crash recovery until after main() calls show() and the event loop runs.
+    StateManagement::logStartupPhase("scheduling deferred _checkCrashRecovery");
+    QTimer::singleShot(0, this, &MainWindow::_checkCrashRecovery);
+    StateManagement::logStartupPhase("MainWindow ctor end");
 }
 
 void MainWindow::closeEvent(QCloseEvent * event) {
@@ -436,10 +439,7 @@ void MainWindow::_buildInitialLayout() {
     // by EditorCreationController when editors are created.
     // No more PropertiesHost container - properties persist independently.
 
-    // === Apply Zone Ratios ===
-    // Defer the splitter size application to after the window is shown and laid out
-    // This ensures the splitters have valid dimensions when sizes are applied
-    _zone_manager->reapplySplitterSizes(200);// 200ms delay for layout to stabilize
+    // Splitter sizes are applied in _finishStartupLayout() after crash-recovery prompt.
 }
 
 void MainWindow::_createActions() {
@@ -520,7 +520,7 @@ If a video is selected, that video will be loaded and the first frame will be
 drawn on the video screen.
 
 */
-void MainWindow::_loadVideoFromFile(const QString& filename) {
+void MainWindow::_loadVideoFromFile(QString const & filename) {
     // Use the conditional video loader
     if (loadVideoData(filename.toStdString(), _data_manager.get())) {
         _state_manager->workspace()->recordVideoLoad(filename);
@@ -568,7 +568,7 @@ void MainWindow::Load_Images() {
     loadData();
 }
 
-void MainWindow::_loadJSONFromFile(const QString& filename) {
+void MainWindow::_loadJSONFromFile(QString const & filename) {
     // Create progress dialog without cancel button
     QProgressDialog progress("Preparing to load data...", nullptr, 0, 100, this);
     progress.setWindowModality(Qt::WindowModal);
@@ -761,17 +761,17 @@ void MainWindow::keyPressEvent(QKeyEvent * event) {
     QMainWindow::keyPressEvent(event);
 }
 
-void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
+void MainWindow::dragEnterEvent(QDragEnterEvent * event) {
     if (event->mimeData()->hasUrls()) {
         event->acceptProposedAction();
     }
 }
 
-void MainWindow::dropEvent(QDropEvent *event) {
+void MainWindow::dropEvent(QDropEvent * event) {
     auto urls = event->mimeData()->urls();
     if (urls.isEmpty()) return;
 
-    for (const QUrl &url : urls) {
+    for (QUrl const & url: urls) {
         if (!url.isLocalFile()) continue;
         QString filePath = url.toLocalFile();
         QFileInfo fileInfo(filePath);
@@ -1264,18 +1264,37 @@ void MainWindow::_updateTitleBar() {
 // Crash Recovery
 // ---------------------------------------------------------------------------
 
+void MainWindow::_finishStartupLayout() {
+    StateManagement::logStartupPhase("before finishStartupLayout");
+    StateManagement::logWindowState("before finishStartupLayout", this);
+    _zone_manager->reapplySplitterSizes(200);
+    _state_manager->workspace()->enableAutoSave();
+    StateManagement::logStartupPhase("finishStartupLayout complete");
+}
+
 void MainWindow::_checkCrashRecovery() {
     auto * ws = _state_manager->workspace();
     if (!ws->hasRecoveryFile()) {
+        StateManagement::logStartupPhase("crash_recovery skipped (no recovery file)");
+        _finishStartupLayout();
         return;
     }
+
+    StateManagement::logStartupPhase("crash_recovery file detected");
+    StateManagement::logWindowState("before readRecoveryFile", this);
 
     auto recovery_data = ws->readRecoveryFile();
     if (!recovery_data) {
         // Corrupt recovery file — delete it silently
+        StateManagement::logStartupPhase("crash_recovery corrupt file deleted");
         ws->deleteRecoveryFile();
+        _finishStartupLayout();
         return;
     }
+
+    StateManagement::logStartupPhase("crash_recovery showing dialog");
+    StateManagement::logWindowState("before recovery dialog", this);
+    StateManagement::setRecoveryDialogOpen(true);
 
     auto const answer = QMessageBox::question(
             this,
@@ -1284,6 +1303,12 @@ void MainWindow::_checkCrashRecovery() {
                            "Would you like to restore it?"),
             QMessageBox::Yes | QMessageBox::No,
             QMessageBox::Yes);
+
+    StateManagement::setRecoveryDialogOpen(false);
+    StateManagement::logStartupPhase(answer == QMessageBox::Yes
+                                             ? "crash_recovery answer=Yes"
+                                             : "crash_recovery answer=No");
+    StateManagement::logWindowState("after recovery dialog", this);
 
     if (answer == QMessageBox::Yes) {
         // Replay data loads
@@ -1319,7 +1344,6 @@ void MainWindow::_checkCrashRecovery() {
 
         // Restore zone layout
         _restoreZoneLayout(*recovery_data);
-        _state_manager->workspace()->enableAutoSave();
 
         // Restore provenance
         ws->clearDataLoads();
@@ -1344,6 +1368,9 @@ void MainWindow::_checkCrashRecovery() {
 
     // Delete the recovery file regardless of choice
     ws->deleteRecoveryFile();
+    StateManagement::logStartupPhase("crash_recovery file deleted");
+    StateManagement::logWindowState("after crash_recovery complete", this);
+    _finishStartupLayout();
 }
 
 // ---------------------------------------------------------------------------

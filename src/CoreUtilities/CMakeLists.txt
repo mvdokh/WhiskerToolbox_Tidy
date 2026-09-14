@@ -5,6 +5,10 @@ add_library(CoreUtilities STATIC
     include/CoreUtilities/string_manip.hpp
     include/CoreUtilities/color.hpp
     src/color.cpp
+    include/CoreUtilities/ProbeGeometry/ChannelPosition.hpp
+    include/CoreUtilities/ProbeGeometry/SwindaleSpikeSorterLoader.hpp
+    src/ProbeGeometry/ChannelPosition.cpp
+    src/ProbeGeometry/SwindaleSpikeSorterLoader.cpp
 )
 
 target_include_directories(CoreUtilities PUBLIC
@@ -15,7 +19,7 @@ target_include_directories(CoreUtilities PUBLIC
 target_link_libraries(CoreUtilities PUBLIC nlohmann_json::nlohmann_json)
 target_link_libraries(CoreUtilities PUBLIC reflectcpp::reflectcpp)
 
-set_target_compiler_warnings(CoreUtilities)
+set_target_compiler_warnings(CoreUtilities MANUAL_EXPORT)
 
 set_target_properties(CoreUtilities PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}

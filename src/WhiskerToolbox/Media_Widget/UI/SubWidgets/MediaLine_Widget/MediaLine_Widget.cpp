@@ -3,11 +3,11 @@
 
 #include "Media_Widget/Core/MediaWidgetState.hpp"
 #include "Media_Widget/Rendering/Media_Window/Media_Window.hpp"
+#include "Media_Widget/UI/Tools/MediaToolId.hpp"
 #include "SelectionWidgets/LineAddSelectionWidget.hpp"
 #include "SelectionWidgets/LineDrawAllFramesSelectionWidget.hpp"
 #include "SelectionWidgets/LineEraseSelectionWidget.hpp"
 #include "SelectionWidgets/LineNoneSelectionWidget.hpp"
-#include "SelectionWidgets/LineSelectSelectionWidget.hpp"
 
 #include "CoreGeometry/point_geometry.hpp"
 #include "CoreMath/polynomial_fit.hpp"
@@ -36,6 +36,73 @@
 
 #include <cmath>
 
+namespace {
+
+/**
+ * @brief Whether the Pen toolbar tool owns selected-line edit gestures
+ * @param state Media widget state
+ * @param active_key Active line data key
+ * @return True when Pen tool is active for a non-empty line key
+ */
+[[nodiscard]] bool isPenLineEditActive(MediaWidgetState const * state, std::string const & active_key) {
+    return state != nullptr && !active_key.empty() && state->activeMediaTool() == MediaToolId::Pen;
+}
+
+/**
+ * @brief Whether the Eraser toolbar tool owns erase gestures for the active line key
+ */
+[[nodiscard]] bool isEraserToolActive(MediaWidgetState const * state, std::string const & active_key) {
+    return state != nullptr && !active_key.empty() && state->activeMediaTool() == MediaToolId::Eraser;
+}
+
+/**
+ * @brief Resolve which line endpoint receives the next appended point
+ * @param policy User-selected append policy
+ * @param click Click position in media coordinates
+ * @param line Selected line geometry
+ * @return Tip or Base endpoint for the append operation
+ */
+[[nodiscard]] LineAppendEndpoint resolveLineAppendEndpoint(LineAppendEndpoint policy,
+                                                           Point2D<float> const & click,
+                                                           Line2D const & line) {
+    if (line.empty()) {
+        return LineAppendEndpoint::Tip;
+    }
+    if (policy != LineAppendEndpoint::Nearest) {
+        return policy;
+    }
+
+    float const dist_to_base = calc_distance(click, line.front());
+    float const dist_to_tip = calc_distance(click, line.back());
+    return dist_to_base <= dist_to_tip ? LineAppendEndpoint::Base : LineAppendEndpoint::Tip;
+}
+
+/**
+ * @brief Append interpolated samples between two points
+ * @param points Output vector receiving interpolated samples (excluding endpoints)
+ * @param from Start point of the interpolation segment
+ * @param to End point of the interpolation segment
+ */
+void appendInterpolationSamples(std::vector<Point2D<float>> & points,
+                                Point2D<float> const & from,
+                                Point2D<float> const & to) {
+    float const dx = to.x - from.x;
+    float const dy = to.y - from.y;
+    float const distance = std::sqrt(dx * dx + dy * dy);
+
+    if (distance <= 5.0f) {
+        return;
+    }
+
+    int const num_interp_points = std::max(2, static_cast<int>(distance / 5.0f));
+    for (int i = 1; i <= num_interp_points; ++i) {
+        float const t = static_cast<float>(i) / static_cast<float>(num_interp_points + 1);
+        points.emplace_back(from.x + t * dx, from.y + t * dy);
+    }
+}
+
+}// namespace
+
 MediaLine_Widget::MediaLine_Widget(std::shared_ptr<DataManager> data_manager, Media_Window * scene, MediaWidgetState * state, QWidget * parent)
     : QWidget(parent),
       ui(new Ui::MediaLine_Widget),
@@ -56,7 +123,6 @@ MediaLine_Widget::MediaLine_Widget(std::shared_ptr<DataManager> data_manager, Me
             this, &MediaLine_Widget::_applyLineStyleToOptions);
 
     _selection_modes["(None)"] = Selection_Mode::None;
-    _selection_modes["Select Line"] = Selection_Mode::Select;
     _selection_modes["Draw Across All Frames"] = Selection_Mode::DrawAllFrames;
 
     ui->selection_mode_combo->addItems(QStringList(_selection_modes.keys()));
@@ -127,15 +193,6 @@ void MediaLine_Widget::_setupSelectionModePages() {
     connect(_eraseSelectionWidget, &line_widget::LineEraseSelectionWidget::showCircleToggled,
             this, &MediaLine_Widget::_toggleShowHoverCircle);
 
-    _selectSelectionWidget = new line_widget::LineSelectSelectionWidget();
-    ui->mode_stacked_widget->addWidget(_selectSelectionWidget);
-
-    connect(_selectSelectionWidget, &line_widget::LineSelectSelectionWidget::selectionThresholdChanged,
-            this, [this](float threshold) {
-                _line_selection_threshold = threshold;
-                spdlog::debug("Line selection threshold set to: {}", threshold);
-            });
-
     _drawAllFramesSelectionWidget = new line_widget::LineDrawAllFramesSelectionWidget();
     ui->mode_stacked_widget->addWidget(_drawAllFramesSelectionWidget);
 
@@ -170,10 +227,9 @@ void MediaLine_Widget::showEvent(QShowEvent * event) {
     spdlog::debug("MediaLine_Widget: initial selected entities on show: {}", initial_selections.size());
 
     connect(_scene, &Media_Window::leftClickMediaWithEvent, this, &MediaLine_Widget::_clickedInVideoWithModifiers);
+    connect(_scene, &Media_Window::mouseMove, this, &MediaLine_Widget::_mouseMovedInVideo);
+    connect(_scene, &Media_Window::leftRelease, this, &MediaLine_Widget::_mouseReleasedInVideo);
     connect(_scene, &Media_Window::rightClickMedia, this, &MediaLine_Widget::_rightClickedInVideo);
-    connect(_scene, &Media_Window::mouseMove, this, [this](qreal x, qreal y) {
-        _mouseMoved(x, y);
-    });
 }
 
 void MediaLine_Widget::hideEvent(QHideEvent * event) {
@@ -188,8 +244,11 @@ void MediaLine_Widget::hideEvent(QHideEvent * event) {
     }
 
     disconnect(_scene, &Media_Window::leftClickMediaWithEvent, this, &MediaLine_Widget::_clickedInVideoWithModifiers);
+    disconnect(_scene, &Media_Window::mouseMove, this, &MediaLine_Widget::_mouseMovedInVideo);
+    disconnect(_scene, &Media_Window::leftRelease, this, &MediaLine_Widget::_mouseReleasedInVideo);
     disconnect(_scene, &Media_Window::rightClickMedia, this, &MediaLine_Widget::_rightClickedInVideo);
-    disconnect(_scene, &Media_Window::mouseMove, this, nullptr);
+
+    _is_eraser_dragging = false;
 
     // Clean up hover circle when switching away from line widget
     _scene->setShowHoverCircle(false);
@@ -268,39 +327,31 @@ void MediaLine_Widget::_clickedInVideoWithModifiers(qreal x_canvas, qreal y_canv
     auto const current_position = _state->current_position;
     auto const current_time = current_position.convertTo(line_data->getTimeFrame().get());
 
+    if (isPenLineEditActive(_state, _active_key)) {
+        if (modifiers & Qt::ControlModifier) {
+            spdlog::debug("MediaLine_Widget: Pen tool Ctrl+click - adding point to selected line");
+            _addPointToLine(x_media, y_media, current_time);
+        } else if (modifiers & Qt::AltModifier) {
+            spdlog::debug("MediaLine_Widget: Pen tool Alt+click - deleting nearest vertex");
+            _deleteNearestVertexFromLine(x_media, y_media, current_time);
+        }
+        return;
+    }
+
+    if (isEraserToolActive(_state, _active_key)) {
+        if ((modifiers & Qt::ControlModifier) || (modifiers & Qt::AltModifier)) {
+            return;
+        }
+
+        spdlog::debug("MediaLine_Widget: Eraser tool click - erasing vertices within radius");
+        _is_eraser_dragging = true;
+        _erasePointsFromLine(x_media, y_media, current_time);
+        return;
+    }
+
     switch (_selection_mode) {
         case Selection_Mode::None: {
             spdlog::debug("MediaLine_Widget: selection mode is None");
-            break;
-        }
-        case Selection_Mode::Select: {
-            spdlog::debug("MediaLine_Widget: selection mode is Select");
-
-            // Check for modifier keys to determine action
-            if (modifiers & Qt::ControlModifier) {
-                // Ctrl+click: Add points to selected line
-                spdlog::debug("MediaLine_Widget: Ctrl+click - adding points to selected line");
-                _addPointToLine(x_media, y_media, current_time);
-            } else if (modifiers & Qt::AltModifier) {
-                // Alt+click: Erase points from selected line
-                spdlog::debug("MediaLine_Widget: Alt+click - erasing points from selected line");
-                _erasePointsFromLine(x_media, y_media, current_time);
-            } else {
-                // Normal click: Select/deselect lines
-                QPointF const scene_pos(x_canvas * _scene->getXAspect(), y_canvas * _scene->getYAspect());
-                std::string data_key, data_type;
-                EntityId const entity_id = _scene->findEntityAtPosition(scene_pos, data_key, data_type);
-
-                if (entity_id != EntityId(0) && data_type == "line" && data_key == _active_key) {
-                    // Use the group-based selection system for consistency
-                    _scene->selectEntity(entity_id, data_key, data_type);
-                    spdlog::debug("MediaLine_Widget: selected line entity {} in group system", entity_id.id);
-                } else {
-                    // Clear selections if no line found
-                    _scene->clearAllSelections();
-                    spdlog::debug("MediaLine_Widget: no line found within threshold - cleared selections");
-                }
-            }
             break;
         }
         case Selection_Mode::DrawAllFrames: {
@@ -308,30 +359,30 @@ void MediaLine_Widget::_clickedInVideoWithModifiers(qreal x_canvas, qreal y_canv
             _addPointToDrawAllFrames(x_media, y_media);
             break;
         }
+        case Selection_Mode::Add:
+        case Selection_Mode::Erase:
+            break;
     }
 }
 
-void MediaLine_Widget::_mouseMoved(qreal x, qreal y) {
-    // Only handle mouse move in Select Line mode
-    if (_selection_mode != Selection_Mode::Select) {
+void MediaLine_Widget::_mouseMovedInVideo(qreal x_canvas, qreal y_canvas) {
+    if (!_is_eraser_dragging || !isEraserToolActive(_state, _active_key)) {
         return;
     }
 
-    // Check if Alt is currently held (we can't get modifier state from mouse move,
-    // so we'll track it from the last click event)
-    // For now, we'll show the eraser circle when in Select mode
-    // This could be improved by tracking modifier state
-    static bool const alt_held = false;
-
-    // Update hover circle position and show/hide based on modifier state
-    if (alt_held) {
-        _scene->setShowHoverCircle(true);
-        if (_eraseSelectionWidget) {
-            _scene->setHoverCircleRadius(_eraseSelectionWidget->getEraserRadius());
-        }
-    } else {
-        _scene->setShowHoverCircle(false);
+    auto line_data = _data_manager->getData<LineData>(_active_key);
+    if (!line_data) {
+        return;
     }
+
+    auto const current_time = _state->current_position.convertTo(line_data->getTimeFrame().get());
+    _erasePointsFromLine(static_cast<float>(x_canvas),
+                         static_cast<float>(y_canvas),
+                         current_time);
+}
+
+void MediaLine_Widget::_mouseReleasedInVideo() {
+    _is_eraser_dragging = false;
 }
 
 void MediaLine_Widget::_addPointToLine(float x_media, float y_media, TimeFrameIndex current_time) {
@@ -377,45 +428,150 @@ void MediaLine_Widget::_addPointToLine(float x_media, float y_media, TimeFrameIn
         y_media = edge_point.second;
     }
 
-    if (_smoothing_mode == Smoothing_Mode::SimpleSmooth) {
-        // Use the original smoothing approach - add point directly
-        line.push_back(Point2D<float>{x_media, y_media});
+    Point2D<float> const new_point{x_media, y_media};
+    LineAppendEndpoint append_endpoint = LineAppendEndpoint::Tip;
+    if (_state) {
+        append_endpoint = resolveLineAppendEndpoint(_state->linePrefs().append_endpoint,
+                                                    new_point,
+                                                    line);
+    }
+
+    if (append_endpoint == LineAppendEndpoint::Base) {
+        if (_smoothing_mode == Smoothing_Mode::SimpleSmooth) {
+            std::vector<Point2D<float>> updated_points;
+            updated_points.reserve(line.size() + 1);
+            updated_points.push_back(new_point);
+            for (Point2D<float> const & existing_point: line) {
+                updated_points.push_back(existing_point);
+            }
+            line = Line2D(std::move(updated_points));
+        } else if (_smoothing_mode == Smoothing_Mode::PolynomialFit) {
+            std::vector<Point2D<float>> updated_points;
+            updated_points.reserve(line.size() + 1);
+            updated_points.push_back(new_point);
+            if (!line.empty()) {
+                appendInterpolationSamples(updated_points, new_point, line.front());
+            }
+            for (Point2D<float> const & existing_point: line) {
+                updated_points.push_back(existing_point);
+            }
+            line = Line2D(std::move(updated_points));
+
+            if (line.size() >= 3) {
+                _applyPolynomialFit(line, _polynomial_order);
+            }
+        }
+    } else if (_smoothing_mode == Smoothing_Mode::SimpleSmooth) {
+        line.push_back(new_point);
     } else if (_smoothing_mode == Smoothing_Mode::PolynomialFit) {
-        // If the line already exists, add interpolated points between the last point and the new point
         if (!line.empty()) {
             Point2D<float> const last_point = line.back();
-
-            // Calculate distance between last point and new point
-            float const dx = x_media - last_point.x;
-            float const dy = y_media - last_point.y;
-            float const distance = std::sqrt(dx * dx + dy * dy);
-
-            // Add interpolated points if the distance is significant
-            if (distance > 5.0f) {// Threshold for adding interpolation
-                int const num_interp_points = std::max(2, static_cast<int>(distance / 5.0f));
-                for (int i = 1; i <= num_interp_points; ++i) {
-                    float const t = static_cast<float>(i) / (num_interp_points + 1);
-                    float const interp_x = last_point.x + t * dx;
-                    float const interp_y = last_point.y + t * dy;
-                    line.push_back(Point2D<float>{interp_x, interp_y});
-                }
+            std::vector<Point2D<float>> interpolated_points;
+            appendInterpolationSamples(interpolated_points, last_point, new_point);
+            for (Point2D<float> const & interpolated_point: interpolated_points) {
+                line.push_back(interpolated_point);
             }
         }
 
-        // Add the actual new point
-        line.push_back(Point2D<float>{x_media, y_media});
+        line.push_back(new_point);
 
-        // Apply polynomial fitting if we have enough points
         if (line.size() >= 3) {
             _applyPolynomialFit(line, _polynomial_order);
         }
     }
 
-    spdlog::debug("MediaLine_Widget: added point ({}, {}) to line {} (EntityID: {})", x_media, y_media, _active_key, selected_entity_id.id);
+    spdlog::debug("MediaLine_Widget: added point ({}, {}) to {} endpoint of line {} (EntityID: {})",
+                  x_media,
+                  y_media,
+                  append_endpoint == LineAppendEndpoint::Base ? "base" : "tip",
+                  _active_key,
+                  selected_entity_id.id);
+}
+
+void MediaLine_Widget::_deleteNearestVertexFromLine(float x_media, float y_media, TimeFrameIndex current_time) {
+    static_cast<void>(current_time);
+
+    auto selected_entities = _scene->getSelectedEntities();
+    if (selected_entities.empty()) {
+        spdlog::debug("MediaLine_Widget: no line selected - cannot delete vertex");
+        return;
+    }
+
+    auto line_data = _data_manager->getData<LineData>(_active_key);
+    if (!line_data) {
+        spdlog::debug("MediaLine_Widget: no line data for active key");
+        return;
+    }
+
+    EntityId const selected_entity_id = *selected_entities.begin();
+
+    auto line_ref = line_data->getMutableData(selected_entity_id, NotifyObservers::Yes);
+    if (!line_ref.has_value()) {
+        spdlog::debug("MediaLine_Widget: could not get mutable reference to line with EntityID {}", selected_entity_id.id);
+        return;
+    }
+
+    Line2D & line = line_ref.value().get();
+
+    if (line.size() <= 1) {
+        spdlog::debug("MediaLine_Widget: selected line has at most one vertex - cannot delete");
+        return;
+    }
+
+    float pick_radius = 15.0f;
+    if (_state) {
+        pick_radius = _state->selectPrefs().pick_radius_px;
+    }
+
+    Point2D<float> const click_point{x_media, y_media};
+    size_t nearest_index = 0;
+    float min_distance = calc_distance(click_point, line[0]);
+
+    for (size_t i = 1; i < line.size(); ++i) {
+        float const distance = calc_distance(click_point, line[i]);
+        if (distance < min_distance) {
+            min_distance = distance;
+            nearest_index = i;
+        }
+    }
+
+    if (min_distance > pick_radius) {
+        spdlog::debug("MediaLine_Widget: no vertex within pick radius {} px (nearest {:.1f} px)",
+                      pick_radius, min_distance);
+        return;
+    }
+
+    std::vector<Point2D<float>> remaining_points;
+    remaining_points.reserve(line.size() - 1);
+    for (size_t i = 0; i < line.size(); ++i) {
+        if (i != nearest_index) {
+            remaining_points.push_back(line[i]);
+        }
+    }
+
+    line = Line2D(remaining_points);
+    line_data->notifyObservers();
+    _scene->UpdateCanvas();
+
+    spdlog::debug("MediaLine_Widget: deleted vertex {} near ({}, {}) from line {} (EntityID: {})",
+                  nearest_index, x_media, y_media, _active_key, selected_entity_id.id);
+}
+
+float MediaLine_Widget::_eraserRadiusPx() const {
+    if (_state && _state->activeMediaTool() == MediaToolId::Eraser) {
+        return static_cast<float>(_state->eraserPrefs().radius_px);
+    }
+
+    if (_eraseSelectionWidget) {
+        return static_cast<float>(_eraseSelectionWidget->getEraserRadius());
+    }
+
+    return 10.0f;
 }
 
 void MediaLine_Widget::_erasePointsFromLine(float x_media, float y_media, TimeFrameIndex current_time) {
-    // Get the EntityID for the selected line from the group system
+    static_cast<void>(current_time);
+
     auto selected_entities = _scene->getSelectedEntities();
     if (selected_entities.empty()) {
         spdlog::debug("MediaLine_Widget: no line selected - cannot erase points");
@@ -443,14 +599,10 @@ void MediaLine_Widget::_erasePointsFromLine(float x_media, float y_media, TimeFr
         return;
     }
 
-    // Get eraser radius from the erase selection widget
-    float eraser_radius = 10.0f;// Default radius
-    if (_eraseSelectionWidget) {
-        eraser_radius = static_cast<float>(_eraseSelectionWidget->getEraserRadius());
-    }
+    float const eraser_radius = _eraserRadiusPx();
 
-    // Find points within eraser radius and remove them
     std::vector<Point2D<float>> remaining_points;
+    remaining_points.reserve(line.size());
     Point2D<float> const click_point{x_media, y_media};
 
     for (auto const & point: line) {
@@ -460,20 +612,27 @@ void MediaLine_Widget::_erasePointsFromLine(float x_media, float y_media, TimeFr
         }
     }
 
-    // Update the line with remaining points (this modifies the original line)
-    line = Line2D(remaining_points);
+    if (remaining_points.size() == line.size()) {
+        return;
+    }
 
-    // Notify observers that the data has changed
+    line = Line2D(std::move(remaining_points));
+
     line_data->notifyObservers();
 
     _scene->UpdateCanvas();
-    spdlog::debug("MediaLine_Widget: erased points near ({}, {}) from line {} (EntityID: {})", x_media, y_media, _active_key, selected_entity_id.id);
+    spdlog::debug("MediaLine_Widget: erased vertices near ({}, {}) from line {} (EntityID: {}, {} remaining)",
+                  x_media,
+                  y_media,
+                  _active_key,
+                  selected_entity_id.id,
+                  line.size());
 }
 
 void MediaLine_Widget::_applyPolynomialFit(Line2D & line, int order) {
 
     assert(order >= 0 && "Order must be non-negative");
-    
+
     if (line.size() < static_cast<size_t>(order + 1)) {
         // Not enough points for the requested polynomial order
         return;
@@ -539,28 +698,10 @@ void MediaLine_Widget::_toggleSelectionMode(QString const & text) {
     int const pageIndex = static_cast<int>(_selection_mode);
     ui->mode_stacked_widget->setCurrentIndex(pageIndex);
 
-    // For Select Line mode, show both add and erase options
-    if (_selection_mode == Selection_Mode::Select) {
-        // Show both add and erase widgets by creating a combined layout
-        // For now, we'll show the add widget as the primary options
-        // The erase options will be available through the existing erase widget
-    }
-
-    // Always enable group selection for line operations
-    // This prevents selections from being cleared when switching modes
-    _scene->setGroupSelectionEnabled(true);
-    spdlog::debug("MediaLine_Widget: group selection enabled for line operations");
-
-    // Debug: Check if we have any selections after mode change
     auto selected_entities = _scene->getSelectedEntities();
     spdlog::debug("MediaLine_Widget: selected entities after mode change: {}", selected_entities.size());
 
-    if (_selection_mode == Selection_Mode::Select) {
-        // Show hover circle for eraser when in Select mode (will be controlled by Shift key)
-        _scene->setShowHoverCircle(false);// Initially off, will be controlled by mouse move events
-    } else {
-        _scene->setShowHoverCircle(false);
-    }
+    _scene->setShowHoverCircle(false);
 
     // Enable/disable temporary line visualization for DrawAllFrames mode
     if (_selection_mode == Selection_Mode::DrawAllFrames) {
@@ -900,8 +1041,7 @@ void MediaLine_Widget::_setSegmentEndPercentage(int percentage) {
 }
 
 void MediaLine_Widget::_rightClickedInVideo(qreal x_canvas, qreal y_canvas) {
-    // Only handle right-clicks in Select mode and when a line is selected
-    if (_selection_mode != Selection_Mode::Select || _active_key.empty()) {
+    if (!isPenLineEditActive(_state, _active_key)) {
         return;
     }
 
@@ -978,7 +1118,10 @@ std::optional<EntityId> MediaLine_Widget::_findNearestLine(float x, float y) {
 
     Point2D<float> const click_point{x, y};
     std::optional<EntityId> nearest_entity_id = std::nullopt;
-    float min_distance = _line_selection_threshold + 1;// Initialize beyond threshold
+    float const selection_threshold = _state != nullptr
+                                              ? _state->selectPrefs().pick_radius_px
+                                              : 15.0f;
+    float min_distance = selection_threshold + 1;// Initialize beyond threshold
 
     for (size_t i = 0; i < lines.size(); ++i) {
         auto const & line = lines[i];
@@ -1015,7 +1158,7 @@ std::optional<EntityId> MediaLine_Widget::_findNearestLine(float x, float y) {
         }
     }
 
-    return (min_distance <= _line_selection_threshold) ? nearest_entity_id : std::nullopt;
+    return (min_distance <= selection_threshold) ? nearest_entity_id : std::nullopt;
 }
 
 void MediaLine_Widget::_selectLine(int line_index) {

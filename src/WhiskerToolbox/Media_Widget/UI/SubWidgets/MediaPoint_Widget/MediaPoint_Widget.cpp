@@ -4,6 +4,7 @@
 #include "Media_Widget/Core/MediaWidgetState.hpp"
 #include "Media_Widget/DisplayOptions/DisplayOptions.hpp"
 #include "Media_Widget/Rendering/Media_Window/Media_Window.hpp"
+#include "Media_Widget/UI/Tools/MediaToolId.hpp"
 
 #include "CorePlotting/Layout/CanvasCoordinateSystem.hpp"
 #include "DataManager/DataManager.hpp"
@@ -115,6 +116,12 @@ void MediaPoint_Widget::_handlePointClickWithModifiers(qreal x_media, qreal y_me
     if (!_selection_enabled || _active_key.empty())
         return;
 
+    if (_state && _scene && _scene->isUnifiedSelectionEnabled() &&
+        _state->activeMediaTool() == MediaToolId::Select &&
+        !(modifiers & (Qt::AltModifier | Qt::ControlModifier))) {
+        return;
+    }
+
     // Check if Alt is held for point creation
     if (modifiers & Qt::AltModifier) {
         // Alt+click: add new point at current time
@@ -131,26 +138,7 @@ void MediaPoint_Widget::_handlePointClickWithModifiers(qreal x_media, qreal y_me
         return;
     }
 
-    _selectPointAtClick(x_media, y_media);
-}
-
-void MediaPoint_Widget::_selectPointAtClick(qreal x_media, qreal y_media) {
-    QPointF const scene_pos(x_media * _scene->getXAspect(), y_media * _scene->getYAspect());
-    EntityId const entity_id = _scene->findPointAtPosition(scene_pos, _active_key);
-
-    if (entity_id != EntityId(0)) {
-        _selectPoint(entity_id);
-    } else {
-        _clearPointSelection();
-    }
-}
-
-void MediaPoint_Widget::_selectPoint(EntityId point_id) {
-    _selected_point_id = point_id;
-
-    // Use Media_Window's selection system for visual feedback
-    _scene->selectEntity(point_id, _active_key, "point");
-    spdlog::debug("MediaPoint_Widget: selected point EntityID {}", point_id.id);
+    // Plain clicks select entities via the global Select tool on the toolbar.
 }
 
 void MediaPoint_Widget::_clearPointSelection() {
@@ -163,12 +151,7 @@ void MediaPoint_Widget::_clearPointSelection() {
 }
 
 EntityId MediaPoint_Widget::_resolveMoveTargetId() {
-    if (_selected_point_id != EntityId(0)) {
-        return _selected_point_id;
-    }
-
-    auto const selected_entities = _scene->getSelectedEntities();
-    if (selected_entities.empty() || _active_key.empty()) {
+    if (_active_key.empty()) {
         return EntityId(0);
     }
 
@@ -177,11 +160,17 @@ EntityId MediaPoint_Widget::_resolveMoveTargetId() {
         return EntityId(0);
     }
 
+    auto const selected_entities = _scene->getSelectedEntities();
     for (EntityId const entity_id: selected_entities) {
         if (point_data->getMutableData(entity_id, NotifyObservers::No).has_value()) {
             _selected_point_id = entity_id;
             return entity_id;
         }
+    }
+
+    if (_selected_point_id != EntityId(0) &&
+        point_data->getMutableData(_selected_point_id, NotifyObservers::No).has_value()) {
+        return _selected_point_id;
     }
 
     return EntityId(0);

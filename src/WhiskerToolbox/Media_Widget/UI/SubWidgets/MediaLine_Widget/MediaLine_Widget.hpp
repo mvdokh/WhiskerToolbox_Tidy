@@ -6,9 +6,9 @@
 #include "Entity/EntityId.hpp"
 #include "TimeFrame/TimeFrameIndex.hpp"
 
-#include <opencv2/opencv.hpp>
 #include <QMap>
 #include <QWidget>
+#include <opencv2/opencv.hpp>
 
 #include <memory>
 #include <optional>
@@ -22,7 +22,6 @@ namespace line_widget {
 class LineNoneSelectionWidget;
 class LineAddSelectionWidget;
 class LineEraseSelectionWidget;
-class LineSelectSelectionWidget;
 class LineDrawAllFramesSelectionWidget;
 }// namespace line_widget
 
@@ -60,7 +59,6 @@ private:
         None,
         Add,
         Erase,
-        Select,
         DrawAllFrames
     };
 
@@ -72,17 +70,14 @@ private:
     line_widget::LineNoneSelectionWidget * _noneSelectionWidget{nullptr};
     line_widget::LineAddSelectionWidget * _addSelectionWidget{nullptr};
     line_widget::LineEraseSelectionWidget * _eraseSelectionWidget{nullptr};
-    line_widget::LineSelectSelectionWidget * _selectSelectionWidget{nullptr};
     line_widget::LineDrawAllFramesSelectionWidget * _drawAllFramesSelectionWidget{nullptr};
 
     QMap<QString, Selection_Mode> _selection_modes;
     Selection_Mode _selection_mode{Selection_Mode::None};
     Smoothing_Mode _smoothing_mode{Smoothing_Mode::SimpleSmooth};
-    int _polynomial_order{3};              // Default polynomial order
-    int _current_line_index{0};            // Track which line is currently selected
-    int _selected_line_index{-1};          // Track which line is selected for operations (-1 = none)
-    float _line_selection_threshold{15.0f};// Pixel threshold for line selection
-
+    int _polynomial_order{3};    // Default polynomial order
+    int _current_line_index{0};  // Track which line is currently selected
+    int _selected_line_index{-1};// Track which line is selected for operations (-1 = none)
     // Edge detection parameters
     bool _edge_snapping_enabled{false};
     int _edge_threshold{100};   // Default Canny edge detection threshold
@@ -92,16 +87,24 @@ private:
 
     // Flag to prevent infinite loops during percentage updates
     bool _is_updating_percentages{false};
+    bool _is_eraser_dragging{false};
 
     void _setupSelectionModePages();
     void _addPointToLine(float x_media, float y_media, TimeFrameIndex current_time);
+    void _deleteNearestVertexFromLine(float x_media, float y_media, TimeFrameIndex current_time);
     void _erasePointsFromLine(float x_media, float y_media, TimeFrameIndex current_time);
+
+    /**
+     * @brief Resolve eraser radius for the active global tool or legacy erase widget
+     * @return Radius in scene/media pixels
+     */
+    [[nodiscard]] float _eraserRadiusPx() const;
 
     /**
      * @brief Apply polynomial fit to a line
      * @param line The line to fit
      * @param order The order of the polynomial to fit
-     * @pre order >= 0 (enforcement: runtime_check via caller UI). 
+     * @pre order >= 0 (enforcement: runtime_check via caller UI).
      * @pre line.size() > order for successful fit (enforcement: runtime_check)
      */
     static void _applyPolynomialFit(Line2D & line, int order);
@@ -116,8 +119,8 @@ private:
 
     // Helper function for calculating distance from point to line segment
     static float _calculateDistanceToLineSegment(Point2D<float> const & point,
-                                          Point2D<float> const & line_start,
-                                          Point2D<float> const & line_end);
+                                                 Point2D<float> const & line_start,
+                                                 Point2D<float> const & line_end);
 
     // Context menu and operations
     void _showLineContextMenu(QPoint const & position);
@@ -139,9 +142,10 @@ private:
 
 private slots:
     void _clickedInVideoWithModifiers(qreal x, qreal y, Qt::KeyboardModifiers modifiers);
+    void _mouseMovedInVideo(qreal x, qreal y);
+    void _mouseReleasedInVideo();
     void _rightClickedInVideo(qreal x, qreal y);
-    void _mouseMoved(qreal x, qreal y);
-    void _toggleSelectionMode(const QString& text);
+    void _toggleSelectionMode(QString const & text);
     void _setSmoothingMode(int index);
     void _setPolynomialOrder(int order);
     void _toggleShowPoints(bool checked);

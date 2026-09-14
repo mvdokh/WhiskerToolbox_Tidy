@@ -155,17 +155,7 @@ if(ENABLE_SPIKE2_SONPY)
             nlohmann_json::nlohmann_json
     )
 
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        target_compile_options(DataManagerIO_Spike2SonPy PRIVATE ${CLANG_OPTIONS})
-    endif()
-
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_compile_options(DataManagerIO_Spike2SonPy PRIVATE ${GCC_WARNINGS})
-    endif()
-
-    if (MSVC)
-        target_compile_options(DataManagerIO_Spike2SonPy PRIVATE ${MSVC_WARNINGS})
-    endif()
+   set_target_compiler_warnings(DataManagerIO_Spike2SonPy)
 
     add_custom_command(TARGET DataManagerIO_Spike2SonPy POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -176,18 +166,7 @@ if(ENABLE_SPIKE2_SONPY)
     enable_whiskertoolbox_pch(DataManagerIO_Spike2SonPy)
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(DataManagerIO PRIVATE ${CLANG_OPTIONS})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
-endif()
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(DataManagerIO PRIVATE ${GCC_WARNINGS})
-endif()
-
-if (MSVC)
-    target_compile_options(DataManagerIO PRIVATE ${MSVC_WARNINGS})
-endif()
+set_target_compiler_warnings(DataManagerIO)
 
 # Prevent static-archive symbols (e.g. TimeFrame) from leaking into the .so
 target_link_options(DataManagerIO PRIVATE

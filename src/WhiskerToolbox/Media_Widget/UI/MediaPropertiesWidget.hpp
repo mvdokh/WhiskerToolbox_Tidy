@@ -41,6 +41,7 @@
 
 class CanvasCoord_Widget;
 class DataManager;
+class MediaRuler_Widget;
 class MediaWidgetState;
 class Media_Window;
 class MediaProcessing_Widget;
@@ -70,9 +71,9 @@ public:
      * @param parent Parent widget
      */
     explicit MediaPropertiesWidget(std::shared_ptr<MediaWidgetState> state,
-                                    std::shared_ptr<DataManager> data_manager,
-                                    Media_Window * media_window = nullptr,
-                                    QWidget * parent = nullptr);
+                                   std::shared_ptr<DataManager> data_manager,
+                                   Media_Window * media_window = nullptr,
+                                   QWidget * parent = nullptr);
 
     ~MediaPropertiesWidget() override;
 
@@ -109,12 +110,20 @@ private:
     Section * _canvas_coord_section{nullptr};
     CanvasCoord_Widget * _canvas_coord_widget{nullptr};
 
+    // Ruler preference widgets
+    Section * _ruler_section{nullptr};
+    MediaRuler_Widget * _ruler_widget{nullptr};
+    bool _syncing_from_table{false};
+
     void resizeEvent(QResizeEvent * event) override;
 
     void _connectStateSignals();
+    void _applyFeatureSelection(QString const & feature);
+    void _syncToDisplayedKey(QString const & key);
     void _setupFeatureTable();
     void _setupTextOverlays();
     void _setupCanvasCoordSection();
+    void _setupRulerSection();
     void _createStackedWidgets();
     void _connectTextWidgetToScene();
     void _updateChildWidths();
@@ -139,4 +148,4 @@ signals:
     void featureSelected(QString const & feature);
 };
 
-#endif // MEDIA_PROPERTIES_WIDGET_HPP
+#endif// MEDIA_PROPERTIES_WIDGET_HPP

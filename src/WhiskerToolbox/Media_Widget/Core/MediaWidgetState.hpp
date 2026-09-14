@@ -72,10 +72,10 @@
  * @see SelectionContext for inter-widget communication
  */
 
-#include "EditorState/EditorState.hpp"
-#include "EditorState/StrongTypes.hpp"  // Must be before any TimePosition usage in signals
-#include "MediaWidgetStateData.hpp"
 #include "DisplayOptionsRegistry.hpp"
+#include "EditorState/EditorState.hpp"
+#include "EditorState/StrongTypes.hpp"// Must be before any TimePosition usage in signals
+#include "MediaWidgetStateData.hpp"
 
 #include "CorePlotting/Layout/CanvasCoordinateSystem.hpp"
 #include "TimeFrame/TimeFrame.hpp"
@@ -109,13 +109,12 @@ enum class DisplayType {
  * The type is inferred from the variant alternative passed.
  */
 using DisplayOptionsVariant = std::variant<
-    LineDisplayOptions,
-    MaskDisplayOptions,
-    PointDisplayOptions,
-    TensorDisplayOptions,
-    DigitalIntervalDisplayOptions,
-    MediaDisplayOptions
->;
+        LineDisplayOptions,
+        MaskDisplayOptions,
+        PointDisplayOptions,
+        TensorDisplayOptions,
+        DigitalIntervalDisplayOptions,
+        MediaDisplayOptions>;
 
 /**
  * @brief State class for Media_Widget
@@ -397,6 +396,42 @@ public:
      */
     void setPointPrefs(PointInteractionPrefs const & prefs);
 
+    /**
+     * @brief Get ruler display preferences
+     * @return Const reference to RulerPrefs
+     */
+    [[nodiscard]] RulerPrefs const & rulerPrefs() const { return _data.ruler_prefs; }
+
+    /**
+     * @brief Set ruler display preferences
+     * @param prefs The new preferences
+     */
+    void setRulerPrefs(RulerPrefs const & prefs);
+
+    /**
+     * @brief Get Select tool preferences
+     * @return Const reference to SelectToolPrefs
+     */
+    [[nodiscard]] SelectToolPrefs const & selectPrefs() const { return _data.select_prefs; }
+
+    /**
+     * @brief Set Select tool preferences
+     * @param prefs The new preferences
+     */
+    void setSelectPrefs(SelectToolPrefs const & prefs);
+
+    /**
+     * @brief Get Eraser tool preferences
+     * @return Const reference to EraserToolPrefs
+     */
+    [[nodiscard]] EraserToolPrefs const & eraserPrefs() const { return _data.eraser_prefs; }
+
+    /**
+     * @brief Set Eraser tool preferences
+     * @param prefs The new preferences
+     */
+    void setEraserPrefs(EraserToolPrefs const & prefs);
+
     // === Text Overlays ===
 
     /**
@@ -443,6 +478,18 @@ public:
     [[nodiscard]] TextOverlayData const * getTextOverlay(int overlay_id) const;
 
     // === Active Tool State ===
+
+    /**
+     * @brief Set the active global Media Viewer toolbar tool
+     * @param tool The toolbar tool identifier
+     */
+    void setActiveMediaTool(MediaToolId tool);
+
+    /**
+     * @brief Get the active global Media Viewer toolbar tool
+     * @return Current toolbar tool
+     */
+    [[nodiscard]] MediaToolId activeMediaTool() const { return _data.active_media_tool; }
 
     /**
      * @brief Set the active line tool mode
@@ -554,6 +601,21 @@ signals:
      */
     void interactionPrefsChanged(QString const & category);
 
+    /**
+     * @brief Emitted when ruler display preferences change
+     */
+    void rulerPrefsChanged();
+
+    /**
+     * @brief Emitted when Select tool preferences change
+     */
+    void selectPrefsChanged();
+
+    /**
+     * @brief Emitted when Eraser tool preferences change
+     */
+    void eraserPrefsChanged();
+
     // === Text Overlay Signals ===
 
     /**
@@ -570,6 +632,12 @@ signals:
      * @param category "line", "mask", or "point"
      */
     void toolModesChanged(QString const & category);
+
+    /**
+     * @brief Emitted when the global Media Viewer toolbar tool changes
+     * @param tool Newly active toolbar tool
+     */
+    void activeMediaToolChanged(MediaToolId tool);
 
     // === Canvas Image (Transient - for video export) ===
 
@@ -631,4 +699,4 @@ private:
     void setMediaOptions(QString const & key, MediaDisplayOptions const & options);
 };
 
-#endif // MEDIA_WIDGET_STATE_HPP
+#endif// MEDIA_WIDGET_STATE_HPP

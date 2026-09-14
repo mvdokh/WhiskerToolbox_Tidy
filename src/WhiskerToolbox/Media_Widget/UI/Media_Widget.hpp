@@ -1,6 +1,8 @@
 #ifndef MEDIA_WIDGET_HPP
 #define MEDIA_WIDGET_HPP
 
+#include "Media_Widget/UI/Tools/MediaToolId.hpp"
+
 #include "EditorState/SelectionContext.hpp"// For SelectionSource
 #include "TimeFrame/StrongTimeTypes.hpp"   // For TimeKey
 
@@ -9,9 +11,15 @@
 #include <memory>
 
 class DataManager;
+class HorizontalAxisWidget;
 class Media_Window;
+class MediaSelectToolController;
+class MediaToolOptionsBar_Widget;
+class MediaToolStrip_Widget;
 class MediaWidgetState;
 class EditorRegistry;
+class RulerCornerWidget;
+class VerticalAxisWidget;
 
 namespace Ui {
 class Media_Widget;
@@ -44,7 +52,7 @@ public:
     void setFeatureColor(std::string const & feature, std::string const & hex_color);
 
     // Method to handle time changes and propagate them
-    void LoadFrame(const TimePosition& position);
+    void LoadFrame(TimePosition const & position);
 
     // Zoom API used by MainWindow actions
     void zoomIn();
@@ -100,13 +108,26 @@ private:
     [[nodiscard]] bool _isUserZoomActive() const;
 
     void _createOptions();
+    void _pruneRemovedFeatures();
     void _createMediaWindow();
 
     // State synchronization helpers
     void _syncCanvasSizeToState();
     void _syncFeatureEnabledToState(QString const & feature_key, QString const & data_type, bool enabled);
     void _connectStateSignals();
+    void _setupRulerLayout();
+    void _wireToolUi();
+    void _applyRulerPrefs();
+    void _updateRulers();
+    void _syncActiveMediaTool(MediaToolId tool);
+    void _syncEraserHoverCircle();
 
+    MediaToolStrip_Widget * _tool_strip{nullptr};
+    MediaToolOptionsBar_Widget * _tool_options_bar{nullptr};
+    MediaSelectToolController * _select_controller{nullptr};
+    HorizontalAxisWidget * _horizontal_ruler{nullptr};
+    VerticalAxisWidget * _vertical_ruler{nullptr};
+    RulerCornerWidget * _ruler_corner{nullptr};
 
 private slots:
     void _updateCanvasSize();

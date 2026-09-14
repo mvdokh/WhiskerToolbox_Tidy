@@ -28,6 +28,32 @@ set(MEDIA_WIDGET_SOURCES
     UI/CanvasCoord_Widget.hpp
     UI/CanvasCoord_Widget.cpp
 
+    UI/MediaRulerViewport.hpp
+
+    UI/Rulers/RulerCornerWidget.hpp
+    UI/Rulers/RulerCornerWidget.cpp
+    UI/Rulers/MediaRuler_Widget.hpp
+    UI/Rulers/MediaRuler_Widget.cpp
+
+    UI/Tools/MediaToolId.hpp
+    UI/Tools/MediaToolIcons.hpp
+    UI/Tools/MediaToolStrip_Widget.hpp
+    UI/Tools/MediaToolStrip_Widget.cpp
+    UI/Tools/MediaToolOptionsBar_Widget.hpp
+    UI/Tools/MediaToolOptionsBar_Widget.cpp
+    UI/Tools/SelectToolOptions_Widget.hpp
+    UI/Tools/SelectToolOptions_Widget.cpp
+    UI/Tools/PenToolOptions_Widget.hpp
+    UI/Tools/PenToolOptions_Widget.cpp
+    UI/Tools/PenToolOptions_Widget.ui
+    UI/Tools/EraserToolOptions_Widget.hpp
+    UI/Tools/EraserToolOptions_Widget.cpp
+    UI/Tools/EraserToolOptions_Widget.ui
+
+    Selection/MediaSelectionHit.hpp
+    Selection/MediaSelectToolController.hpp
+    Selection/MediaSelectToolController.cpp
+
     UI/SubWidgets/MediaProcessing_Widget/MediaProcessing_Widget.cpp
     UI/SubWidgets/MediaProcessing_Widget/MediaProcessing_Widget.hpp
     UI/SubWidgets/MediaProcessing_Widget/MediaProcessing_Widget.ui
@@ -65,9 +91,6 @@ set(MEDIA_WIDGET_SOURCES
     UI/SubWidgets/MediaLine_Widget/SelectionWidgets/LineEraseSelectionWidget.cpp
     UI/SubWidgets/MediaLine_Widget/SelectionWidgets/LineEraseSelectionWidget.hpp
     UI/SubWidgets/MediaLine_Widget/SelectionWidgets/LineEraseSelectionWidget.ui
-    UI/SubWidgets/MediaLine_Widget/SelectionWidgets/LineSelectSelectionWidget.cpp
-    UI/SubWidgets/MediaLine_Widget/SelectionWidgets/LineSelectSelectionWidget.hpp
-    UI/SubWidgets/MediaLine_Widget/SelectionWidgets/LineSelectSelectionWidget.ui
     UI/SubWidgets/MediaLine_Widget/SelectionWidgets/LineDrawAllFramesSelectionWidget.cpp
     UI/SubWidgets/MediaLine_Widget/SelectionWidgets/LineDrawAllFramesSelectionWidget.hpp
     UI/SubWidgets/MediaLine_Widget/SelectionWidgets/LineDrawAllFramesSelectionWidget.ui
@@ -121,6 +144,8 @@ target_link_libraries(Media_Widget PUBLIC WhiskerToolbox::CoreMath)
 target_link_libraries(Media_Widget PRIVATE Feature_Table_Widget)
 target_link_libraries(Media_Widget PRIVATE ColorAlphaControls)
 target_link_libraries(Media_Widget PRIVATE Collapsible_Widget)
+target_link_libraries(Media_Widget PRIVATE HorizontalAxisWidget)
+target_link_libraries(Media_Widget PRIVATE VerticalAxisWidget)
 target_link_libraries(Media_Widget PRIVATE AutoParamWidget)
 target_link_libraries(Media_Widget PRIVATE GlyphStyleWidget)
 target_link_libraries(Media_Widget PRIVATE LineStyleControls)
